@@ -19,7 +19,7 @@ else # on lassen, Nvidia GPU
   CXXFLAGS=-O3 -g -fopenmp -fopenmp-targets=nvptx64 
 endif 
 
-CXXFLAGS+=-DSKIP_BACKTRACK=0
+CXXFLAGS+=-DSKIP_BACKTRACK=0 -DDEBUG
 
 # APOLLO_HOME is your environment variable indicating the path to Apollo Installation
 # e.g.: 
@@ -27,7 +27,7 @@ CXXFLAGS+=-DSKIP_BACKTRACK=0
 APOLLO_DIR=$(APOLLO_HOME)
 INC_DIR=$(APOLLO_DIR)/include 
 LIB_DIR=$(APOLLO_DIR)/lib
-LIBS=-lapollo
+#LIBS=-lapollo
 
 LINK_FALGS= -L$(LIB_DIR) -Wl,--rpath,$(LIB_DIR)
 
@@ -42,12 +42,6 @@ endif
 
 
 CPP_SRC_FILES = \
-hasGPU.cpp \
-omp_smithW-declare-adaptation-v1-apollo.cpp \
-omp_smithW-declare-adaptation-v1-apollo-nEle.cpp \
-omp_smithW-declare-adaptation-v2-apollo.cpp \
-smithw-serial.cpp \
-smithw-omp-cpu.cpp \
 smithw-omp-offload-optimized.cpp \
 smithw-omp-offload-optimized-inlined.cpp
 
@@ -60,9 +54,7 @@ all: $(EXE_FILES)
 test: hasGPU.out
 	./$<
 .PHONY: clean run check
-# TEST cross execution: save region information from current execution
-run2: daxpy-v2
-	APOLLO_CROSS_EXECUTION=1 ./$^ 10000000
+
 clean:
-	rm -rf daxpy daxpy-v2 *.out input.data.pdf input.data.eps input.data
+	rm -rf *.out 
 

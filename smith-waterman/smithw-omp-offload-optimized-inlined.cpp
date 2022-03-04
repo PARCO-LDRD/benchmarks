@@ -349,8 +349,8 @@ int main(int argc, char* argv[]) {
   printf("\nSimilarity Matrix:\n");
   printMatrix(H);
 
-  //    printf("\nPredecessor Matrix:\n");
-  //    printPredecessorMatrix(P);
+//  printf("\nPredecessor Matrix:\n");
+//  printPredecessorMatrix(P);   // unicode not supported on lassen
 #endif
 
   if (useBuiltInData)
@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
   free(H);
   free(P);
 
-#if 0 // TODO: causing corona clang compiler core dump
+#if 1 // TODO: causing corona clang compiler core dump
   //Frees input arrays
   free(a);
   free(b);
