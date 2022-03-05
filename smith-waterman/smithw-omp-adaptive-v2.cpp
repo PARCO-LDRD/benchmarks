@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) {
 
 #pragma omp metadirective \
       when (user={adaptation(mymodel==ompgpu)}: target enter data map(to:a[0:m-1], b[0:n-1]) map(to: H[0:asz], P[0:asz], maxPos)) \ 
-      when (user={adaptation(mymodel==ompcpu)}: parallel default(none) shared(H, P, maxPos, nDiag, j) private(i))
+      when (user={adaptation(mymodel==ompcpu)}: parallel private(i))
   {
     for (int i = 1; i <= nDiag; ++i) // start from 1 since 0 is the boundary padding
     {
