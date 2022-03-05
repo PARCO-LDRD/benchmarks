@@ -21,8 +21,8 @@
 #include <stdbool.h> // C99 does not support the boolean data type
 
 //#include "parameters.h"
-#define FACTOR 128 
-#define CUTOFF 1024
+//#define FACTOR 128 
+//#define CUTOFF 1024
 
 /*--------------------------------------------------------------------
  * Text Tweaks
@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i <= nDiag; ++i) // start from 1 since 0 is the boundary padding
     {
       long long int nEle, si, sj;
-      //  nEle = nElement(i);
+      //nEle = nElement(i);
       //---------------inlined ------------
       if (i < m && i < n) { // smaller than both directions
         //Number of elements in the diagonal is increasing
