@@ -249,7 +249,8 @@ namespace miniFE {
 
 #pragma omp metadirective \
     when(user={adaptation(miniFE==single)} : parallel num_threads(1) ) \
-    when(user={adaptation(miniFE==CPU)} : parallel for reduction(+:result) firstprivate(n)) 
+    when(user={adaptation(miniFE==CPU)} : parallel for reduction(+:result) firstprivate(n)) \
+    when(user={adaptation(miniFE==GPU)} : target teams distribute parallel for map(tofrom:result) reduction(+:result)) 
         for(int i=0; i<n; ++i) {
           result += xcoefs[i] * ycoefs[i];
         }

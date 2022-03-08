@@ -90,13 +90,12 @@ int main(int argc, char** argv)
 #pragma omp begin declare adaptation feature(iterations, numRows, numCols) model_name(hotspot) \
   variants(single, CPU, GPU) model(dtree)
 
-#pragma omp metadirective \
-    when(user={adaptation(hotspot==gpu)} : target data map(to: tIn[0:size], pIn[0:size]) map(alloc: tOut[0:size]))
+#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target data map(to: tIn[0:size], pIn[0:size]) map(alloc: tOut[0:size]))
+
   {
     for(int j = 0; j < iterations; j++)
     {
-#pragma omp metadirective \
-    when(user={adaptation(hotspot==gpu)} : target teams distribute parallel for collapse(2) thread_limit(256))\
+#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target teams distribute parallel for ) \
     when(user={adaptation(hotspot==cpu)} : parallel for collapse(2) firstprivate(numRows, numCols)) \
     when(user={adaptation(hotspot==single)} : parallel for num_threads(1)) 
     for (int j = 0; j < numRows; j++)  

@@ -46,9 +46,9 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
   variants(single, cpu, gpu) model(dtree)
 
 #pragma omp metadirective \
-    when(user={adaptation(vecAdd==single)} : parallel num_threads(1) ) \
-    when(user={adaptation(vecAdd==parallel)} : parallel for reduction(+:verification) firstprivate(total_lus)) \
-    when(user={adaptation(vecAdd==gpu)} : target teams distribute parallel for \
+    when(user={adaptation(lookups==single)} : parallel num_threads(1) ) \
+    when(user={adaptation(lookups==cpu)} : parallel for reduction(+:verification) firstprivate(total_lus)) \
+    when(user={adaptation(lookups==gpu)} : target teams distribute parallel for \
           map(to: SD.max_num_nucs)\
           map(to: SD.num_nucs[:SD.length_num_nucs])\
           map(to: SD.concs[:SD.length_concs])\
@@ -57,7 +57,7 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
           map(to: SD.index_grid[:SD.length_index_grid])\
           map(to: SD.nuclide_grid[:SD.length_nuclide_grid])\
           reduction(+:verification))
-	for( int i = 0; i < total_lus; i++ )
+	for( int i = 0; i < in.lookups; i++ )
 	{
 		// Set the initial seed value
 		uint64_t seed = STARTING_SEED;	

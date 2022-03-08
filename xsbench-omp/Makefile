@@ -33,7 +33,7 @@ obj = $(source:.c=.o)
 CFLAGS =-std=c++14 -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -D__STRICT_ANSI__
 
 # Linker Flags
-LDFLAGS = -lm
+LDFLAGS = -lm -lapollo
 
 
 # Debug Flags

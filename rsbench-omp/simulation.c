@@ -26,9 +26,9 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 
 	//#pragma omp parallel for reduction(+:verification)
 #pragma omp metadirective \
-    when(user={adaptation(vecAdd==single)} : parallel num_threads(1) ) \
-    when(user={adaptation(vecAdd==parallel)} : parallel for reduction(+:verification) firstprivate(total_lus)) \
-    when(user={adaptation(vecAdd==gpu)} : target teams distribute parallel for \
+    when(user={adaptation(lookups==single)} : parallel num_threads(1) ) \
+    when(user={adaptation(lookups==cpu)} : parallel for reduction(+:verification) firstprivate(total_lus)) \
+    when(user={adaptation(lookups==gpu)} : target teams distribute parallel for \
         map(to:data.n_poles[:data.length_n_poles])\
         map(to:data.n_windows[:data.length_n_windows])\
         map(to:data.poles[:data.length_poles])\

@@ -5,7 +5,7 @@
 # Compiler can be set below, or via environment variable
 CC        = clang++
 OPTIMIZE  = yes
-DEBUG     = no
+DEBUG     = yes
 DEVICE      = gpu
 
 #===============================================================================
