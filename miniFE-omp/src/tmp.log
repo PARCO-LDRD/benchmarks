@@ -1,0 +1,977 @@
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name main.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/main-6251ed.bc -x c++ main.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+Is recognized : 1
+In Line : 2365
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : atomic
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+Parse Var List
+Parse Var List
+LLVM Kind is : target teams distribute parallel for
+Is recognized : 1
+In Line : 2603
+Parse Var List
+Parse Var List
+LLVM Kind is : target teams distribute parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : atomic
+Is recognized : 1
+In Line : 2603
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : atomic
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+Parse Var List
+LLVM Kind is : target teams distribute parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+Parse Var List
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+Parse Clauses for OMPD end adaptation
+DeclRefExpr 0x20001096e650 'const char *' lvalue Var 0x20001096e578 '__omp_adaptation_name_miniFE' 'const char *'
+Got model_name
+Parse Var List
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x20001096e7c8 'ScalarType':'typename OperatorType::ScalarType' lvalue Var 0x20001096d6a0 'x_size' 'ScalarType':'typename OperatorType::ScalarType'
+DeclRefExpr 0x20001096e7e8 'ScalarType':'typename OperatorType::ScalarType' lvalue Var 0x20001096d800 'A_packed_size' 'ScalarType':'typename OperatorType::ScalarType'
+V:single
+V:CPU
+V:GPU
+Got variants
+Got model
+Adaptation Begin Directive Sema
+Model Name is miniFE
+__omp_adaptation_variant_miniFE_single
+__omp_adaptation_variant_miniFE_CPU
+__omp_adaptation_variant_miniFE_GPU
+Is recognized : 1
+In Line : 2603
+Parse Var List
+Parse Var List
+LLVM Kind is : target data
+Is recognized : 1
+In Line : 2603
+Parse Clauses for OMPD end adaptation
+DeclRefExpr 0x20001098a030 'const char *' lvalue Var 0x200010989f48 '__omp_adaptation_name_miniFE' 'const char *'
+Got model_name
+Adaptation End Directive Sema
+Is recognized : 1
+In Line : 2603
+Parse Var List
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : atomic
+LLVM Kind is : atomic
+LLVM Kind is : atomic
+LLVM Kind is : parallel for
+DeclRefExpr 0x11c165f0 'const char *' lvalue Var 0x11c16508 '__omp_adaptation_name_miniFE' 'const char *'
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x11c16778 'ScalarType':'double' lvalue Var 0x11c15458 'x_size' 'ScalarType':'double'
+DeclRefExpr 0x11c16798 'ScalarType':'double' lvalue Var 0x11c155b8 'A_packed_size' 'ScalarType':'double'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target data
+DeclRefExpr 0x11c36e30 'const char *' lvalue Var 0x11c36d48 '__omp_adaptation_name_miniFE' 'const char *'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for
+DeclRefExpr 0x200010ffe3b0 'const char *' lvalue Var 0x200010ffe2c8 '__omp_adaptation_name_miniFE' 'const char *'
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x200010ffe538 'ScalarType':'double' lvalue Var 0x200010ffd2d8 'x_size' 'ScalarType':'double'
+DeclRefExpr 0x200010ffe558 'ScalarType':'double' lvalue Var 0x200010ffd438 'A_packed_size' 'ScalarType':'double'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target data
+DeclRefExpr 0x200011019da8 'const char *' lvalue Var 0x200011019cc0 '__omp_adaptation_name_miniFE' 'const char *'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target teams distribute parallel for
+[CodeGen] Need to emit Adaptation Directive
+[CodeGen] Need to emit Adaptation Directive
+[CodeGen] Need to emit Adaptation Directive
+[CodeGen] Need to emit Adaptation Directive
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name main.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/main-6251ed.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/main-945d27.ll -x c++ main.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+In Line : 2365
+Is recognized : 1
+In Line : 2365
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : atomic
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : target teams distribute parallel for simd
+Is recognized : 1
+In Line : 2603
+Parse Var List
+Parse Var List
+LLVM Kind is : target teams distribute parallel for
+Is recognized : 1
+In Line : 2603
+Parse Var List
+Parse Var List
+LLVM Kind is : target teams distribute parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : atomic
+Is recognized : 1
+In Line : 2603
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : atomic
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+Parse Var List
+LLVM Kind is : target teams distribute parallel for
+Is recognized : 1
+In Line : 2603
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+Parse Var List
+LLVM Kind is : parallel for
+Is recognized : 1
+In Line : 2603
+Parse Clauses for OMPD end adaptation
+DeclRefExpr 0x11d3d090 'const char *' lvalue Var 0x11d3cfb8 '__omp_adaptation_name_miniFE' 'const char *'
+Got model_name
+Parse Var List
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x11d3d208 'ScalarType':'typename OperatorType::ScalarType' lvalue Var 0x11d3c0e0 'x_size' 'ScalarType':'typename OperatorType::ScalarType'
+DeclRefExpr 0x11d3d228 'ScalarType':'typename OperatorType::ScalarType' lvalue Var 0x11d3c240 'A_packed_size' 'ScalarType':'typename OperatorType::ScalarType'
+V:single
+V:CPU
+V:GPU
+Got variants
+Got model
+Adaptation Begin Directive Sema
+Model Name is miniFE
+__omp_adaptation_variant_miniFE_single
+__omp_adaptation_variant_miniFE_CPU
+__omp_adaptation_variant_miniFE_GPU
+Is recognized : 1
+In Line : 2603
+Parse Var List
+Parse Var List
+LLVM Kind is : target data
+Is recognized : 1
+In Line : 2603
+Parse Clauses for OMPD end adaptation
+DeclRefExpr 0x11d48a70 'const char *' lvalue Var 0x11d48988 '__omp_adaptation_name_miniFE' 'const char *'
+Got model_name
+Adaptation End Directive Sema
+Is recognized : 1
+In Line : 2603
+Parse Var List
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : parallel for
+LLVM Kind is : atomic
+LLVM Kind is : atomic
+LLVM Kind is : atomic
+LLVM Kind is : parallel for
+DeclRefExpr 0x12378690 'const char *' lvalue Var 0x123785a8 '__omp_adaptation_name_miniFE' 'const char *'
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x12378818 'ScalarType':'double' lvalue Var 0x123774f8 'x_size' 'ScalarType':'double'
+DeclRefExpr 0x12378838 'ScalarType':'double' lvalue Var 0x12377658 'A_packed_size' 'ScalarType':'double'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target data
+DeclRefExpr 0x123869a0 'const char *' lvalue Var 0x123868b8 '__omp_adaptation_name_miniFE' 'const char *'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for simd
+LLVM Kind is : target teams distribute parallel for
+DeclRefExpr 0x1244d9a0 'const char *' lvalue Var 0x1244d8b8 '__omp_adaptation_name_miniFE' 'const char *'
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x1244db28 'ScalarType':'double' lvalue Var 0x1244c8c8 'x_size' 'ScalarType':'double'
+DeclRefExpr 0x1244db48 'ScalarType':'double' lvalue Var 0x1244ca28 'A_packed_size' 'ScalarType':'double'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target data
+DeclRefExpr 0x12459698 'const char *' lvalue Var 0x124595b0 '__omp_adaptation_name_miniFE' 'const char *'
+LLVM Kind is : end declare adaptation
+Adaptation End Directive Sema
+LLVM Kind is : target teams distribute parallel for
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+18 warnings generated.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name main.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/main-d51726.ll -x ir /var/tmp/main-6251ed.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+warning: <unknown>:0:0: loop not vectorized: the optimizer was unable to perform the requested transformation; the transformation might be disabled or specified as part of an unsupported transformation ordering [-Wpass-failed=transform-warning]
+9 warnings generated.
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=main.ll -inputs=/var/tmp/main-945d27.ll,/var/tmp/main-d51726.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name BoxPartition.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/BoxPartition-ab9e44.bc -x c++ ../utils/BoxPartition.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name BoxPartition.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/BoxPartition-ab9e44.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/BoxPartition-06384c.ll -x c++ ../utils/BoxPartition.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name BoxPartition.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/BoxPartition-ad38fa.ll -x ir /var/tmp/BoxPartition-ab9e44.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=BoxPartition.ll -inputs=/var/tmp/BoxPartition-06384c.ll,/var/tmp/BoxPartition-ad38fa.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name YAML_Doc.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/YAML_Doc-ead0ee.bc -x c++ YAML_Doc.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name YAML_Doc.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/YAML_Doc-ead0ee.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/YAML_Doc-dfe7ed.ll -x c++ YAML_Doc.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name YAML_Doc.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/YAML_Doc-4e14ca.ll -x ir /var/tmp/YAML_Doc-ead0ee.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=YAML_Doc.ll -inputs=/var/tmp/YAML_Doc-dfe7ed.ll,/var/tmp/YAML_Doc-4e14ca.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name YAML_Element.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/YAML_Element-047449.bc -x c++ YAML_Element.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name YAML_Element.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/YAML_Element-047449.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/YAML_Element-399d91.ll -x c++ YAML_Element.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name YAML_Element.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/YAML_Element-438bdc.ll -x ir /var/tmp/YAML_Element-047449.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=YAML_Element.ll -inputs=/var/tmp/YAML_Element-399d91.ll,/var/tmp/YAML_Element-438bdc.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name param_utils.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/param_utils-8e5b1a.bc -x c++ ../utils/param_utils.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name param_utils.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/param_utils-8e5b1a.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/param_utils-4eda28.ll -x c++ ../utils/param_utils.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name param_utils.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/param_utils-06b465.ll -x ir /var/tmp/param_utils-8e5b1a.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=param_utils.ll -inputs=/var/tmp/param_utils-4eda28.ll,/var/tmp/param_utils-06b465.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name utils.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/utils-e65481.bc -x c++ ../utils/utils.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name utils.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/utils-e65481.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/utils-48ccc9.ll -x c++ ../utils/utils.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name utils.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/utils-42570d.ll -x ir /var/tmp/utils-e65481.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=utils.ll -inputs=/var/tmp/utils-48ccc9.ll,/var/tmp/utils-42570d.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name mytimer.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/mytimer-e8c340.bc -x c++ ../utils/mytimer.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple nvptx64-nvidia-cuda -aux-triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name mytimer.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=fast -fno-rounding-math -fno-verbose-asm -no-integrated-as -target-cpu sm_70 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fno-dwarf-directory-asm -v -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers -include __clang_openmp_device_functions.h -D __STRICT_ANSI__ -I . -I ../utils -I ../fem -D MINIFE_SCALAR=double -D MINIFE_LOCAL_ORDINAL=int -D MINIFE_GLOBAL_ORDINAL=int -D MINIFE_RESTRICT=__restrict__ -D MINIFE_CSR_MATRIX -D MINIFE_INFO=1 -D MINIFE_KERNELS=0 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O3 -fdeprecated-macro -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fvisibility protected -fopenmp -fopenmp-target-new-runtime -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -fopenmp-is-device -fopenmp-host-ir-file-path /var/tmp/mytimer-e8c340.bc -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/mytimer-70de26.ll -x c++ ../utils/mytimer.cpp
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux"
+ignoring duplicate directory "/opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers"
+ignoring duplicate directory "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ ../utils
+ ../fem
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/openmp_wrappers
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux
+ /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include/ppc_wrappers
+ /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0/include
+ /usr/local/include
+ /usr/include
+ /usr/tce/packages/cuda/cuda-10.1.243/include
+End of search list.
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+Is recognized : 1
+In Line : 2191
+ "/usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-14" -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm -disable-free -clear-ast-before-backend -main-file-name mytimer.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=fast -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -v -fcoverage-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -resource-dir /usr/WS2/koparasy/PARCO/SC-22/build_lassen/install/lib/clang/14.0.0 -O3 -fdebug-compilation-dir=/usr/workspace/koparasy/PARCO/SC-22/benchmarks/miniFE-omp/src -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -vectorize-loops -vectorize-slp -fopenmp-targets=nvptx64-nvidia-cuda -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/mytimer-22eb17.ll -x ir /var/tmp/mytimer-e8c340.bc
+clang -cc1 version 14.0.0 based upon LLVM 14.0.0git default target powerpc64le-unknown-linux-gnu
+ "/usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin/clang-offload-bundler" -type=ll -targets=openmp-nvptx64-nvidia-cuda,host-powerpc64le-unknown-linux-gnu -outputs=mytimer.ll -inputs=/var/tmp/mytimer-70de26.ll,/var/tmp/mytimer-22eb17.ll
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git 57f6b002589ddbfa715ddd9ea752700e004464bf)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/workspace/koparasy/PARCO/SC-22/build_lassen/install/bin
+Found candidate GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Selected GCC installation: /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/tce/packages/cuda/cuda-10.1.243, version 10.1
+clang-14: warning: main.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: BoxPartition.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: YAML_Doc.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: YAML_Element.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: param_utils.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: utils.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: mytimer.o: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: -lapollo: 'linker' input unused [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-O3' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D __STRICT_ANSI__' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-ffp-contract=fast' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-emit-llvm' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-I .' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-I ../utils' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-I ../fem' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D MINIFE_SCALAR=double' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D MINIFE_LOCAL_ORDINAL=int' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D MINIFE_GLOBAL_ORDINAL=int' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D MINIFE_RESTRICT=__restrict__' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D MINIFE_CSR_MATRIX' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-O3' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-D __STRICT_ANSI__' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-ffp-contract=fast' [-Wunused-command-line-argument]
+clang-14: warning: argument unused during compilation: '-emit-llvm' [-Wunused-command-line-argument]
