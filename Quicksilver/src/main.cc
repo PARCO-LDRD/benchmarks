@@ -173,7 +173,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
                 if ( numParticles != 0 )
                 {
                     NVTX_Range trackingKernel("cycleTracking_TrackingKernel"); // range ends at end of scope
-
+#if 0
                     // The tracking kernel can run
                     // * As a cuda kernel
                     // * As an OpenMP 4.5 parallel loop on the GPU
@@ -201,27 +201,34 @@ void cycleTracking(MonteCarlo *monteCarlo)
                        
                       case gpuWithOpenMP:
                        {
+#endif
+                         #pragma omp begin declare adaptation feature (numParticles) model_name(mymodel) variant(serial,ompcpu,ompgpu) model (dtree)
+
+                          // TODO: there are some supportive code for the omp-gpu version. It is turned on for all now.
                           int nthreads=128;
                           if (numParticles <  64*56 ) 
                              nthreads = 64;
                           int nteams = (numParticles + nthreads - 1 ) / nthreads;
                           nteams = nteams > 1 ? nteams : 1;
-                          #ifdef HAVE_OPENMP_TARGET
-                          #pragma omp target enter data map(to:monteCarlo[0:1]) 
-                          #pragma omp target enter data map(to:processingVault[0:1]) 
-                          #pragma omp target enter data map(to:processedVault[0:1])
-                          #pragma omp target teams distribute parallel for num_teams(nteams) thread_limit(128)
-                          #endif
+                      
+                          #pragma omp metadirective \
+			        when (user={adaptation(mymodel==ompgpu)}:target enter data map(to:monteCarlo[0:1],processingVault[0:1], processedVault[0:1]) ) 
+
+                          #pragma omp metadirective \
+                                when (user={adaptation(mymodel==serial)}:  ) \
+                                when (user={adaptation(mymodel==ompcpu)}: parallel for schedule (static)  ) \
+                                default(target teams distribute parallel for num_teams(nteams) thread_limit(128))
                           for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
                           {
                              CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
                           }
-                          #ifdef HAVE_OPENMP_TARGET
-                          #pragma omp target exit data map(from:monteCarlo[0:1])
-                          #pragma omp target exit data map(from:processingVault[0:1])
-                          #pragma omp target exit data map(from:processedVault[0:1])
-                          #endif
-                       }
+                        
+                          #pragma omp metadirective \
+			        when (user={adaptation(mymodel==ompgpu)}: target exit data map(from:monteCarlo[0:1],processingVault[0:1], processedVault[0:1]))
+                       
+                          #pragma omp end declare adaptation model_name(mymodel)  
+#if 0		       
+		       }
                        break;
 
                       case cpu:
@@ -234,6 +241,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
                       default:
                        qs_assert(false);
                     } // end switch
+#endif
                 }
 
                 particle_count += numParticles;
