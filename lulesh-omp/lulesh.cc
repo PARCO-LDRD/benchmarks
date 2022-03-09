@@ -2263,7 +2263,7 @@ int main(int argc, char *argv[])
     //=================================================
     Real_t  e_cut = domain.e_cut() ;
     Real_t  p_cut = domain.p_cut() ;
-    Real_t  ss4o3 = domain.ss4o3() ;
+//    Real_t  ss4o3 = domain.ss4o3() ;
     Real_t  q_cut = domain.q_cut() ;
     Real_t  v_cut = domain.v_cut() ;
 

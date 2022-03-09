@@ -5,9 +5,8 @@
 # Compiler can be set below, or via environment variable
 CC        = clang++
 OPTIMIZE  = yes
-DEBUG     = no
+DEBUG     = yes
 DEVICE    = gpu
-ARCH      = gfx906
 
 #===============================================================================
 # Program name & source code list
@@ -51,10 +50,7 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 ifeq ($(DEVICE),gpu)
-  CFLAGS += -target x86_64-pc-linux-gnu \
-          -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa \
-          -Xopenmp-target=amdgcn-amd-amdhsa \
-          -march=$(ARCH)
+  CFLAGS += -fopenmp -fopenmp-targets=nvptx64 
 else
   CFLAGS +=-fopenmp
 endif
@@ -62,10 +58,10 @@ endif
 # Targets to Build
 #===============================================================================
 
-$(program): $(obj) Makefile
+$(program): $(obj) Makefile.lassen
 	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
-%.o: %.cc Makefile
+%.o: %.cc Makefile.lassen
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
