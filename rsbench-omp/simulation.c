@@ -15,35 +15,34 @@
 void run_event_based_simulation(Input input, SimulationData data, unsigned long * vhash_result )
 {
 	printf("Beginning baseline event based simulation on device...\n");
-	unsigned long verification = 0;
+	unsigned long long * verification = (unsigned long long *) malloc(input.lookups * sizeof(unsigned long long));
 
 	int offloaded_to_device = 0;
-  int total_lus = input.lookups;
+
+	int total_lookups = input.lookups;
 
 	// Main simulation loop over macroscopic cross section lookups
-#pragma omp begin declare adaptation feature(total_lus) model_name(lookups) \
+#pragma omp begin declare adaptation feature(total_lookups) model_name(lookups) \
   variants(single, cpu, gpu) model(dtree)
 
-	//#pragma omp parallel for reduction(+:verification)
 #pragma omp metadirective \
     when(user={adaptation(lookups==single)} : parallel num_threads(1) ) \
-    when(user={adaptation(lookups==cpu)} : parallel for reduction(+:verification) firstprivate(total_lus)) \
-    when(user={adaptation(lookups==gpu)} : target teams distribute parallel for \
-        map(to:data.n_poles[:data.length_n_poles])\
-        map(to:data.n_windows[:data.length_n_windows])\
-        map(to:data.poles[:data.length_poles])\
-        map(to:data.windows[:data.length_windows])\
-        map(to:data.pseudo_K0RS[:data.length_pseudo_K0RS])\
-        map(to:data.num_nucs[:data.length_num_nucs])\
-        map(to:data.mats[:data.length_mats])\
-        map(to:data.concs[:data.length_concs])\
-        map(to:data.max_num_nucs)\
-        map(to:data.max_num_poles)\
-        map(to:data.max_num_windows)\
-        map(tofrom:offloaded_to_device)\
-        reduction(+:verification))
-
-	for( int i = 0; i < total_lus; i++ )
+    when(user={adaptation(lookups==cpu)} : parallel for schedule(dynamic, 1000)) \
+    when(user={adaptation(lookups==gpu)} : target teams distribute parallel for\
+	map(to:data.n_poles[:data.length_n_poles])\
+	map(to:data.n_windows[:data.length_n_windows])\
+	map(to:data.poles[:data.length_poles])\
+	map(to:data.windows[:data.length_windows])\
+	map(to:data.pseudo_K0RS[:data.length_pseudo_K0RS])\
+	map(to:data.num_nucs[:data.length_num_nucs])\
+	map(to:data.mats[:data.length_mats])\
+	map(to:data.concs[:data.length_concs])\
+	map(to:data.max_num_nucs)\
+	map(to:data.max_num_poles)\
+	map(to:data.max_num_windows)\
+	map(tofrom:offloaded_to_device)\
+  map(from:verification[:input.lookups]))
+	for( int i = 0; i < input.lookups; i++ )
 	{
 		// Set the initial seed value
 		uint64_t seed = STARTING_SEED;	
@@ -76,13 +75,19 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 				max_idx = x;
 			}
 		}
-		verification += max_idx+1;
+		verification[i] = max_idx+1;
 
 		// Check if we are currently running on the device or not
 		if( i == 0 )
 			offloaded_to_device = !omp_is_initial_device();
 	}
+
 #pragma omp end declare adaptation model_name(lookups)
+  
+  // Reduce validation hash on the host
+  unsigned long long validation_hash = 0;
+	for( int i = 0; i < input.lookups; i++ )
+    validation_hash += verification[i];
 
 	// Print if kernel actually ran on the device
 	if( offloaded_to_device )
@@ -90,7 +95,7 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 	else
 		printf( "NOTE - Kernel ran on the host!\n" );
 
-	*vhash_result = verification;
+	*vhash_result = validation_hash;
 }
 
 void calculate_macro_xs( double * macro_xs, int mat, double E, Input input, int * num_nucs, int * mats, int max_num_nucs, double * concs, int * n_windows, double * pseudo_K0Rs, Window * windows, Pole * poles, int max_num_windows, int max_num_poles ) 
