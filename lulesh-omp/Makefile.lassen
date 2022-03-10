@@ -5,8 +5,9 @@
 # Compiler can be set below, or via environment variable
 CC        = clang++
 OPTIMIZE  = yes
-DEBUG     = yes
+DEBUG     = no
 DEVICE    = gpu
+VERIFY    = yes
 
 #===============================================================================
 # Program name & source code list
@@ -14,7 +15,7 @@ DEVICE    = gpu
 
 program = lulesh
 
-source = lulesh.cc \
+source = lulesh-adaptive.cc \
         lulesh-viz.cc \
         lulesh-util.cc \
         lulesh-init.cc
