@@ -2,8 +2,7 @@
 # User Options
 #===============================================================================
 
-# Compiler can be set below, or via environment variable
-CC          = clang++
+COMPILER    = llvm
 OPTIMIZE    = yes
 DEBUG       = no
 PROFILE     = no
@@ -30,11 +29,46 @@ obj = $(source:.c=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS =-std=c++14 -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -D__STRICT_ANSI__
+CFLAGS := -std=gnu99 -Wall
 
 # Linker Flags
 LDFLAGS = -lm -lapollo
 
+# Regular gcc Compiler
+ifeq ($(COMPILER),gnu)
+  CC = gcc
+  CFLAGS += -fopenmp -flto
+endif
+
+# Intel Compiler
+ifeq ($(COMPILER),intel)
+  CC = icx 
+  CFLAGS += -fiopenmp -fopenmp-targets=spir64 -D__STRICT_ANSI__ 
+endif
+
+# LLVM Compiler Targeting A100 -- Change SM Level to Target Other GPUs
+ifeq ($(COMPILER),llvm)
+  CC = clang
+  CFLAGS += -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_70
+endif
+
+# IBM XL Compiler
+ifeq ($(COMPILER),ibm)
+  CC = xlc_r
+  CFLAGS += -qsmp=omp -qoffload
+endif
+
+# NVIDIA Compiler Targeting A100 -- Change SM Level to Target Other GPUs
+ifeq ($(COMPILER),nvidia)
+  CC = nvc
+  CFLAGS += -mp=gpu -Minfo=mp -gpu=cc80
+endif
+
+# AOMP Targeting MI100 -- Change march to Target Other GPUs
+ifeq ($(COMPILER),amd)
+  CC = clang
+  CFLAGS += -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx908
+endif
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
@@ -75,5 +109,5 @@ clean:
 edit:
 	vim -p $(source) XSbench_header.h
 
-run: $(program)
-	./$(program) -s small -m event
+run:
+	./$(program)

@@ -20,9 +20,11 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 	int offloaded_to_device = 0;
 
 	int total_lookups = input.lookups;
+  int particles = input.particles;
+	int nuclides = input.n_nuclides;
 
 	// Main simulation loop over macroscopic cross section lookups
-#pragma omp begin declare adaptation feature(total_lookups) model_name(lookups) \
+#pragma omp begin declare adaptation feature(total_lookups, nuclides) model_name(lookups) \
   variants(single, cpu, gpu) model(dtree)
 
 #pragma omp metadirective \

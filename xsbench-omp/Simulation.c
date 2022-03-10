@@ -39,24 +39,24 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 	////////////////////////////////////////////////////////////////////////////////
 	// Begin Actual Simulation Loop 
 	////////////////////////////////////////////////////////////////////////////////
-	unsigned long long verification = 0;
-  unsigned long total_lus = in.lookups;
+	unsigned long long * verification = (unsigned long long *) malloc(in.lookups * sizeof(unsigned long long));
+
+  int total_lus = in.lookups;
 
 #pragma omp begin declare adaptation feature(total_lus) model_name(lookups) \
   variants(single, cpu, gpu) model(dtree)
 
 #pragma omp metadirective \
     when(user={adaptation(lookups==single)} : parallel num_threads(1) ) \
-    when(user={adaptation(lookups==cpu)} : parallel for reduction(+:verification) firstprivate(total_lus)) \
-    when(user={adaptation(lookups==gpu)} : target teams distribute parallel for \
-          map(to: SD.max_num_nucs)\
-          map(to: SD.num_nucs[:SD.length_num_nucs])\
-          map(to: SD.concs[:SD.length_concs])\
-          map(to: SD.mats[:SD.length_mats])\
-          map(to: SD.unionized_energy_array[:SD.length_unionized_energy_array])\
-          map(to: SD.index_grid[:SD.length_index_grid])\
-          map(to: SD.nuclide_grid[:SD.length_nuclide_grid])\
-          reduction(+:verification))
+    when(user={adaptation(lookups==cpu)} : parallel for schedule(dynamic, 100)) \
+    when(user={adaptation(lookups==gpu)} : target teams distribute parallel for map(to: SD.max_num_nucs)\
+	map(to: SD.num_nucs[:SD.length_num_nucs])\
+	map(to: SD.concs[:SD.length_concs])\
+	map(to: SD.mats[:SD.length_mats])\
+	map(to: SD.unionized_energy_array[:SD.length_unionized_energy_array])\
+	map(to: SD.index_grid[:SD.length_index_grid])\
+	map(to: SD.nuclide_grid[:SD.length_nuclide_grid])\
+  map(from: verification[:in.lookups]))
 	for( int i = 0; i < in.lookups; i++ )
 	{
 		// Set the initial seed value
@@ -110,11 +110,17 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 				max_idx = j;
 			}
 		}
-		verification += max_idx+1;
+		verification[i] = max_idx+1;
 	}
+
+  // Reduce validation hash on the host
+  unsigned long long validation_hash = 0;
+	for( int i = 0; i < in.lookups; i++ )
+    validation_hash += verification[i];
+
 #pragma omp end declare adaptation model_name(lookups)
 
-	return verification;
+	return validation_hash;
 }
 
 // Calculates the microscopic cross section for a given nuclide & energy
