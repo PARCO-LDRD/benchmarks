@@ -1,0 +1,121 @@
+clang++ -Wfatal-errors -std=c++14 -Wall -DREFDATA_TWOJ=14 -march=native -O3 -fopenmp -fopenmp-targets=nvptx64 -c main.cpp -o main.o
+Parse Clauses for OMPD end adaptation
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x11a6a430 'const int' lvalue Var 0x11a54988 'num_atoms' 'const int'
+DeclRefExpr 0x11a6a6b8 'const char *' lvalue Var 0x11a6a5e0 '__omp_adaptation_name_by_num_atoms' 'const char *'
+Got model_name
+V:cpu
+V:gpu
+Got variants
+Got model
+Adaptation Begin Directive Sema
+Model Name is by_num_atoms
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Parse Clauses for OMPD end adaptation
+DeclRefExpr 0x11ffbe10 'const char *' lvalue Var 0x11ffbd28 '__omp_adaptation_name_by_num_atoms' 'const char *'
+Returning already declared variable
+Got model_name
+Adaptation End Directive Sema
+Var Declaration is: 
+__omp_adaptation_by_num_atoms
+Var Declaration is: 
+__omp_adaptation_name_by_num_atoms
+Var Declaration is: 
+__omp_adaptation_policy_by_num_atoms
+  %736 = call i8* @__apollo_region_create(i32 1, i8* %734, i32 2)
+  call void @__apollo_region_set_feature(i8* %737, float %conv909)
+[CodeGen] Need to emit Adaptation Directive
+Parse Clauses for OMPD end adaptation
+[Adaptation] This requires more thought
+[Adaptation] Probably I can borrow code from private clause
+DeclRefExpr 0x12529cf8 'const int' lvalue Var 0x12059c18 'num_atoms' 'const int'
+DeclRefExpr 0x12529f80 'const char *' lvalue Var 0x12529ea8 '__omp_adaptation_name_by_num_atoms' 'const char *'
+Got model_name
+V:cpu
+V:gpu
+Got variants
+Got model
+Adaptation Begin Directive Sema
+Model Name is by_num_atoms
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+Returning already declared Variant
+Parse Clauses for OMPD end adaptation
+DeclRefExpr 0x12604840 'const char *' lvalue Var 0x12604758 '__omp_adaptation_name_by_num_atoms' 'const char *'
+Returning already declared variable
+Got model_name
+Adaptation End Directive Sema
+clang++ -Wfatal-errors -std=c++14 -Wall -DREFDATA_TWOJ=14 -march=native -O3 -fopenmp -fopenmp-targets=nvptx64 main.o -o main -L /p/vast1/ggeorgak/projects/apollo/apollo/build-lassen/install/lib -lapollo
