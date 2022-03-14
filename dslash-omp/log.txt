@@ -1,0 +1,127 @@
+clang++ -Wall -DMILC_COMPLEX -DLDIM=32 -DPRECISION=2 -march=native -O3 -fopenmp -fopenmp-targets=nvptx64 -c main.cpp -o main.o
+clang++ -Wall -DMILC_COMPLEX -DLDIM=32 -DPRECISION=2 -march=native -O3 -fopenmp -fopenmp-targets=nvptx64 -c dslash.cpp -o dslash.o
+clang++ -Wall -DMILC_COMPLEX -DLDIM=32 -DPRECISION=2 -march=native -O3 -fopenmp -fopenmp-targets=nvptx64 -c kernels.cpp -o kernels.o
+kernels.cpp:36:13: error: expected an OpenMP directive
+#pragma omp begin adaptation features(total_sites) model_name(by_total_sites) \
+            ^
+kernels.cpp:49:24: error: map type 'from' is not allowed for '#pragma omp target enter data'
+                       map(from: d_dst[0:total_sites],\
+                       ^
+kernels.cpp:49:24: error: map type 'from' is not allowed for '#pragma omp target enter data'
+kernels.cpp:49:24: error: map type 'from' is not allowed for '#pragma omp target enter data'
+Returning already declared variable
+Returning already declared Variant
+Returning already declared variable
+kernels.cpp:103:9: error: expected '(' after 'unknown'
+    user=({adaptation(by_total_sites==gpu)} : \
+        ^
+        (
+clang-14: /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/Parser.h:980: clang::Parser::TentativeParsingAction::~TentativeParsingAction(): Assertion `!isActive && "Forgot to call Commit or Revert!"' failed.
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed source, and associated run script.
+Stack dump:
+0.	Program arguments: /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/clang-14 -cc1 -triple powerpc64le-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name kernels.cpp -mrelocation-model static -mframe-pointer=none -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu ppc64le -mfloat-abi hard -target-abi elfv2 -mllvm -treat-scalable-fixed-error-as-warning -debugger-tuning=gdb -fcoverage-compilation-dir=/p/vast1/ggeorgak/projects/compilers/adaptive-omp/test/HeCBench/dslash-omp -resource-dir /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/lib/clang/14.0.0 -D MILC_COMPLEX -D LDIM=32 -D PRECISION=2 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8 -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/ppc64le-redhat-linux -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/lib/clang/14.0.0/include/ppc_wrappers -internal-isystem /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/lib/clang/14.0.0/include -internal-isystem /usr/local/include -internal-isystem /opt/rh/devtoolset-8/root/usr/lib/gcc/ppc64le-redhat-linux/8/../../../../ppc64le-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /usr/tce/packages/cuda/cuda-10.1.243/include -O3 -Wall -fdeprecated-macro -fdebug-compilation-dir=/p/vast1/ggeorgak/projects/compilers/adaptive-omp/test/HeCBench/dslash-omp -ferror-limit 19 -fopenmp -fopenmp-target-new-runtime -fno-signed-char -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -disable-llvm-passes -fopenmp-targets=nvptx64 -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /var/tmp/kernels-e6b137.bc -x c++ kernels.cpp
+1.	kernels.cpp:103:9: current parser token '='
+2.	kernels.cpp:14:1: parsing function body 'dslash_fn'
+3.	kernels.cpp:14:1: in compound statement ('{}')
+4.	kernels.cpp:52:1: in compound statement ('{}')
+5.	kernels.cpp:97:56: in compound statement ('{}')
+ #0 0x0000200008e110ac llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/llvm/lib/Support/Unix/Signals.inc:565:22
+ #1 0x0000200008e0eb54 llvm::sys::RunSignalHandlers() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/llvm/lib/Support/Signals.cpp:96:22
+ #2 0x0000200008e0f9e4 SignalHandler(int) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/llvm/lib/Support/Unix/Signals.inc:407:1
+ #3 0x00002000000504d8  0x4d8 abort
+ #4 0x00002000000504d8 /usr/src/debug/glibc-2.17-c758a686/stdlib/abort.c:75:0 
+ #5 0x00002000000504d8 __assert_fail_base /usr/src/debug/glibc-2.17-c758a686/assert/assert.c:92:0
+ #6 0x000020000b3e2134 __assert_fail /usr/src/debug/glibc-2.17-c758a686/assert/assert.c:101:0
+ #7 0x000020000b3d57d4 clang::Parser::TentativeParsingAction::~TentativeParsingAction() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/Parser.h:980:7
+ #8 0x000020000b3d57d4 clang::Parser::ParseOpenMPDeclarativeOrExecutableDirective(clang::Parser::ParsedStmtContext, bool) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseOpenMP.cpp:2622:39
+ #9 0x000020000b3d58c4 clang::Parser::ParseStatementOrDeclarationAfterAttributes(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*, clang::ParsedAttributesWithRange&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:413:63
+#10 0x000020000db5c564 clang::Parser::MaybeDestroyTemplateIds() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/Parser.h:288:30
+#11 0x000020000db5c564 clang::Parser::ParseStatementOrDeclaration(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:115:26
+#12 0x000020000db7a804 clang::Parser::ParseCompoundStatementBody(bool) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:1111:56
+#13 0x000020000db7bc88 clang::Parser::ParseCompoundStatement(bool, unsigned int) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:920:47
+#14 0x000020000db779e4 clang::Parser::ParseStatementOrDeclarationAfterAttributes(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*, clang::ParsedAttributesWithRange&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:258:35
+#15 0x000020000db78028 clang::Parser::MaybeDestroyTemplateIds() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/Parser.h:288:30
+#16 0x000020000db78028 clang::Parser::ParseStatementOrDeclaration(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:115:26
+#17 0x000020000db7afdc clang::Parser::ParseStatement(clang::SourceLocation*, clang::Parser::ParsedStmtContext) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:41:70
+#18 0x000020000db7bc88 clang::Parser::ParseForStatement(clang::SourceLocation*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:2191:3
+#19 0x000020000db7bfdc clang::Parser::ParseStatementOrDeclarationAfterAttributes(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*, clang::ParsedAttributesWithRange&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:276:45
+#20 0x000020000db7c538 clang::Parser::MaybeDestroyTemplateIds() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/Parser.h:288:30
+#21 0x000020000db7c538 clang::Parser::ParseStatementOrDeclaration(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:115:26
+#22 0x000020000db7aedc clang::Parser::ParseCompoundStatementBody(bool) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:1111:56
+#23 0x000020000db7bc88 clang::Parser::ParseCompoundStatement(bool, unsigned int) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:920:47
+#24 0x000020000db779e4 clang::Parser::ParseStatementOrDeclarationAfterAttributes(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*, clang::ParsedAttributesWithRange&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:258:35
+#25 0x000020000db78028 clang::Parser::MaybeDestroyTemplateIds() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/Parser.h:288:30
+#26 0x000020000db78028 clang::Parser::ParseStatementOrDeclaration(llvm::SmallVector<clang::Stmt*, 32u>&, clang::Parser::ParsedStmtContext, clang::SourceLocation*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:115:26
+#27 0x000020000db7afdc clang::Parser::ParseCompoundStatementBody(bool) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:1111:56
+#28 0x000020000db7bc88 clang::Parser::ParseFunctionStatementBody(clang::Decl*, clang::Parser::ParseScope&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseStmt.cpp:2373:3
+#29 0x000020000db779e4 clang::Parser::ParseFunctionDefinition(clang::ParsingDeclarator&, clang::Parser::ParsedTemplateInfo const&, clang::Parser::LateParsedAttrList*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/Parser.cpp:1378:36
+#30 0x000020000db77f30 clang::Parser::ParseDeclGroup(clang::ParsingDeclSpec&, clang::DeclaratorContext, clang::SourceLocation*, clang::Parser::ForRangeInit*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseDecl.cpp:2053:50
+#31 0x000020000dba8288 clang::Parser::ParseDeclOrFunctionDefInternal(clang::ParsedAttributesWithRange&, clang::ParsingDeclSpec&, clang::AccessSpecifier) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/Parser.cpp:1138:52
+#32 0x000020000daee3a0 clang::ParsingDeclRAIIObject::pop(clang::Decl*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/RAIIObjectsForParser.h:167:7
+#33 0x000020000daee3a0 clang::ParsingDeclRAIIObject::abort() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/RAIIObjectsForParser.h:146:10
+#34 0x000020000daee3a0 clang::ParsingDeclRAIIObject::~ParsingDeclRAIIObject() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/RAIIObjectsForParser.h:127:12
+#35 0x000020000daee3a0 clang::ParsingDeclSpec::~ParsingDeclSpec() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/include/clang/Parse/RAIIObjectsForParser.h:175:9
+#36 0x000020000daee3a0 clang::Parser::ParseDeclarationOrFunctionDefinition(clang::ParsedAttributesWithRange&, clang::ParsingDeclSpec*, clang::AccessSpecifier) (.part.325) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/Parser.cpp:1148:30
+#37 0x000020000dba4b34 clang::Parser::ParseExternalDeclaration(clang::ParsedAttributesWithRange&, clang::ParsingDeclSpec*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/Parser.cpp:976:58
+#38 0x000020000dba51a4 clang::Parser::ParseTopLevelDecl(clang::OpaquePtr<clang::DeclGroupRef>&, bool) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/Parser.cpp:720:42
+#39 0x000020000dbaa600 clang::ParseAST(clang::Sema&, bool, bool) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Parse/ParseAST.cpp:158:37
+#40 0x000020000dbab4d0 clang::ASTFrontendAction::ExecuteAction() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Frontend/FrontendAction.cpp:1074:11
+#41 0x000020000dac0124 clang::CodeGenAction::ExecuteAction() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/CodeGen/CodeGenAction.cpp:1106:43
+#42 0x000020000ac56344 clang::FrontendAction::Execute() /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Frontend/FrontendAction.cpp:967:21
+#43 0x000020000a32b780 clang::CompilerInstance::ExecuteAction(clang::FrontendAction&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/Frontend/CompilerInstance.cpp:1036:41
+#44 0x000020000ac5a678 clang::ExecuteCompilerInvocation(clang::CompilerInstance*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/lib/FrontendTool/ExecuteCompilerInvocation.cpp:261:38
+#45 0x000020000abe5840 cc1_main(llvm::ArrayRef<char const*>, char const*, void*) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/tools/driver/cc1_main.cpp:248:40
+#46 0x000020000add47a4 ExecuteCC1Tool(llvm::SmallVectorImpl<char const*>&) /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/tools/driver/driver.cpp:317:20
+#47 0x0000000010016c08 main /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/clang/tools/driver/driver.cpp:388:26
+#48 0x00000000100110b8 generic_start_main.isra.0 /usr/src/debug/glibc-2.17-c758a686/csu/../csu/libc-start.c:266:0
+#49 0x000000001000d9dc __libc_start_main /usr/src/debug/glibc-2.17-c758a686/csu/../sysdeps/unix/sysv/linux/powerpc/libc-start.c:81:0
+Stack dump without symbol names (ensure you have llvm-symbolizer in your PATH or set the environment var `LLVM_SYMBOLIZER_PATH` to point to it):
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libLLVMSupport.so.14git(_ZN4llvm3sys15PrintStackTraceERNS_11raw_ostreamEi+0x3c)[0x200008e110ac]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libLLVMSupport.so.14git(_ZN4llvm3sys17RunSignalHandlersEv+0x74)[0x200008e0eb54]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libLLVMSupport.so.14git(+0x21f9e4)[0x200008e0f9e4]
+[0x2000000504d8]
+/lib64/libc.so.6(abort+0x2b4)[0x20000b3e2134]
+/lib64/libc.so.6(+0x357d4)[0x20000b3d57d4]
+/lib64/libc.so.6(__assert_fail+0x64)[0x20000b3d58c4]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser43ParseOpenMPDeclarativeOrExecutableDirectiveENS0_17ParsedStmtContextEb+0x2564)[0x20000db5c564]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser42ParseStatementOrDeclarationAfterAttributesERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationERNS_25ParsedAttributesWithRangeE+0x6d4)[0x20000db7a804]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser27ParseStatementOrDeclarationERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationE+0xa8)[0x20000db7bc88]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser26ParseCompoundStatementBodyEb+0x5c4)[0x20000db779e4]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser22ParseCompoundStatementEbj+0x48)[0x20000db78028]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser42ParseStatementOrDeclarationAfterAttributesERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationERNS_25ParsedAttributesWithRangeE+0xeac)[0x20000db7afdc]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser27ParseStatementOrDeclarationERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationE+0xa8)[0x20000db7bc88]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser14ParseStatementEPNS_14SourceLocationENS0_17ParsedStmtContextE+0x6c)[0x20000db7bfdc]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser17ParseForStatementEPNS_14SourceLocationE+0x4f8)[0x20000db7c538]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser42ParseStatementOrDeclarationAfterAttributesERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationERNS_25ParsedAttributesWithRangeE+0xdac)[0x20000db7aedc]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser27ParseStatementOrDeclarationERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationE+0xa8)[0x20000db7bc88]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser26ParseCompoundStatementBodyEb+0x5c4)[0x20000db779e4]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser22ParseCompoundStatementEbj+0x48)[0x20000db78028]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser42ParseStatementOrDeclarationAfterAttributesERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationERNS_25ParsedAttributesWithRangeE+0xeac)[0x20000db7afdc]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser27ParseStatementOrDeclarationERN4llvm11SmallVectorIPNS_4StmtELj32EEENS0_17ParsedStmtContextEPNS_14SourceLocationE+0xa8)[0x20000db7bc88]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser26ParseCompoundStatementBodyEb+0x5c4)[0x20000db779e4]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser26ParseFunctionStatementBodyEPNS_4DeclERNS0_10ParseScopeE+0x1b0)[0x20000db77f30]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser23ParseFunctionDefinitionERNS_17ParsingDeclaratorERKNS0_18ParsedTemplateInfoEPNS0_18LateParsedAttrListE+0x4b8)[0x20000dba8288]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser14ParseDeclGroupERNS_15ParsingDeclSpecENS_17DeclaratorContextEPNS_14SourceLocationEPNS0_12ForRangeInitE+0x920)[0x20000daee3a0]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser30ParseDeclOrFunctionDefInternalERNS_25ParsedAttributesWithRangeERNS_15ParsingDeclSpecENS_15AccessSpecifierE+0x204)[0x20000dba4b34]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(+0x1151a4)[0x20000dba51a4]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser24ParseExternalDeclarationERNS_25ParsedAttributesWithRangeEPNS_15ParsingDeclSpecE+0xf40)[0x20000dbaa600]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang6Parser17ParseTopLevelDeclERNS_9OpaquePtrINS_12DeclGroupRefEEEb+0x1a0)[0x20000dbab4d0]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/../lib/libclangParse.so.14git(_ZN5clang8ParseASTERNS_4SemaEbb+0x2b4)[0x20000dac0124]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libclangFrontend.so.14git(_ZN5clang17ASTFrontendAction13ExecuteActionEv+0x74)[0x20000ac56344]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libclangCodeGen.so.14git(_ZN5clang13CodeGenAction13ExecuteActionEv+0x220)[0x20000a32b780]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libclangFrontend.so.14git(_ZN5clang14FrontendAction7ExecuteEv+0x108)[0x20000ac5a678]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libclangFrontend.so.14git(_ZN5clang16CompilerInstance13ExecuteActionERNS_14FrontendActionE+0x180)[0x20000abe5840]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/../lib/libclangFrontendTool.so.14git(_ZN5clang25ExecuteCompilerInvocationEPNS_16CompilerInstanceE+0x304)[0x20000add47a4]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/clang-14(_Z8cc1_mainN4llvm8ArrayRefIPKcEES2_Pv+0xa58)[0x10016c08]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/clang-14[0x100110b8]
+/p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin/clang-14(main+0xb7c)[0x1000d9dc]
+/lib64/libc.so.6(+0x25300)[0x20000b3c5300]
+/lib64/libc.so.6(__libc_start_main+0xc4)[0x20000b3c54f4]
+clang-14: error: unable to execute command: Aborted
+clang-14: error: clang frontend command failed due to signal (use -v to see invocation)
+clang version 14.0.0 (git@github.com:koparasy/ML-LLVM.git e04df107c9c5f5e56ac0cd62b4e7d601e72e4e3e)
+Target: powerpc64le-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /p/vast1/ggeorgak/projects/compilers/adaptive-omp/ML-LLVM/build/install/bin
+clang-14: note: diagnostic msg: Error generating preprocessed source(s).
+make: *** [Makefile.adaptive:59: kernels.o] Error 254
