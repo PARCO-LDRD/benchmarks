@@ -5,7 +5,7 @@ benchmark will be compiled with OpenMP offload flags. The system specific flags 
 the harness to the makefile/CMake through the 'FOPENMP' env variable. The harness
 accepts a DSL benchmark specification under the root directory of the benchmark source code.
 
-##Benchmark DSL 
+## Benchmark DSL 
 
 Below you can view an example of the DSL of the VecAdd benchmark:
 
@@ -102,8 +102,24 @@ spawn the workes on the compute nodes and then it will spawn a copy of the farme
 
 
 
-# benchmarks
+# Benchmarks
 
 Where to find adaptive regions
-
 * Quicksilver/src/main.cc
+
+## Inputs of Benchmarks:
+
+### Hotspot
+  We investigate 3 input parameters, the number of layers, the size of the simulated box (we always consider width to be equal to height) and the number of layers.
+
+### RSBench
+  We investigate 2 input parameters, the number of look ups and the number of particles. The latter we can control only with a categorical variable (small, large) otherwise the code fails.
+
+### XSBench
+  We investigate 2 input parameters, the number of look ups and the number of particles. The latter we can control only with a categorical variable (small, large) otherwise the code fails. 
+
+### Quicksilver
+  We investigate only the number of time steps.
+
+# Smith-Waterman
+  We investigate the size of the simulated block. We always check cases where width = height
