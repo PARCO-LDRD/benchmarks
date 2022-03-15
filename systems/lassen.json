@@ -1,0 +1,7 @@
+{
+  "name": "lassen",
+  "num_nodes": 1,
+  "num_cores": 40, 
+  "system_compile_flags" : "-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70",
+  "scheduler": "lsf"
+}

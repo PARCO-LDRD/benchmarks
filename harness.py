@@ -82,6 +82,10 @@ def reduce_partial_results(data, bench):
       pending_experiments.append(e)
       continue
 
+    if not (os.path.exists(e['stdout'])):
+      pending_experiments.append(e)
+      continue
+
     if e['type'] == 'csv' and (not (os.path.isdir(f'{exp_dir}/trace/'))):
       pending_experiments.append(e)
       continue
@@ -91,6 +95,9 @@ def reduce_partial_results(data, bench):
         print(e['stdout'])
         stdout = fd.read()
         executionTime = bench.getTime(stdout)
+        if executionTime is None:
+          pending_experiments.append(e)
+          continue
         e['measured'] = executionTime
     print('Exeperiment ', exp_dir, ' finished', e['type'])
     e['executed'] = True
@@ -199,6 +206,7 @@ def main():
 
   args = parser.parse_args()
   host = "".join(filter(lambda x: not x.isdigit(), socket.gethostname()))
+  print("Host is ", host)
 
   bench_path = args.benchmark
   analysis_dir = os.path.realpath(args.results_dir)
@@ -266,6 +274,7 @@ def main():
 
   elif args.action == 'gather':
     import pandas as pd
+    pd.set_option('display.max_rows', None)
     packed_exp = []
     for d in glob.glob(f'{args.results_dir}/*/{bench.name}/'):
       system_name = d.split('/')[-3]
@@ -280,6 +289,7 @@ def main():
     columns = ['System', 'Region',  'Policy','Input', 'Id', 'Execution time (micro-seconds)']
     df = pd.DataFrame(packed_exp, columns=columns)
     print(df)
+    print(df.groupby(['System', 'Region',  'Policy','Input']).mean())
     df.to_json(f'{args.results_dir}/{bench.name}_gathered.json')
 
 
