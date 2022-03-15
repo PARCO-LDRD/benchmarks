@@ -1,0 +1,9 @@
+#!/bin/bash
+#BSUB -W ${TIME}
+#BSUB -o ${LOGDIR}/${EXP}.out
+#BSUB -e ${LOGDIR}/${EXP}.err
+
+echo $$PWD
+$CMD
+jsrun -n1 -c40 echo "Exiting"
+exit

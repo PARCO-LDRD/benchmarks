@@ -3,7 +3,7 @@
 import os
 import shutil
 import sys
-script = os.path.realpath(__file__)
+script = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script)
 import bench_modules
 from bench_modules import util
@@ -17,6 +17,51 @@ from importlib import import_module
 import re
 import glob
 import csv
+
+textWidth=505.89
+
+tex_fonts = {
+# Use LaTeX to write all text
+"text.usetex": True,
+"font.family": "serif",
+# Use 10pt font in plots, to match 10pt font in document
+"axes.labelsize": 8,
+"font.size": 8,
+# Make the legend/label fonts a little smaller
+"legend.fontsize": 6,
+"xtick.labelsize": 8,
+"ytick.labelsize": 8
+}
+
+
+def set_size(width, fraction=1, heigh_scale = 1):
+    """Set figure dimensions to avoid scaling in LaTeX.
+    Parameters
+    ----------
+    width: float
+    Document textwidth or columnwidth in pts
+    fraction: float, optional
+    Fraction of the width which you wish the figure to occupy
+    Returns
+    -------
+    fig_dim: tuple
+    Dimensions of figure in inches
+    """
+    # Width of figure (in pts)
+    fig_width_pt = width * fraction
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+    # Golden ratio to set aesthetic figure height
+    # https://disq.us/p/2940ij3
+    golden_ratio = (5**.5 - 1) / 2
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+    fig_height_in = heigh_scale *fig_width_in * golden_ratio
+    fig_dim = (fig_width_in, fig_height_in)
+    return fig_dim
+
+
 
 
 def pack(e, bench):
@@ -195,10 +240,9 @@ def execute_experiment(root,system,e):
 
 def main():
   parser = argparse.ArgumentParser(description='Spack installer which exploits clusters to install pkgs and keep statistics')
-  parser.add_argument('-s', '--system', dest='system', type=str, help='Yaml file containing the description of the system', required=True)
   parser.add_argument('-r', '--results-dir', dest='results_dir', type=str, help='root directory to store all data', required=True)
   parser.add_argument('-b', '--benchmark', dest='benchmark', type=str, help='Directory containing benchmark to execute', required=True)
-  parser.add_argument('-a', '--action', dest='action', type=str.lower, choices=('setup', 'map-reduce', 'execute', 'gather'), help='Action to be performed by the script', required=True)
+  parser.add_argument('-a', '--action', dest='action', type=str.lower, choices=('setup', 'map-reduce', 'execute', 'gather', 'visualize'), help='Action to be performed by the script', required=True)
   parser.add_argument('-j', '--jobs', dest='job', type=str, help='Number of maximum instances/jobs per benchmark', required=True)
   parser.add_argument('-t', '--disable-traverse-states', action='store_false', dest='traverse')
   parser.add_argument('-f', '--first-element', dest='first', type=int, help='Give index of the first worker item')
@@ -207,12 +251,14 @@ def main():
   args = parser.parse_args()
   host = "".join(filter(lambda x: not x.isdigit(), socket.gethostname()))
   print("Host is ", host)
+  systemDescr = f'{os.path.dirname(os.path.realpath(__file__))}/systems/{host}.json'
+  print (systemDescr)
 
   bench_path = args.benchmark
   analysis_dir = os.path.realpath(args.results_dir)
   sys.path.append(bench_path)
   benchClass = getattr(import_module('bench_descr'), 'Benchmark')
-  system = jobScheduler.System.from_json(args.system)
+  system = jobScheduler.System.from_json(systemDescr)
   bench = benchClass(system)
   experiment_root_dir = f'{analysis_dir}/{host}/{bench.name}'
   print(experiment_root_dir)
@@ -246,12 +292,12 @@ def main():
     for i in range(0,int(args.job)):
       start = i * experiments_per_worker
       last = (i+1)*experiments_per_worker
-      cmd=f'{sys.argv[0]} -s {args.system} -r {args.results_dir} -b {args.benchmark} -a execute -j {args.job}'
+      cmd=f'{sys.argv[0]} -r {args.results_dir} -b {args.benchmark} -a execute -j {args.job}'
       cmd += f' -f {start} -l {last}'
       jId = system.dispatch_node(f'node_{i}', f'{experiment_root_dir}/node_tmps/',f'{experiment_root_dir}/node_tmps/', cmd, '01:00:00', f'{bench.name}_{start}_{last}')
       jobs.append(jId)
       print(cmd)
-    cmd=f'{sys.argv[0]} -s {args.system} -r {args.results_dir} -b {args.benchmark} -a map-reduce -j {args.job}'
+    cmd=f'{sys.argv[0]} -r {args.results_dir} -b {args.benchmark} -a map-reduce -j {args.job}'
     system.dispatch_node(f'master', f'{experiment_root_dir}/node_tmps/',f'{experiment_root_dir}/node_tmps/', cmd, '00:20:00', f'{bench.name}_master', jobs)
     return
 
@@ -291,6 +337,16 @@ def main():
     print(df)
     print(df.groupby(['System', 'Region',  'Policy','Input']).mean())
     df.to_json(f'{args.results_dir}/{bench.name}_gathered.json')
+
+  elif args.action == 'visualize':
+    import pandas as pd
+    pd.set_option('display.max_rows', None)
+    data = f'{args.results_dir}/{bench.name}_gathered.json'
+    df = pd.read_json(data)
+    df['Execution time (s)'] = df['Execution time (micro-seconds)'] / 1000000
+    sizes=set_size(width=textWidth)
+    bench.visualize(df, f'{args.results_dir}/{bench.name}.pdf', sizes)
+    print(df)
 
 
 if __name__ == '__main__':

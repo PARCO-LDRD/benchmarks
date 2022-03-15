@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH --time $TIME
+#SBATCH --open-mode append 
+#SBATCH --output ${LOGDIR}/${EXP}.out
+#SBATCH --error ${LOGDIR}/${EXP}.err
+#SBATCH --partition pbatch
+
+$CMD
