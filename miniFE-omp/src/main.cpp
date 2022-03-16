@@ -64,15 +64,9 @@
 
 //The following macros should be specified as compile-macros in the
 //makefile. They are defaulted here just in case...
-#ifndef MINIFE_SCALAR
 #define MINIFE_SCALAR double
-#endif
-#ifndef MINIFE_LOCAL_ORDINAL
 #define MINIFE_LOCAL_ORDINAL int
-#endif
-#ifndef MINIFE_GLOBAL_ORDINAL
 #define MINIFE_GLOBAL_ORDINAL int
-#endif
 
 // ************************************************************************
 
