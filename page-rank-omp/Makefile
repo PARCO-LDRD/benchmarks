@@ -27,7 +27,7 @@ obj = $(source:.cpp=.o)
 BLOCK_SIZE=256
 
 # Standard flags
-CFLAGS := -std=c++14 -Wall 
+CFLAGS := -std=c++14 -Wall -O3 
 
 # Linker Flags
 LDFLAGS = -lapollo 

@@ -8,7 +8,7 @@ OPTIMIZE  = yes
 DEBUG     = no 
 DEVICE    = apollo
 
-FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+FOPENMP?= -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 #===============================================================================
 # Program name & source code list
@@ -17,8 +17,7 @@ FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 program = main
 
 source = 3D.cpp 3D_helper.cpp
-
-obj = $(source:.cpp=.o)
+obpollj = $(source:.cpp=.o)
 
 #===============================================================================
 # Sets Flags
@@ -47,7 +46,7 @@ ifeq ($(DEVICE),gpu)
 endif
 
 ifeq ($(DEVICE), apollo)
-  CFLAGS +=${FOPENMP}
+  CFLAGS +=${FOPENMP} -O3
 endif
 
 #===============================================================================

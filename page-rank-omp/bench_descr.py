@@ -12,10 +12,10 @@ class Benchmark(BaseBenchmark):
     self._clean = 'make clean'
     self._inputs = []
     iterations = range(1,20,2)
-    numPages = range(400,20001,200)
+    numPages = range(400,20001,400)
     for i in iterations:
       for n in numPages:
-        self._inputs.append(f'-n {n} -i {iterations}')
+        self._inputs.append(f'-n {n} -i {i}')
     self._executable = f'page-rank'
 
   @property

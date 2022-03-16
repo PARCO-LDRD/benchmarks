@@ -250,6 +250,16 @@ void fluidSim (
 
   }
 
+#pragma omp metadirective when(user={adaptation(simulation==gpu)} : \
+                                   target exit data map (delete: h_if0[0:temp],\
+                                   h_of0[0:temp],\
+                                   h_if1234[0:temp*4],\
+                                   h_of1234[0:temp*4],\
+                                   h_if5678[0:temp*4],\
+                                   h_of5678[0:temp*4],\
+                                   h_weight[0:9],\
+                                   h_type[0:temp]))
+
   if (iterations % 2 == 0) {
     memcpy(h_of0, h_if0, dbl_size);
     memcpy(h_of1234, h_if1234, dbl4_size);

@@ -6,7 +6,6 @@ COMPILER  = llvm
 OPTIMIZE  = yes
 DEBUG     = no
 PROFILE   = no
-APOLLO_LIBDIR = /p/vast1/ggeorgak/projects/apollo/apollo/build-lassen/install/lib
 FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 #===============================================================================
@@ -30,10 +29,10 @@ obj = $(source:.c=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -std=gnu99 -Wall -O3
+CFLAGS :=  -O3
 
 # Linker Flags
-LDFLAGS = -lm -L $(APOLLO_LIBDIR) -lapollo
+LDFLAGS = -lm  -lapollo
 
 # Intel Compiler
 ifeq ($(COMPILER),intel)

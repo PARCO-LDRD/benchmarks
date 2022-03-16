@@ -121,5 +121,5 @@ Where to find adaptive regions
 ### Quicksilver
   We investigate only the number of time steps.
 
-# Smith-Waterman
+### Smith-Waterman
   We investigate the size of the simulated block. We always check cases where width = height
