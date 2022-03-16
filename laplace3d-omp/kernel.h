@@ -34,11 +34,8 @@ void laplace3d(
         float *__restrict u2)
 {
 #pragma omp metadirective \
-  when(user={adaptation(by_dims==gpu)} : \
-      target teams distribute parallel for collapse(3) thread_limit(BLOCK_X*BLOCK_Y))
-//  when(user={adaptation(by_dims==cpu)} : \
-//    parallel for collapse(3))
-//#pragma omp target teams distribute parallel for collapse(3) thread_limit(BLOCK_X*BLOCK_Y)
+  when(user={adaptation(by_dims==gpu)} : target teams distribute parallel for collapse(3) thread_limit(BLOCK_X*BLOCK_Y)) \
+      when(user={adaptation(by_dims==cpu)} :   parallel for collapse(3))
   for (int k=0; k<NZ; k++) {
     for (int j=0; j<NY; j++) {
       for (int i=0; i<NX; i++) {   // i loop innermost for sequential memory access

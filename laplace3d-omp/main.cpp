@@ -69,17 +69,24 @@ int main(int argc, char **argv){
 #pragma omp begin declare adaptation feature(NX, NY, NZ) model_name(by_dims) \
   variants(cpu, gpu) model(dtree)
 
-  #pragma omp target data map (tofrom: h_u1[0:grid3D_size]) \
-                          map (alloc: h_u2[0:grid3D_size])
+#pragma omp metadirective \
+  when(user={adaptation(by_dims==gpu)} : \
+   target enter data map(to: h_u1[0:grid3D_size]) \
+                          map (alloc: h_u2[0:grid3D_size]))
   {
     // Execute GPU kernel
     for (i = 1; i <= REPEAT; ++i) {
       laplace3d(NX, NY, NZ, pitch, h_u1, h_u2);
-//#pragma omp target update from(h_u1[0:grid3D_size]) from(h_u2[0:grid3D_size])
+#pragma omp metadirective \
+  when(user={adaptation(by_dims==gpu)} : \
+   target update from(h_u1[0:grid3D_size]) from(h_u2[0:grid3D_size]))
       std::swap(h_u1, h_u2);
     }
   }
-  //#pragma omp target exit data map (from: h_u1[0:grid3D_size])
+
+#pragma omp metadirective \
+  when(user={adaptation(by_dims==gpu)} : \
+   target exit data map (from: h_u1[0:grid3D_size]))
 
 #pragma omp end declare adaptation model_name(by_dims)
   // overwrite the h1_u array on the host after the omp target data region
