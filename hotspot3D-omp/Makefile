@@ -17,7 +17,7 @@ FOPENMP?= -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 program = main
 
 source = 3D.cpp 3D_helper.cpp
-obpollj = $(source:.cpp=.o)
+obj = $(source:.cpp=.o)
 
 #===============================================================================
 # Sets Flags

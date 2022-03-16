@@ -87,14 +87,18 @@ def compile(bench):
 
 def get_apollo_regions_variants( compile_err ):
   regions = {}
-  model_pattern= 'Model Name is (.*)'
+  model_pattern= 'ModelName is:(.*)'
   tmp =  set(re.findall(model_pattern, compile_err))
+  print(tmp)
   l = []
   for k in tmp:
-    variant_pattern=f'__omp_adaptation_variant_{k}_(.*)'
-    regions[k]= set(re.findall(variant_pattern, compile_err))
-    print(variant_pattern, regions[k])
+    variant_pattern=f'Declare Variant:__omp_adaptation_variant_{k}_(.*)'
+    regions[k]= []
+    for s in set(re.findall(variant_pattern, compile_err)):
+      v = s.split(':')
+      regions[k].append([v[0], int(v[1])])
     l.append(len(regions[k]))
+  print(regions)
 
   if ( len(set(l)) != 1 ):
     print('Currently we are supporting only same size regions')
@@ -173,7 +177,7 @@ def createStaticRuns(root_dir, bench, regions, space, repeats):
             for k, v in regions.items():
               app_region[k]= {}
               code+= '|' + k
-              app_region[k]['policy'] = v[policy % len(v)]
+              app_region[k]['policy'] = v[policy % len(v)][0]
               code+= '|'  + app_region[k]['policy']
               app_region[k]['execution_time'] = []
             code += '|'
@@ -247,6 +251,7 @@ def main():
   parser.add_argument('-t', '--disable-traverse-states', action='store_false', dest='traverse')
   parser.add_argument('-f', '--first-element', dest='first', type=int, help='Give index of the first worker item')
   parser.add_argument('-l', '--last-element', dest='last', type=int, help='Give index of the last worker item')
+  parser.add_argument('-d', '--dry-run', dest='fake', type=int, help='Do not deploy jobs, just create everything and print command', default=0)
 
   args = parser.parse_args()
   host = "".join(filter(lambda x: not x.isdigit(), socket.gethostname()))
@@ -294,11 +299,14 @@ def main():
       last = (i+1)*experiments_per_worker
       cmd=f'{sys.argv[0]} -r {args.results_dir} -b {args.benchmark} -a execute -j {args.job}'
       cmd += f' -f {start} -l {last}'
-      jId = system.dispatch_node(f'node_{i}', f'{experiment_root_dir}/node_tmps/',f'{experiment_root_dir}/node_tmps/', cmd, '01:00:00', f'{bench.name}_{start}_{last}')
-      jobs.append(jId)
+      if not args.fake:
+        jId = system.dispatch_node(f'node_{i}', f'{experiment_root_dir}/node_tmps/',f'{experiment_root_dir}/node_tmps/', cmd, '01:00:00', f'{bench.name}_{start}_{last}')
+        jobs.append(jId)
       print(cmd)
     cmd=f'{sys.argv[0]} -r {args.results_dir} -b {args.benchmark} -a map-reduce -j {args.job}'
-    system.dispatch_node(f'master', f'{experiment_root_dir}/node_tmps/',f'{experiment_root_dir}/node_tmps/', cmd, '00:20:00', f'{bench.name}_master', jobs)
+    print(cmd)
+    if not args.fake:
+      system.dispatch_node(f'master', f'{experiment_root_dir}/node_tmps/',f'{experiment_root_dir}/node_tmps/', cmd, '00:20:00', f'{bench.name}_master', jobs)
     return
 
   elif args.action == 'execute':
