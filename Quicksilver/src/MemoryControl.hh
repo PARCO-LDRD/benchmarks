@@ -4,6 +4,9 @@
 #include "cudaUtils.hh"
 
 #include "qs_assert.hh"
+#include "macros.hh"
+
+extern "C" void *llvm_omp_target_alloc_shared(size_t, int);
 
 namespace MemoryControl
 {
@@ -23,7 +26,11 @@ namespace MemoryControl
 #ifdef HAVE_UVM
         case AllocationPolicy::UVM_MEM:
          void *ptr;
+      #if defined(HAVE_OPENMP_TARGET)
+        ptr = llvm_omp_target_alloc_shared( sizeof(T)*size, omp_get_default_device());
+      #else
          cudaMallocManaged(&ptr, size*sizeof(T), cudaMemAttachGlobal);
+      #endif
          tmp = new(ptr) T[size]; 
          break;
 #endif
@@ -46,7 +53,11 @@ namespace MemoryControl
         case UVM_MEM:
          for (int i=0; i < size; ++i)
             data[i].~T();
+#if defined(HAVE_OPENMP_TARGET)
+         omp_target_free(data, omp_get_default_device());
+#else
          cudaFree(data);
+#endif
          break;
 #endif         
         default:

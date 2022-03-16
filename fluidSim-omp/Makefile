@@ -4,9 +4,10 @@
 
 # Compiler can be set below, or via environment variable
 CC        = clang++
-OPTIMIZE  = yes
-DEBUG     = no 
+OPTIMIZE  = yes 
+DEBUG     = no
 DEVICE    = apollo
+VERIFY    = no 
 
 FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
@@ -16,23 +17,21 @@ FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 program = main
 
-source = 3D.cpp 3D_helper.cpp
-
-obj = $(source:.cpp=.o)
+obj = main.o kernels.o reference.o
 
 #===============================================================================
 # Sets Flags
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -Wall 
+CFLAGS := -std=c++14 -Wall -include utils.h
 
 # Linker Flags
 LDFLAGS = -lapollo 
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
-  CFLAGS += -g
+  CFLAGS += -g -DDEBUG
   LDFLAGS  += -g
 endif
 
@@ -42,27 +41,37 @@ ifeq ($(OPTIMIZE),yes)
   CFLAGS += -O3
 endif
 
-ifeq ($(DEVICE),gpu)
-  CFLAGS +=-fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
+ifeq ($(VERIFY),yes)
+  CFLAGS += -DVERIFY
 endif
 
+ifeq ($(DEVICE),gpu)
+  CFLAGS +=-fiopenmp -fopenmp-targets=spir64 -D__STRICT_ANSI__
+else
 ifeq ($(DEVICE), apollo)
   CFLAGS +=${FOPENMP}
+else
+  CFLAGS +=-qopenmp
 endif
-
+endif
 #===============================================================================
 # Targets to Build
 #===============================================================================
 
-$(program): $(obj) Makefile
+$(program): $(obj)
 	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
-%.o: %.cpp Makefile
+kernels.o: kernels.cpp utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+main.o: main.cpp utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+reference.o: reference.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(program) $(obj) output.out
+	rm -rf $(program) $(obj)
 
 run: $(program)
-	./$(program) 512 8 5000 ../data/hotspot3D/power_512x8 ../data/hotspot3D/temp_512x8 output.out
-
+	./$(program) 10000

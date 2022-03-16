@@ -11,11 +11,8 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    start = 16
-    ratio=2
-    n = 11
-    progression = [start * ratio**i for i in range(n)]
-    for i in progression:
+    #5000 x 5000 -> 30 000 30 000 , stride : 512
+    for i in range(4*1024,30*1024+1,512):
       self._inputs.append(f'{i} {i}')
     self._executable = f'SW'
 
@@ -42,12 +39,27 @@ class Benchmark(BaseBenchmark):
   def getTime(self, stdout):
     print(' I am trying t find execution time')
     exec_time_pattern = '__ExecutionTime__:(.*)'
-    tmp =  re.findall(exec_time_pattern, stdout)[0]
-    print(tmp, type(tmp))
-    return tmp
+    tmp =  re.findall(exec_time_pattern, stdout)
+    if len(tmp) == 0:
+      return None
+    return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     vals=cmd.split(' ')
     cmd=':'.join(vals[1:3])
     return cmd
+
+  def visualize(self, df, outfile, sizes):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    import seaborn as sns
+    fig, ax = plt.subplots(figsize=sizes)
+    df[['N', 'M']] = df['Input'].str.split(':', expand=True)
+    df['N'] = df['N'].astype(int)
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    g.set(xscale="log")
+    g.set(yscale="log")
+    plt.savefig(f'{outfile}')
+    plt.close()
 

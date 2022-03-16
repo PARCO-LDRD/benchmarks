@@ -7,6 +7,7 @@ OPTIMIZE  = yes
 DEBUG     = no
 PROFILE   = no
 APOLLO_LIBDIR = /p/vast1/ggeorgak/projects/apollo/apollo/build-lassen/install/lib
+FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 #===============================================================================
 # Program name & source code list
@@ -29,7 +30,7 @@ obj = $(source:.c=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -std=gnu99 -Wall
+CFLAGS := -std=gnu99 -Wall -O3
 
 # Linker Flags
 LDFLAGS = -lm -L $(APOLLO_LIBDIR) -lapollo
@@ -43,7 +44,7 @@ endif
 # LLVM Compiler Targeting A100 -- Change SM Level to Target Other GPUs
 ifeq ($(COMPILER),llvm)
   CC = clang
-  CFLAGS += -O3 -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
+  CFLAGS += ${FOPENMP}
 endif
 
 # IBM XL Compiler

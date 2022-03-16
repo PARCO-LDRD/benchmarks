@@ -2,6 +2,7 @@ import os
 from bench_modules.benchmark import BaseBenchmark
 import re
 
+
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
     super().__init__('hotspot3D')
@@ -47,7 +48,12 @@ class Benchmark(BaseBenchmark):
   def getTime(self, stdout):
     print(' I am trying t find execution time')
     exec_time_pattern = '__ExecutionTime__:(.*)'
-    tmp =  re.findall(exec_time_pattern, stdout)[0]
+    tmp =  re.findall(exec_time_pattern, stdout)
+    if len(tmp) == 0:
+      return None
+    print(tmp, type(tmp))
+    return tmp[0]
+
     print(tmp, type(tmp))
     return tmp
 
@@ -55,4 +61,18 @@ class Benchmark(BaseBenchmark):
     vals=cmd.split(' ')
     cmd=':'.join(vals[1:4])
     return cmd
+
+  def visualize(self, df, outfile, sizes):
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    import seaborn as sns
+    fig, ax = plt.subplots(figsize=sizes)
+    df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
+    df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
+    df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    g.set(xscale="log")
+    g.set(yscale="log")
+    plt.savefig(f'{outfile}')
+    plt.close()
 

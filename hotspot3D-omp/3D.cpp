@@ -19,6 +19,14 @@ float chip_height = 0.016;
 float chip_width  = 0.016;
 float amb_temp    = 80.0;
 
+double get_time(void)
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec; 
+}
+
 
 void usage(int argc, char **argv)
 {
@@ -86,18 +94,15 @@ int main(int argc, char** argv)
 
   memcpy(tCopy,tIn, size * sizeof(float));
 
-  long long start = get_time();
-#pragma omp begin declare adaptation feature(iterations, numRows, numCols) model_name(hotspot) \
-  variants(single, CPU, GPU) model(dtree)
+  double start = get_time();
+#pragma omp begin declare adaptation feature(iterations, numRows, numCols) model_name(hotspot) variants(cpu, gpu) model(dtree)
 
-#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target data map(to: tIn[0:size], pIn[0:size]) map(alloc: tOut[0:size]))
+#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target enter data map(to: tIn[0:size], pIn[0:size]) map(alloc: tOut[0:size])) 
 
-  {
     for(int j = 0; j < iterations; j++)
     {
-#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target teams distribute parallel for ) \
-    when(user={adaptation(hotspot==cpu)} : parallel for collapse(2) firstprivate(numRows, numCols)) \
-    when(user={adaptation(hotspot==single)} : parallel for num_threads(1)) 
+#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target teams distribute parallel for collapse(2)) \
+                          when(user={adaptation(hotspot==cpu)} : parallel for collapse(2) firstprivate(numRows, numCols)) 
     for (int j = 0; j < numRows; j++)  
       {
         for (int i = 0; i < numCols; i++)  
@@ -153,20 +158,22 @@ int main(int argc, char** argv)
 #pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target update from (tOut[0:size]))
      sel = tOut;
     }
-  } 
 
 #pragma omp end declare adaptation model_name(hotspot)
-  long long stop = get_time();
 
-  float* answer = (float*)calloc(size, sizeof(float));
-  computeTempCPU(pIn, tCopy, answer, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, amb_temp, iterations);
+  double stop = get_time();
+  printf("__ExecutionTime__:%g\n" , (stop - start));
 
-  float acc = accuracy(sel,answer,numRows*numCols*layers);
-  float time = (float)((stop - start)/(1000.0 * 1000.0));
-  printf("Device offloading time: %.3f (s)\n",time);
-  printf("Root-mean-square error: %e\n",acc);
 
-  writeoutput(tOut,numRows,numCols,layers,ofile);
+//  float* answer = (float*)calloc(size, sizeof(float));
+//  computeTempCPU(pIn, tCopy, answer, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, amb_temp, iterations);
+//
+//  float acc = accuracy(sel,answer,numRows*numCols*layers);
+//  float time = (float)((stop - start)/(1000.0 * 1000.0));
+//  printf("Device offloading time: %.3f (s)\n",time);
+//  printf("Root-mean-square error: %e\n",acc);
+
+  //writeoutput(tOut,numRows,numCols,layers,ofile);
   free(tIn);
   free(pIn);
   free(tCopy);

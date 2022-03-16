@@ -25,10 +25,9 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 
 	// Main simulation loop over macroscopic cross section lookups
 #pragma omp begin declare adaptation feature(total_lookups, nuclides) model_name(lookups) \
-  variants(single, cpu, gpu) model(dtree)
+  variants(cpu, gpu) model(dtree)
 
 #pragma omp metadirective \
-    when(user={adaptation(lookups==single)} : parallel num_threads(1) ) \
     when(user={adaptation(lookups==cpu)} : parallel for schedule(dynamic, 1000)) \
     when(user={adaptation(lookups==gpu)} : target teams distribute parallel for\
 	map(to:data.n_poles[:data.length_n_poles])\

@@ -13,6 +13,7 @@
 #include "macros.hh" // current location of openMP wrappers.
 #include "cudaUtils.hh"
 
+extern "C" void *llvm_omp_target_alloc_shared(size_t, int);
 //using std::ceil;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -28,10 +29,17 @@ MonteCarlo::MonteCarlo(const Parameters& params)
     #if defined (HAVE_UVM)
         void *ptr1, *ptr2, *ptr3, *ptr4;
 
+      #if defined(HAVE_OPENMP_TARGET)
+        ptr1 = llvm_omp_target_alloc_shared( sizeof(Tallies), omp_get_default_device());
+        ptr2 = llvm_omp_target_alloc_shared( sizeof(MC_Processor_Info),  omp_get_default_device());
+        ptr3 = llvm_omp_target_alloc_shared( sizeof(MC_Time_Info), omp_get_default_device());
+        ptr4 = llvm_omp_target_alloc_shared( sizeof(MC_Fast_Timer_Container), omp_get_default_device() );
+      #else
         cudaMallocManaged( &ptr1, sizeof(Tallies), cudaMemAttachHost );
         cudaMallocManaged( &ptr2, sizeof(MC_Processor_Info), cudaMemAttachHost );
         cudaMallocManaged( &ptr3, sizeof(MC_Time_Info), cudaMemAttachHost );
         cudaMallocManaged( &ptr4, sizeof(MC_Fast_Timer_Container) );
+      #endif
 
         _tallies                = new(ptr1) Tallies( params.simulationParams.balanceTallyReplications, 
                                                      params.simulationParams.fluxTallyReplications,
@@ -98,8 +106,13 @@ MonteCarlo::MonteCarlo(const Parameters& params)
 
     #if defined(HAVE_UVM)
         void *ptr5, *ptr6;
+      #if defined(HAVE_OPENMP_TARGET)
+        ptr5 = llvm_omp_target_alloc_shared( sizeof(MC_Particle_Buffer), omp_get_default_device());
+        ptr6 = llvm_omp_target_alloc_shared( sizeof(ParticleVaultContainer),  omp_get_default_device());
+      #else
         cudaMallocManaged( &ptr5, sizeof(MC_Particle_Buffer) );
         cudaMallocManaged( &ptr6, sizeof(ParticleVaultContainer), cudaMemAttachHost );
+      #endif
         particle_buffer         = new(ptr5) MC_Particle_Buffer(this, batch_size);
         _particleVaultContainer = new(ptr6) ParticleVaultContainer(batch_size, num_batches, num_extra_vaults);
     #else
@@ -125,6 +138,16 @@ MonteCarlo::~MonteCarlo()
         fast_timer->~MC_Fast_Timer_Container();
         particle_buffer->~MC_Particle_Buffer();
 
+      #if defined(HAVE_OPENMP_TARGET)
+        omp_target_free( _nuclearData , omp_get_default_device());
+        omp_target_free( _particleVaultContainer, omp_get_default_device());
+        omp_target_free( _materialDatabase, omp_get_default_device());
+        omp_target_free( _tallies, omp_get_default_device());
+        omp_target_free( processor_info, omp_get_default_device());
+        omp_target_free( time_info, omp_get_default_device());
+        omp_target_free( fast_timer, omp_get_default_device());
+        omp_target_free( particle_buffer, omp_get_default_device());
+      #else
         cudaFree( _nuclearData );
         cudaFree( _particleVaultContainer);
         cudaFree( _materialDatabase);
@@ -133,7 +156,7 @@ MonteCarlo::~MonteCarlo()
         cudaFree( time_info);
         cudaFree( fast_timer);
         cudaFree( particle_buffer);
-
+      #endif
     #else
         delete _nuclearData;
         delete _particleVaultContainer;

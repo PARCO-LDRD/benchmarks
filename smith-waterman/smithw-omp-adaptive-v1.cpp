@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <assert.h>
 #include <stdbool.h> // C99 does not support the boolean data type
 
@@ -72,7 +74,18 @@ double omp_get_wtime()
   return time_stamp();
 }
 
+
+
+
 #endif
+double get_time(void)
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec; 
+}
+
+
 /*--------------------------------------------------------------------
  * Functions Prototypes
  */
@@ -237,11 +250,14 @@ int main(int argc, char* argv[]) {
   // int asz= m*n*sizeof(int);
   int asz= m*n;
 
+
+
+  double start = get_time();
 //Choice 3: map the entire region to gpu, preparing data regions  
-#pragma omp begin declare adaptation feature (nDiag) model_name(mymodel) variant(serial,ompcpu,ompgpu) model (dtree)
+#pragma omp begin declare adaptation feature (nDiag) model_name(mymodel) variants(cpu,gpu) model (dtree)
 
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target enter data map(to:a[0:m-1], b[0:n-1]) map(to: H[0:asz], P[0:asz], maxPos)) 
+      when (user={adaptation(mymodel==gpu)}: target enter data map(to:a[0:m-1], b[0:n-1]) map(to: H[0:asz], P[0:asz], maxPos)) 
  
   {
     for (int i = 1; i <= nDiag; ++i) // start from 1 since 0 is the boundary padding
@@ -276,8 +292,7 @@ int main(int argc, char* argv[]) {
       }
 
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==serial)}:  ) \
-      when (user={adaptation(mymodel==ompcpu)}: parallel for  ) \
+      when (user={adaptation(mymodel==cpu)}: parallel for  ) \
       default(target teams distribute parallel for map(tofrom:maxPos) )
       for (int j = 0; j < nEle; ++j) 
       {  // going upwards : anti-diagnol direction
@@ -341,9 +356,13 @@ int main(int argc, char* argv[]) {
   } // end omp parallel
 
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target exit data map(from: H[0:asz], P[0:asz], maxPos) ) 
+      when (user={adaptation(mymodel==gpu)}: target exit data map(from: H[0:asz], P[0:asz], maxPos) ) 
  
 #pragma omp end declare adaptation model_name(mymodel)
+
+
+  double stop = get_time();
+  printf("__ExecutionTime__:%g\n" , (stop - start));
 
   double finalTime = omp_get_wtime();
   printf("\nElapsed time for scoring matrix computation: %f\n", finalTime - initialTime);

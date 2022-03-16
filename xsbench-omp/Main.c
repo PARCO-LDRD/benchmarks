@@ -4,6 +4,14 @@
 #include<mpi.h>
 #endif
 
+double get_time(void)
+{
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec; 
+}
+
 int main( int argc, char* argv[] )
 {
 	// =====================================================================
@@ -69,7 +77,7 @@ int main( int argc, char* argv[] )
 	}
 
 	// Start Simulation Timer
-	omp_start = omp_get_wtime();
+	omp_start = get_time();
 
 	// Run simulation
 	if( in.simulation_method == EVENT_BASED )
@@ -95,7 +103,8 @@ int main( int argc, char* argv[] )
 	}
 
 	// End Simulation Timer
-	omp_end = omp_get_wtime();
+	omp_end = get_time();
+	printf("__ExecutionTime__:%g\n", omp_end-omp_start);
 
 	// =====================================================================
 	// Output Results & Finalize
@@ -105,7 +114,7 @@ int main( int argc, char* argv[] )
 	verification = verification % 999983;
 
 	// Print / Save Results and Exit
-	int is_invalid_result = print_results( in, mype, omp_end-omp_start, nprocs, verification );
+	int is_invalid_result = print_results( in, mype, (double)(omp_end-omp_start)/1000000.0, nprocs, verification );
 
 	#ifdef MPI
 	MPI_Finalize();

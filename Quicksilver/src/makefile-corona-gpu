@@ -94,7 +94,7 @@ SHELL = /bin/bash
 # Set your desired C++ compiler and any necessary flags.
 # The interpretation of each of these four variables is described above.
 # A number of examples for machines we regularly run on are given below.
-CXX = /opt/rocm-4.1.0/llvm/bin/clang++
+CXX = /opt/rocm-4.5.2/llvm/bin/clang # /opt/rocm-4.1.0/llvm/bin/clang++
 OPENMP_FLAGS = -O2 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-version=50 -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx906
 CXXFLAGS = $(OPENMP_FLAGS)
 CPPFLAGS = $(OPENMP_FLAGS) 

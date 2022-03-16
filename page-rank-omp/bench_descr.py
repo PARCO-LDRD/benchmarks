@@ -5,18 +5,18 @@ import re
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
-    super().__init__('XSBench')
+    super().__init__('PageRank')
     self._root = os.path.split(os.path.realpath(__file__))[0]
     compile_flags=system.get_compile_flags()
     self._build = f'FOPENMP="{compile_flags}" make'
     self._clean = 'make clean'
     self._inputs = []
-    for size in ['small', 'large']:
-      for i in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]:
-        lus = i * 5000
-        in_args = f'-m event -s {size} -l {lus}'
-        self._inputs.append(in_args)
-    self._executable = f'XSBench'
+    iterations = range(1,20,2)
+    numPages = range(400,20001,200)
+    for i in iterations:
+      for n in numPages:
+        self._inputs.append(f'-n {n} -i {iterations}')
+    self._executable = f'page-rank'
 
   @property
   def build(self):
@@ -44,21 +44,23 @@ class Benchmark(BaseBenchmark):
     tmp =  re.findall(exec_time_pattern, stdout)
     if len(tmp) == 0:
       return None
+    print(tmp, type(tmp))
     return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     vals=cmd.split(' ')
-    return f'{vals[4]}:{vals[6]}'
+    cmd=':'.join([vals[2],vals[4]])
+    return cmd
 
   def visualize(self, df, outfile, sizes):
-    import pandas as pd
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
-    df['lookups'] = df['lookups'].astype(int)
-    g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='System', hue='Policy', style='Type', kind='line')
+    df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
+    df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
+    df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
     g.set(xscale="log")
     g.set(yscale="log")
     plt.savefig(f'{outfile}')

@@ -5,7 +5,7 @@
 # Compiler can be set below, or via environment variable
 CC        = clang++
 OPTIMIZE  = yes
-DEBUG     = no 
+DEBUG     = no
 DEVICE    = apollo
 
 FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
@@ -14,25 +14,27 @@ FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 # Program name & source code list
 #===============================================================================
 
-program = main
+program = page-rank 
 
-source = 3D.cpp 3D_helper.cpp
+source = main.cpp
 
 obj = $(source:.cpp=.o)
 
 #===============================================================================
 # Sets Flags
 #===============================================================================
+# turning the work-group size
+BLOCK_SIZE=256
 
-# Standard Flags
-CFLAGS := -Wall 
+# Standard flags
+CFLAGS := -std=c++14 -Wall 
 
 # Linker Flags
 LDFLAGS = -lapollo 
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
-  CFLAGS += -g
+  CFLAGS += -g -DDEBUG
   LDFLAGS  += -g
 endif
 
@@ -43,14 +45,17 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 ifeq ($(DEVICE),gpu)
-  CFLAGS +=-fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
-endif
-
+  CFLAGS += -target x86_64-pc-linux-gnu \
+          -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa \
+          -Xopenmp-target=amdgcn-amd-amdhsa \
+          -march=$(ARCH)
+else
 ifeq ($(DEVICE), apollo)
   CFLAGS +=${FOPENMP}
+else
+  CFLAGS +=-qopenmp
 endif
-
-#===============================================================================
+endif#===============================================================================
 # Targets to Build
 #===============================================================================
 
@@ -61,8 +66,9 @@ $(program): $(obj) Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(program) $(obj) output.out
+	rm -rf $(program) $(obj)
 
 run: $(program)
-	./$(program) 512 8 5000 ../data/hotspot3D/power_512x8 ../data/hotspot3D/temp_512x8 output.out
+	./$(program) -n 10000
+	#./$(program) -x 128 -y 128 -z 10 -np 1024
 

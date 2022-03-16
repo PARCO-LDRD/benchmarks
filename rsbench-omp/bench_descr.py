@@ -2,6 +2,8 @@ import os
 from bench_modules.benchmark import BaseBenchmark
 import re
 
+
+
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
     super().__init__('RSBench')
@@ -11,8 +13,8 @@ class Benchmark(BaseBenchmark):
     self._clean = 'make clean'
     self._inputs = []
     for size in ['small', 'large']:
-      for i in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]:
-        lus = i * 10000
+      for i in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]:
+        lus = i * 5000
         in_args = f'-m event -s {size} -l {lus}'
         self._inputs.append(in_args)
     self._executable = f'rsbench'
@@ -40,11 +42,27 @@ class Benchmark(BaseBenchmark):
   def getTime(self, stdout):
     print(' I am trying t find execution time')
     exec_time_pattern = '__ExecutionTime__:(.*)'
-    tmp =  re.findall(exec_time_pattern, stdout)[0]
+    tmp =  re.findall(exec_time_pattern, stdout)
+    if len(tmp) == 0:
+      return None
     print(tmp, type(tmp))
-    return tmp
+    return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     vals=cmd.split(' ')
     return f'{vals[4]}:{vals[6]}'
+
+  def visualize(self, df, outfile, sizes):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    import seaborn as sns
+    fig, ax = plt.subplots(figsize=sizes)
+    df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
+    df['lookups'] = df['lookups'].astype(int)
+    g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='System', hue='Policy', style='Type', kind='line')
+    g.set(xscale="log")
+    g.set(yscale="log")
+    plt.savefig(f'{outfile}')
+    plt.close()
 

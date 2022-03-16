@@ -97,21 +97,22 @@ SHELL = /bin/bash
 CXX = 
 CXXFLAGS =
 CPPFLAGS = 
-LDFLAGS =
+LDFLAGS = -lapollo -lm 
 
 ###############################################################################
 # Very simple GCC build with OpenMP but without MPI.  
 # This works on a Macbook (if gcc is installed)
 ###############################################################################
 #
-OPENMP_FLAGS = -DHAVE_OPENMP -fopenmp 
+#OPENMP_FLAGS = -DHAVE_OPENMP -fopenmp 
 OPENMP_LDFLAGS = -fopenmp
-OPTFLAGS = -g -O2
+OPTFLAGS = -O2
 #
+FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 CXX=g++
 CXXFLAGS = -std=c++11  $(OPTFLAGS) -Wpedantic
-CPPFLAGS = $(OPENMP_FLAGS)
-LDFLAGS = $(OPENMP_LDFLAGS) 
+CPPFLAGS = -DHAVE_OPENMP -DHAVE_OPENMP_TARGET $(OPENMP_FLAGS) $(FOPENMP)
+LDFLAGS += -DHAVE_OPENMP -DHAVE_OPENMP_TARGET $(OPENMP_LDFLAGS) $(FOPENMP) 
 
 
 ###############################################################################
@@ -159,11 +160,11 @@ LDFLAGS = $(OPENMP_LDFLAGS)
 #OPTFLAGS = -O2
 
 #CUDA_FLAGS = -I${CUDA_PATH}/include/
-#CUDA_LDFLAGS = -L${CUDA_PATH}/lib64/ -lcuda -lcudart
+
 
 #CXXFLAGS = -std=c++11 $(OPTFLAGS)
 #CPPFLAGS = -DHAVE_MPI $(OPENMP_FLAGS) $(CUDA_FLAGS) 
-#LDFLAGS  = $(CUDA_LDFLAGS)
+LDFLAGS  += $(CUDA_LDFLAGS)
 
 
 ###############################################################################

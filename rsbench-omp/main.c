@@ -65,6 +65,7 @@ int main(int argc, char * argv[])
 	}
 
 	stop = get_time();
+  printf("__ExecutionTime__:%g\n" , (stop - start));
 
 	// Final hash step
 	vhash = vhash % 999983;
@@ -78,7 +79,7 @@ int main(int argc, char * argv[])
 	center_print("RESULTS", 79);
 	border_print();
 
-	int is_invalid = validate_and_print_results(input, stop-start, vhash);
+	int is_invalid = validate_and_print_results(input, (double)(stop-start)/1000000.0, vhash);
 
 	border_print();
 

@@ -22,6 +22,10 @@
 #include "MC_Base_Particle.hh"
 #include "cudaUtils.hh"
 #include "cudaFunctions.hh"
+#include "macros.hh"
+
+
+extern "C" void *llvm_omp_target_alloc_shared(size_t, int);
 
 using std::vector;
 using std::string;
@@ -54,7 +58,11 @@ MonteCarlo* initMC(const Parameters& params)
    MonteCarlo* monteCarlo;
    #ifdef HAVE_UVM
       void* ptr;
+      #if defined(HAVE_OPENMP_TARGET)
+      ptr = llvm_omp_target_alloc_shared(sizeof(MonteCarlo),omp_get_default_device());
+      #else
       cudaMallocManaged( &ptr, sizeof(MonteCarlo), cudaMemAttachGlobal );
+      #endif
       monteCarlo = new(ptr) MonteCarlo(params);
    #else
      monteCarlo = new MonteCarlo(params);
@@ -95,9 +103,9 @@ namespace
             
             #if defined(HAVE_OPENMP_TARGET)
                 omp_set_default_device(GPUID);
-            #endif
-
+            #else
             cudaSetDevice(GPUID);
+            #endif
             //cudaDeviceSetLimit( cudaLimitStackSize, 64*1024 );
             #endif
          }
@@ -132,8 +140,13 @@ namespace
    {
       #if defined HAVE_UVM
          void *ptr1, *ptr2;
+      #if defined(HAVE_OPENMP_TARGET)
+         ptr1 = llvm_omp_target_alloc_shared( sizeof(NuclearData), omp_get_default_device());
+         ptr2 = llvm_omp_target_alloc_shared( sizeof(MaterialDatabase), omp_get_default_device());
+      #else
          cudaMallocManaged( &ptr1, sizeof(NuclearData), cudaMemAttachGlobal );
          cudaMallocManaged( &ptr2, sizeof(MaterialDatabase), cudaMemAttachGlobal );
+      #endif
 
          monteCarlo->_nuclearData = new(ptr1) NuclearData(params.simulationParams.nGroups,
                                                           params.simulationParams.eMin,
