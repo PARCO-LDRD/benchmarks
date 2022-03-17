@@ -50,7 +50,7 @@ endif
 # LLVM Compiler Targeting A100 -- Change SM Level to Target Other GPUs
 ifeq ($(COMPILER),llvm)
   CC = clang
-  CFLAGS += ${FOPENMP}
+  CFLAGS += -O3 ${FOPENMP}
 endif
 
 # IBM XL Compiler

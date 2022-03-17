@@ -93,10 +93,11 @@ def get_apollo_regions_variants( compile_err ):
   l = []
   for k in tmp:
     variant_pattern=f'Declare Variant:__omp_adaptation_variant_{k}_(.*)'
-    regions[k]= []
-    for s in set(re.findall(variant_pattern, compile_err)):
+    variants = set(re.findall(variant_pattern, compile_err))
+    regions[k]= [None] * len(variants)
+    for s in variants:
       v = s.split(':')
-      regions[k].append([v[0], int(v[1])])
+      regions[k][int(v[1])] = [v[0], int(v[1])]
     l.append(len(regions[k]))
   print(regions)
 
@@ -167,7 +168,6 @@ def createStaticRuns(root_dir, bench, regions, space, repeats):
     if max_policies < len(v):
       max_policies = len(v)
 
-  print(regions.keys())
   for i in space:
     for e in execTypes:
       for r in range(e['repeats']):
@@ -270,6 +270,7 @@ def main():
 
   if args.action == 'setup':
     out, err = compile(bench)
+    print(out)
     regions = get_apollo_regions_variants( err )
     setup_directories(experiment_root_dir)
     createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, 5)
@@ -335,6 +336,11 @@ def main():
       print(system_name)
       with open(f'{d}/scenaria.json','r') as fd:
         experiments = json.load(fd)
+
+      pending = reduce_partial_results(experiments, bench)
+      if len(pending) != 0:
+        print (f'Skipping {system_name}')
+        continue
       for e in experiments['experiments']:
         if e['type'] == 'Application Time':
           print(e)

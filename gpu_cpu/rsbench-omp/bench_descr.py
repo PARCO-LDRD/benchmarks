@@ -13,7 +13,7 @@ class Benchmark(BaseBenchmark):
     self._clean = 'make clean'
     self._inputs = []
     for size in ['small', 'large']:
-      for i in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]:
+      for i in [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]:
         lus = i * 5000
         in_args = f'-m event -s {size} -l {lus}'
         self._inputs.append(in_args)
