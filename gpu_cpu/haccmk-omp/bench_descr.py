@@ -11,10 +11,9 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make'
     self._clean = 'make clean'
     self._inputs = []
-    outer_loop = range(800, 60000, 800)
-    inner_loop = range(800, 60000, 800)
+    outer_loop = range(400, 40000, 1600)
     for n in outer_loop:
-      for ilp in inner_loop:
+      for ilp in range(n, 40000, 1600):
         self._inputs.append(f'{n} {ilp}')
     self._executable = f'haccmk'
 

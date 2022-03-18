@@ -24,28 +24,28 @@ obj = $(source:.cpp=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -Wall 
+CFLAGS := -Wall  
 
 # Linker Flags
-LDFLAGS = -lapollo 
+LDFLAGS = -lapollo -lm 
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
   CFLAGS += -g
-  LDFLAGS  += -g
+  LDFLAGS += -g
 endif
 
 
 # Optimization Flags
 ifeq ($(OPTIMIZE),yes)
-  CFLAGS += -O3
+  CFLAGS += -O3 
 endif
 
 ifeq ($(DEVICE),gpu)
   CFLAGS +=-qnextgen -fiopenmp -fopenmp-targets=spir64 -D__STRICT_ANSI__
 else
 ifeq ($(DEVICE), apollo)
-  CFLAGS +=${FOPENMP} -O3
+  CFLAGS +=${FOPENMP} -O3 
 else
   CFLAGS +=-qopenmp
 endif

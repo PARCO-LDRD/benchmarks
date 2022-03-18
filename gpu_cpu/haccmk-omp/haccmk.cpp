@@ -4,6 +4,41 @@
 #include <iostream>
 #include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
+
+
+/* Allocate aligned memory in a portable way.
+ *
+ * Memory allocated with aligned alloc *MUST* be freed using aligned_free.
+ *
+ * @param alignment The number of bytes to which memory must be aligned. This
+ *  value *must* be <= 255.
+ * @param bytes The number of bytes to allocate.
+ * @param zero If true, the returned memory will be zeroed. If false, the
+ *  contents of the returned memory are undefined.
+ * @returns A pointer to `size` bytes of memory, aligned to an `alignment`-byte
+ *  boundary.
+ */
+void *aligned_alloc(size_t alignment, size_t size, bool zero) {
+    size_t request_size = size + alignment;
+    char* buf = (char*)(zero ? calloc(1, request_size) : malloc(size));
+
+    size_t remainder = ((size_t)buf) % alignment;
+    size_t offset = alignment - remainder;
+    char* ret = buf + (unsigned char)offset;
+
+    // store how many extra bytes we allocated in the byte just before the
+    // pointer we return
+    *(unsigned char*)(ret - 1) = offset;
+
+    return (void*)ret;
+}
+
+/* Free memory allocated with aligned_alloc */
+void aligned_free(void* aligned_ptr) {
+    int offset = *(((char*)aligned_ptr) - 1);
+    free(((char*)aligned_ptr) - offset);
+}
 
 double get_time(void)
 {
@@ -137,6 +172,8 @@ void haccmk_gold(
 int main( int argc, char *argv[] )
 {
 
+  int page_size = getpagesize();
+
   float fsrrmax2, mp_rsm2, fcoeff, dx1, dy1, dz1; 
 #ifdef __VERIFY__
   float dx2, dy2, dz2;
@@ -147,16 +184,16 @@ int main( int argc, char *argv[] )
   printf( "Outer loop count is set %d\n", n1 );
   printf( "Inner loop count is set %d\n", n2 );
 
-  float* xx = (float*) malloc (sizeof(float) * n2);
-  float* yy = (float*) malloc (sizeof(float) * n2);
-  float* zz = (float*) malloc (sizeof(float) * n2);
-  float* mass = (float*) malloc (sizeof(float) * n2);
-  float* vx2 = (float*) malloc (sizeof(float) * n2);
-  float* vy2 = (float*) malloc (sizeof(float) * n2);
-  float* vz2 = (float*) malloc (sizeof(float) * n2);
-  float* vx2_hw = (float*) malloc (sizeof(float) * n2);
-  float* vy2_hw = (float*) malloc (sizeof(float) * n2);
-  float* vz2_hw = (float*) malloc (sizeof(float) * n2);
+  float* xx = (float*) aligned_alloc (page_size,sizeof(float) * n2);
+  float* yy = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* zz = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* mass = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* vx2 = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* vy2 = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* vz2 = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* vx2_hw = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* vy2_hw = (float*) aligned_alloc(page_size, sizeof(float) * n2);
+  float* vz2_hw = (float*) aligned_alloc(page_size, sizeof(float) * n2);
 
   /* Initial data preparation */
   fcoeff = 0.23f;  
@@ -224,16 +261,16 @@ int main( int argc, char *argv[] )
   } 
 #endif
 
-  free(xx);
-  free(yy);
-  free(zz);
-  free(mass);
-  free(vx2);
-  free(vy2);
-  free(vz2);
-  free(vx2_hw);
-  free(vy2_hw);
-  free(vz2_hw);
+  aligned_free(xx);
+  aligned_free(yy);
+  aligned_free(zz);
+  aligned_free(mass);
+  aligned_free(vx2);
+  aligned_free(vy2);
+  aligned_free(vz2);
+  aligned_free(vx2_hw);
+  aligned_free(vy2_hw);
+  aligned_free(vz2_hw);
   if (error) {
     printf("FAIL\n"); 
     return EXIT_FAILURE; 
