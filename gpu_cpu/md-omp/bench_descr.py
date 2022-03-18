@@ -2,18 +2,19 @@ import os
 from bench_modules.benchmark import BaseBenchmark
 import re
 
+
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
-    super().__init__('LULESH')
+    super().__init__('MD')
     self._root = os.path.split(os.path.realpath(__file__))[0]
     compile_flags=system.get_compile_flags()
-    self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
-    self._clean = 'make -f Makefile.adaptive clean'
+    self._build = f'FOPENMP="{compile_flags}" make'
+    self._clean = 'make clean'
     self._inputs = []
-    for s in range(20,101, 20):
-      self.inputs.append(f'-s {s}')
-
-    self._executable = f'lulesh'
+    for s in range(int(12288/2),73729, int(12288/2)):
+      for i in range(1,11):
+          self._inputs.append(f'{s} {i}')
+    self._executable = f'main'
 
   @property
   def build(self):
@@ -36,24 +37,32 @@ class Benchmark(BaseBenchmark):
     return self._root
 
   def getTime(self, stdout):
-    print(' I am trying t find execution time')
-    exec_time_pattern = 'Elapsed time\s*=\s* (.*) \(s\)'
-    tmp =  re.findall(exec_time_pattern, stdout)[0]
+    exec_time_pattern = '__ExecutionTime__:(.*)'
+    tmp =  re.findall(exec_time_pattern, stdout)
+    if len(tmp) == 0:
+      return None
+    print(tmp, type(tmp))
+    return tmp[0]
+
     print(tmp, type(tmp))
     return tmp
 
   def extractInputFromCMD(self, cmd):
-    return int(cmd.split(' ')[-1])
+    vals=cmd.split(' ')
+    cmd=':'.join(vals[1:4])
+    return cmd
 
   def visualize(self, df, outfile, sizes):
-    import pandas as pd
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df['size'] = df['Input'].astype(int)
-    g = sns.relplot(data=df, x='size', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
+    df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
+    df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    g.set(xscale="log")
+    g.set(yscale="log")
     plt.savefig(f'{outfile}')
     plt.close()
-
 
