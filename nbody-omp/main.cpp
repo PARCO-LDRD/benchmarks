@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "GSimulation.hpp"
+#include <omp.h>
 
 int main(int argc, char** argv) {
   int n;      // number of particles
@@ -27,6 +28,12 @@ int main(int argc, char** argv) {
       sim.SetNumberOfSteps(nstep);
     }
   }
+
+#if defined(_OPENMP)
+#pragma omp parallel  
+#pragma omp master  
+  printf ("Using OpenMP Threads count=%d\n", omp_get_num_threads());
+#endif /* _OPENMP */
 
   sim.Start();
 
