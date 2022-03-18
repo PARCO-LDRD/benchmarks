@@ -160,9 +160,7 @@ notice, this list of conditions and the disclaimer (as noted below)
 #include <limits>
 #include <fstream>
 #include <string>
-//#ifdef VERIFY
-#include <assert.h>
-//#endif
+#include <omp.h>
 
 #include "lulesh.h"
 
@@ -917,26 +915,6 @@ void CalcTimeConstraintsForElems(Domain& domain) {
 
 int main(int argc, char *argv[])
 {
-
-#ifdef _OPENMP  
-  int runningOnGPU = 0;
-  /* Test if GPU is available using OpenMP4.5 */
-#pragma omp target map(from:runningOnGPU)
-  {
-    // This function returns true if currently running on the host device, false otherwise.
-    if (!omp_is_initial_device())
-      runningOnGPU = 1;
-  }
-  /* If still running on CPU, GPU must not be available */
-  if (runningOnGPU == 1)
-    printf("### Able to use the GPU! ### \n");
-  else
-  {
-    printf("### Unable to use the GPU, using CPU! ###\n");
-    assert (false);
-  }
-#endif
-
   Domain *locDom ;
   Int_t numRanks ;
   Int_t myRank ;
@@ -1017,10 +995,6 @@ int main(int argc, char *argv[])
 
   printf("numNode=%d numElem=%d\n", numNode, numElem);
 
-#ifdef VERIFY
-  assert(numElem > 0);
-#endif
-
   Real_t *x = &locDom->m_x[0];
   Real_t *y = &locDom->m_y[0];
   Real_t *z = &locDom->m_z[0];
@@ -1074,13 +1048,6 @@ int main(int argc, char *argv[])
   Index_t *elemRep = &locDom->m_elemRep[0];
   Index_t *elemElem = &locDom->m_elemElem[0];
 
-#ifdef VERIFY
-  for (int i = 0; i < numNode; i++) {
-    xd[i] = ((float)rand()/(float)(RAND_MAX));
-    yd[i] = ((float)rand()/(float)(RAND_MAX));
-    zd[i] = ((float)rand()/(float)(RAND_MAX));
-  }
-#endif
 
   Real_t *fx_elem = Allocate<Real_t>(numElem8) ;
   Real_t *fy_elem = Allocate<Real_t>(numElem8) ;
@@ -1154,11 +1121,79 @@ int main(int argc, char *argv[])
 
   int vol_error[1]; 
 
-#pragma omp begin declare adaptation feature (numElem) model_name(mymodel) variant(serial,ompcpu,ompgpu) model (dtree)
+
+#pragma omp begin declare adaptation feature(numElem, numNode) model_name(by_dims) \
+  variants(cpu, gpu) model(dtree)
 
 #pragma omp metadirective \
-    when (user={adaptation(mymodel==ompgpu)}:target data map(to: x[0:numNode], y[0:numNode], z[0:numNode], fx[0:numNode], fy[0:numNode], fz[0:numNode], xd[0:numNode], yd[0:numNode], zd[0:numNode], xdd[0:numNode], ydd[0:numNode], zdd[0:numNode], nodelist[0:numElem8], nodeElemStart[0:len1], nodeElemCornerList[0:len2], gamma[0:32]) \
- map (alloc: determ[0:numElem], fx_elem[0:numElem8], fy_elem[0:numElem8], fz_elem[0:numElem8], dvdx[0:numElem8], dvdy[0:numElem8], dvdz[0:numElem8], x8n[0:numElem8], y8n[0:numElem8], z8n[0:numElem8], sigxx [0:numElem], sigyy [0:numElem], sigzz [0:numElem], delv_xi [0:numElem], delx_xi [0:numElem], delv_eta [0:numElem], delx_eta [0:numElem], delv_zeta [0:numElem], delx_zeta [0:numElem], p [0:numElem], q [0:numElem], volo[0:numElem], v[0:numElem], vol_error[0:1], ss[0:numElem], elemMass[0:numElem], nodalMass[0:numNode], symmX[0:numNodeBC], symmY[0:numNodeBC], symmZ[0:numNodeBC], vdov [0:numElem], delv [0:numElem], arealg [0:numElem], dxx [0:numElem], dyy [0:numElem], dzz [0:numElem], vnew [0:numElem], lzetam[0:numElem], lzetap[0:numElem], letap[0:numElem], letam[0:numElem], lxip[0:numElem], lxim[0:numElem], elemBC[0:numElem], ql[0:numElem], qq[0:numElem], e [0:numElem], elemRep [0:numElem], elemElem [0:numElem]) )
+  when(user={adaptation(by_dims==gpu)} : \
+      target enter data map(to: \
+        x[0:numNode], \
+        y[0:numNode], \
+        z[0:numNode], \
+        fx[0:numNode], \
+        fy[0:numNode], \
+        fz[0:numNode], \
+        xd[0:numNode], \
+        yd[0:numNode], \
+        zd[0:numNode], \
+        xdd[0:numNode], \
+        ydd[0:numNode], \
+        zdd[0:numNode], \
+        nodelist[0:numElem8], \
+        nodeElemStart[0:len1],\
+        nodeElemCornerList[0:len2], \
+        gamma[0:32]) \
+      map (alloc: \
+        determ[0:numElem], \
+        fx_elem[0:numElem8], \
+        fy_elem[0:numElem8], \
+        fz_elem[0:numElem8], \
+        dvdx[0:numElem8], \
+        dvdy[0:numElem8], \
+        dvdz[0:numElem8], \
+        x8n[0:numElem8], \
+        y8n[0:numElem8], \
+        z8n[0:numElem8], \
+        sigxx [0:numElem], \
+        sigyy [0:numElem], \
+        sigzz [0:numElem], \
+        delv_xi [0:numElem], \
+        delx_xi [0:numElem], \
+        delv_eta [0:numElem], \
+        delx_eta [0:numElem], \
+        delv_zeta [0:numElem], \
+        delx_zeta [0:numElem], \
+        p [0:numElem], \
+  q [0:numElem], \
+  volo[0:numElem], \
+  v[0:numElem], \
+  vol_error[0:1], \
+  ss[0:numElem], \
+  elemMass[0:numElem], \
+  nodalMass[0:numNode], \
+  symmX[0:numNodeBC], \
+  symmY[0:numNodeBC], \
+  symmZ[0:numNodeBC], \
+  vdov [0:numElem], \
+  delv [0:numElem], \
+  arealg [0:numElem], \
+  dxx [0:numElem], \
+  dyy [0:numElem], \
+  dzz [0:numElem], \
+  vnew [0:numElem], \
+  lzetam[0:numElem], \
+  lzetap[0:numElem], \
+  letap[0:numElem], \
+  letam[0:numElem], \
+  lxip[0:numElem], \
+  lxim[0:numElem], \
+  elemBC[0:numElem], \
+  ql[0:numElem], \
+  qq[0:numElem], \
+  e [0:numElem], \
+  elemRep [0:numElem], \
+  elemElem [0:numElem]))
 
   while((locDom->time() < locDom->stoptime()) && (locDom->cycle() < opts.its)) {
 
@@ -1192,13 +1227,17 @@ int main(int argc, char *argv[])
     Real_t  hgcoef = domain.hgcoef() ;
 
     // Sum contributions to total stress tensor 
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (p[0:numElem], q[0:numElem]))  
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update to (p[0:numElem], q[0:numElem]))
+
+
+#pragma omp metadirective \
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numElem; i++) {
       sigxx[i] = sigyy[i] = sigzz[i] = - p[i] - q[i] ;
     }
@@ -1206,10 +1245,12 @@ int main(int argc, char *argv[])
     //==============================================================================================
     // IntegrateStressForElems( domain, sigxx, sigyy, sigzz, determ, numElem, domain.numNode())
     //==============================================================================================
+
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t k = 0; k < numElem; k++) {
 
       const Index_t* const elemToNode = nodelist + Index_t(8)*k;
@@ -1270,9 +1311,10 @@ int main(int argc, char *argv[])
     }
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t gnode = 0; gnode < numNode; gnode++) {
       // element count
       const Index_t count = nodeElemStart[gnode+1] - nodeElemStart[gnode];//domain.nodeElemCount(gnode) ;
@@ -1293,8 +1335,10 @@ int main(int argc, char *argv[])
     }
 
     // check for negative element volume on the host
+
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}:target update from (determ[0:numElem]))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update from (determ[0:numElem]))
 
 #ifdef _OPENMP
 #pragma omp parallel for firstprivate(numElem)
@@ -1311,13 +1355,16 @@ int main(int argc, char *argv[])
 
     vol_error[0] = -1;
 
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (vol_error[0:1],volo[0:numElem,v[0:numElem])) 
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+      target update to (vol_error[0:1], volo[0:numElem], v[0:numElem]))
+
+#pragma omp metadirective \
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numElem; i++) {
 
       Real_t  x1[8],  y1[8],  z1[8] ;
@@ -1384,18 +1431,9 @@ int main(int argc, char *argv[])
       }
     }
 
-#ifdef VERIFY
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (determ[0:numElem],dvdx[0:numElem8],dvdy[0:numElem8],dvdz[0:numElem8],x8n[0:numElem8],y8n[0:numElem8],z8n[0:numElem8]) )
-    // volumn derivative
-    for (int i = 0; i < numElem8; i++) {
-      printf("vd %d %f %f %f %f %f %f %f\n", 
-          i, dvdx[i], dvdy[i], dvdz[i], x8n[i], y8n[i], z8n[i], determ[i/8]);
-    }
-#endif
-
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (vol_error[0:1]))
+    when(user={adaptation(by_dims==gpu)} : \
+      target update from (vol_error[0:1]))
 
     if (vol_error[0] >= 0){
       printf("VolumeError: negative volumn\n");
@@ -1412,22 +1450,15 @@ int main(int argc, char *argv[])
       //Index_t *nodeElemCornerList = &domain.m_nodeElemCornerList[0];
       //Index_t len2 = nodeElemStart[numNode];
 
-#ifdef VERIFY
-      // initialize data for testing
-      for (int i = 0; i < numElem; i++) {
-        ss[i] = ((float)rand()/(float)(RAND_MAX));
-        elemMass[i] = ((float)rand()/(float)(RAND_MAX));
-      }
-#endif
+#pragma omp metadirective \
+      when(user={adaptation(by_dims==gpu)} : \
+          target update to (ss[0:numElem], elemMass[0:numElem]))
 
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (ss[0:numElem],elemMass[0:numElem]))
-
-
-#pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+      when(user={adaptation(by_dims==gpu)} : \
+          target teams distribute parallel for thread_limit(THREADS)) \
+      when(user={adaptation(by_dims==cpu)} : \
+          parallel for)
       for (Index_t i2 = 0; i2 < numElem; i2++) {
 
         Index_t i3 = 8*i2;
@@ -1616,9 +1647,10 @@ int main(int argc, char *argv[])
 
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+      when(user={adaptation(by_dims==gpu)} : \
+          target teams distribute parallel for thread_limit(THREADS)) \
+      when(user={adaptation(by_dims==cpu)} : \
+          parallel for)
       for (Index_t gnode = 0; gnode < numNode; gnode++) {
         // element count
         const Index_t count = nodeElemStart[gnode+1] - nodeElemStart[gnode];//domain.nodeElemCount(gnode) ;
@@ -1638,12 +1670,6 @@ int main(int argc, char *argv[])
         fz[gnode] = fz_tmp ;
       }
 
-#ifdef VERIFY
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (fx[0:numNode] , fy[0:numNode], fz[0:numNode])) 
-      for (int i = 0; i < numNode; i++)
-        printf("fb: %d %f %f %f\n", i, fx[i], fy[i], fz[i]); 
-#endif 
     } // if ( hgcoef > Real_t(0.) ) 
 
 
@@ -1651,13 +1677,16 @@ int main(int argc, char *argv[])
     //CalcAccelerationForNodes(domain, domain.numNode());   // IN: fx  OUT: m_xdd
     //===========================================================================
 
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (nodalMass[0:numNode]))
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+      when(user={adaptation(by_dims==gpu)} : \
+          target update to (nodalMass[0:numNode]))
+
+#pragma omp metadirective \
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numNode; i++) {
       Real_t one_over_nMass = Real_t(1.) / nodalMass[i];
       xdd[i] = fx[i] * one_over_nMass;
@@ -1670,17 +1699,20 @@ int main(int argc, char *argv[])
     //======================================================================================
     //Index_t size = domain.sizeX();
     //Index_t numNodeBC = (size+1)*(size+1) ;
+
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (symmX[0:numNodeBC],symmY[0:numNodeBC],symmZ[0:numNodeBC]))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update to (symmX[0:numNodeBC], symmY[0:numNodeBC], symmZ[0:numNodeBC]))
 
     Index_t s1 = domain.symmXempty();
     Index_t s2 = domain.symmYempty();
     Index_t s3 = domain.symmZempty();
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numNodeBC; i++) {
       if ((!s1) != 0) xdd[symmX[i]] = Real_t(0.0) ;
       if ((!s2) != 0) ydd[symmY[i]] = Real_t(0.0) ;
@@ -1692,9 +1724,10 @@ int main(int argc, char *argv[])
     //=================================================================
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numNode; i++) {
 
       Real_t xdtmp = xd[i] + xdd[i] * deltaTime;
@@ -1718,9 +1751,10 @@ int main(int argc, char *argv[])
     // CalcPositionForNodes( domain, delt, domain.numNode() );  //uses m_xd and m_x 
     //=================================================================================
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numNode; i++) {
 
       x[i] += xd[i] * deltaTime;
@@ -1728,31 +1762,26 @@ int main(int argc, char *argv[])
       z[i] += zd[i] * deltaTime;
     }
 
-#ifdef VERIFY
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (xd[0:numNode],yd[0:numNode],zd[0:numNode], x[0:numNode], y[0:numNode], z[0:numNode]))
-
-    for (int i = 0; i < numNode; i++)
-      printf("CalcPositionForNodes: %d %f %f %f %f %f %f\n", 
-          i, x[i], y[i], z[i], xd[i], yd[i], zd[i]); 
-#endif 
-
     //=========================================================
     // calculate element quantities (i.e. velocity gradient & q), and update material states 
     // LagrangeElements(domain);
     //=========================================================
     //domain.AllocateStrains(numElem);
 
+
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (vdov[0:numElem], delv[0:numElem], arealg[0:numElem], dxx[0:numElem], dyy[0:numElem], dzz[0:numElem]))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update to (vdov[0:numElem], delv[0:numElem], \
+          arealg[0:numElem], dxx[0:numElem], dyy[0:numElem], dzz[0:numElem]))
 
     //========================================================================
     // void CalcKinematicsForElems( Domain &domain, Real_t *vnew, 
     //========================================================================
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t k = 0; k < numElem; k++) {
 
       Real_t B[3][8] ; // shape function derivatives 
@@ -1848,12 +1877,15 @@ int main(int argc, char *argv[])
 
     vol_error[0] = -1; // reset volumn error
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (vol_error[0:1]))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update to (vol_error[0:1]))
+
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t k = 0; k < numElem; k++) {
       // calc strain rate and apply as constraint (only done in FB element)
       Real_t vvdov = dxx[k] + dyy[k] + dzz[k] ;
@@ -1871,15 +1903,10 @@ int main(int argc, char *argv[])
         vol_error[0] = k;
       }
     }
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (vdov[0:numElem],vol_error[0:1]))
 
-#ifdef VERIFY
-    for ( Index_t k=0 ; k<numElem ; ++k )
-    {
-      printf("kintec: %d %f\n", k, vdov[k]);
-    }
-#endif
+#pragma omp metadirective \
+    when(user={adaptation(by_dims==gpu)} : \
+        target update from (vdov[0:numElem], vol_error[0:1]))
 
     if (vol_error[0] >= 0){
       printf("VolumeError: negative volumn\n");
@@ -1902,9 +1929,10 @@ int main(int argc, char *argv[])
     //================================================================
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numElem; i++) {
 
       Real_t ax,ay,az ;
@@ -2052,13 +2080,18 @@ int main(int argc, char *argv[])
     Real_t qlc_monoq = domain.qlc_monoq();
     Real_t qqc_monoq = domain.qqc_monoq();
 
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (lzetam[0:numElem],lzetap[0:numElem],letap[0:numElem],letam[0:numElem],lxip[0:numElem],lxim[0:numElem],elemBC[0:numElem],elemMass[0:numElem]))
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update to (lzetam[0:numElem], lzetap[0:numElem], \
+          letap[0:numElem], letam[0:numElem], lxip[0:numElem], lxim[0:numElem], \
+          elemBC[0:numElem], elemMass[0:numElem]))
+
+#pragma omp metadirective \
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t i = 0; i < numElem; i++) {
 
       Real_t qlin, qquad ;
@@ -2204,15 +2237,6 @@ int main(int argc, char *argv[])
       ql[i] = qlin  ;
     }
 
-#ifdef VERIFY
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (qq[0:numElem],ql[0:numElem]))
-    for (int i = 0; i < numElem; i++) {
-      printf("mqr: %d %f %f\n", i, qq[i], ql[i]);
-    }
-#endif
-
-
     /* Don't allow excessive artificial viscosity */
     Index_t idx = -1; 
     for (Index_t i=0; i<numElem; ++i) {
@@ -2241,13 +2265,18 @@ int main(int argc, char *argv[])
     Real_t pmin    = domain.pmin() ;
     Real_t emin    = domain.emin() ;
     Real_t rho0    = domain.refdens() ;
-#pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update to (e[0:numElem],ss[0:numElem],elemRep[0:numElem],elemElem[0:numElem]))
+
 
 #pragma omp metadirective \
-  when (user={adaptation(mymodel==serial)}:  ) \
-  when (user={adaptation(mymodel==ompcpu)}: parallel for thread_limit(THREADS) ) \
-  default(target teams distribute parallel for thread_limit(THREADS))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update to (e[0:numElem], ss[0:numElem], elemRep[0:numElem], \
+          elemElem[0:numElem]))
+
+#pragma omp metadirective \
+    when(user={adaptation(by_dims==gpu)} : \
+        target teams distribute parallel for thread_limit(THREADS)) \
+    when(user={adaptation(by_dims==cpu)} : \
+        parallel for)
     for (Index_t elem = 0; elem < numElem; elem++) {
       Index_t rep = elemRep[elem];
       Real_t e_old, delvc, p_old, q_old, qq_old, ql_old;
@@ -2450,13 +2479,10 @@ int main(int argc, char *argv[])
     }
 
 #pragma omp metadirective \
-      when (user={adaptation(mymodel==ompgpu)}: target update from (q[0:numElem],p[0:numElem],e[0:numElem],ss[0:numElem],v[0:numElem]))
+    when(user={adaptation(by_dims==gpu)} : \
+        target update from (q[0:numElem], p[0:numElem], e[0:numElem], \
+          ss[0:numElem], v[0:numElem]))
 
-#ifdef VERIFY
-    for (int i = 0; i < numElem; i++) {
-      printf("eos: %f %f %f %f %f\n", q[i], p[i], e[i], ss[i], v[i]);
-    }
-#endif
 
     CalcTimeConstraintsForElems(domain);
 
@@ -2470,7 +2496,7 @@ int main(int argc, char *argv[])
     opts.iteration_cap -= 1;
   }
 
-#pragma omp end declare adaptation model_name(mymodel)
+#pragma omp end declare adaptation model_name(by_dims)
 
   // Use reduced max elapsed time
   double elapsed_time;

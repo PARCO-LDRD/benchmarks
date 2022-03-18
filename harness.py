@@ -273,7 +273,7 @@ def main():
     print(out)
     regions = get_apollo_regions_variants( err )
     setup_directories(experiment_root_dir)
-    createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, 5)
+    createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, 1)
     shutil.copy(f'{bench.root}/{bench.executable}', f'{experiment_root_dir}/bin/')
 
   elif args.action == 'map-reduce':

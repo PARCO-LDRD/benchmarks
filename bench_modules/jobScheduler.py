@@ -35,6 +35,8 @@ class System:
         template = Template(fd.read())
     elif self.scheduler == 'lsf':
       seconds = util.convert_str_seconds(time)
+      print('seconds', seconds)
+      input('key...')
       time = str(int(seconds / 60))
       with open('batch_templates/lsf_template.batch', 'r') as fd:
         template = Template(fd.read())

@@ -7,7 +7,7 @@ CC        = clang++
 OPTIMIZE  = yes
 DEBUG     = no
 DEVICE    = gpu
-VERIFY    = yes
+VERIFY    = no
 
 #===============================================================================
 # Program name & source code list
@@ -31,7 +31,7 @@ obj = $(source:.cc=.o)
 CFLAGS := -std=c++14 -Wall 
 
 # Linker Flags
-LDFLAGS = 
+LDFLAGS = -lapollo
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
@@ -51,7 +51,7 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 ifeq ($(DEVICE),gpu)
-  CFLAGS += -fopenmp -fopenmp-targets=nvptx64 
+  CFLAGS += $(FOPENMP)
 else
   CFLAGS +=-fopenmp
 endif
@@ -59,10 +59,10 @@ endif
 # Targets to Build
 #===============================================================================
 
-$(program): $(obj) Makefile.lassen
+$(program): $(obj) Makefile.adaptive
 	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
-%.o: %.cc Makefile.lassen
+%.o: %.cc Makefile.adaptive
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
