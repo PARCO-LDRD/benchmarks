@@ -932,7 +932,7 @@ int main(int argc, char *argv[])
   else
   {
     printf("### Unable to use the GPU, using CPU! ###\n");
-    assert (false);
+//    assert (false);
   }
 
 
