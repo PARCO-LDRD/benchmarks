@@ -213,14 +213,19 @@ int main( int argc, char** argv )
 
   double t1, t2, time;
 
-  #pragma omp target data map(to: a_from_m[0:a_from_m_size],\
-                                  m_from_a[0:a_from_m_size],\
-                                        vi[0:v_size]) \
-                          map(alloc: facexy[0:facexy_size],\
-                                     facexz[0:facexz_size],\
-                                     faceyz[0:faceyz_size],\
-                                     vslocal[0:vslocal_size],\
-                                     vo[0:v_size]) 
+#pragma omp begin declare adaptation feature(a_from_m_size) model_name(by_size) \
+  variants(cpu, gpu) model(dtree)
+
+#pragma omp metadirective \
+  when(user={adaptation(by_size==gpu)} : \
+      target enter data map(to: a_from_m[0:a_from_m_size],\
+        m_from_a[0:a_from_m_size],\
+        vi[0:v_size]) \
+      map(alloc: facexy[0:facexy_size],\
+        facexz[0:facexz_size],\
+        faceyz[0:faceyz_size],\
+        vslocal[0:vslocal_size],\
+        vo[0:v_size]))
 {
 
   t1 = get_time();
@@ -272,9 +277,15 @@ int main( int argc, char** argv )
 
       if (is_first_step) {
          memset(vo, 0, v_size * sizeof(P));
-         #pragma omp target update to(vo[0:v_size])
+#pragma omp metadirective \
+         when(user={adaptation(by_size==gpu)} : \
+             target update to(vo[0:v_size]))
 
-         #pragma omp target teams distribute parallel for collapse(3)
+#pragma omp metadirective \
+         when(user={adaptation(by_size==gpu)} : \
+             target teams distribute parallel for collapse(3)) \
+         when(user={adaptation(by_size==cpu)} : \
+             parallel for collapse(3))
          for( int octant=0; octant<NOCTANT; ++octant )
          for( int iy=0; iy<dims_b_ncell_y; ++iy )
          for( int ix=0; ix<dims_b_ncell_x; ++ix )
@@ -307,7 +318,11 @@ int main( int argc, char** argv )
 #endif
       }
 
-      #pragma omp target teams distribute parallel for collapse(3)
+#pragma omp metadirective \
+      when(user={adaptation(by_size==gpu)} : \
+          target teams distribute parallel for collapse(3)) \
+      when(user={adaptation(by_size==cpu)} : \
+          parallel for collapse(3))
       for( int octant=0; octant<NOCTANT; ++octant )
       for( int iz=0; iz<dims_b_ncell_z; ++iz )
       for( int ix=0; ix<dims_b_ncell_x; ++ix )
@@ -340,7 +355,11 @@ int main( int argc, char** argv )
         printf("facexz: %d %f\n", i, facexz[i]);
 #endif
 
-      #pragma omp target teams distribute parallel for collapse(3) 
+#pragma omp metadirective \
+      when(user={adaptation(by_size==gpu)} : \
+          target teams distribute parallel for collapse(3)) \
+      when(user={adaptation(by_size==cpu)} : \
+          parallel for collapse(3))
       for( int octant=0; octant<NOCTANT; ++octant )
       for( int iz=0; iz<dims_b_ncell_z; ++iz )
       for( int iy=0; iy<dims_b_ncell_y; ++iy )
@@ -375,7 +394,11 @@ int main( int argc, char** argv )
         printf("faceyz: %d %f\n", i, faceyz[i]);
 #endif
 
-      #pragma omp target teams distribute parallel for collapse(2)
+#pragma omp metadirective \
+      when(user={adaptation(by_size==gpu)} : \
+          target teams distribute parallel for collapse(2)) \
+      when(user={adaptation(by_size==cpu)} : \
+          parallel for collapse(2))
       for( int ie=0; ie<dims_b_ne; ++ie )
       for( int octant=0; octant<NOCTANT; ++octant )
         for ( int wavefront = 0; wavefront < num_wavefronts; wavefront++ )
@@ -420,8 +443,10 @@ int main( int argc, char** argv )
       } /*--- wavefront ---*/
 
       if (is_last_step) { 
-       
-        #pragma omp target update from (vo[0:v_size])
+
+#pragma omp metadirective \
+        when(user={adaptation(by_size==gpu)} : \
+            target update from (vo[0:v_size]))
 #ifdef DEBUG
         for (int i = 0; i < v_size; i++) printf("vo %d %f\n", i, vo[i]);
 #endif
@@ -435,6 +460,7 @@ int main( int argc, char** argv )
   t2 = get_time();
   time = t2 - t1;
 } 
+#pragma omp end declare adaptation model_name(by_size)
 
   // Verification (input and output vectors are equal) 
   P normsq = (P)0;
