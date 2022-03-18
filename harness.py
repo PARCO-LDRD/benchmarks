@@ -252,6 +252,7 @@ def main():
   parser.add_argument('-f', '--first-element', dest='first', type=int, help='Give index of the first worker item')
   parser.add_argument('-l', '--last-element', dest='last', type=int, help='Give index of the last worker item')
   parser.add_argument('-d', '--dry-run', dest='fake', type=int, help='Do not deploy jobs, just create everything and print command', default=0)
+  parser.add_argument('-R', '--Repearts', dest='repeats', type=int, help='Number of repetitions of each experiment', default=5)
 
   args = parser.parse_args()
   host = "".join(filter(lambda x: not x.isdigit(), socket.gethostname()))
@@ -273,7 +274,7 @@ def main():
     print(out)
     regions = get_apollo_regions_variants( err )
     setup_directories(experiment_root_dir)
-    createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, 1)
+    createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, args.repeats)
     shutil.copy(f'{bench.root}/{bench.executable}', f'{experiment_root_dir}/bin/')
 
   elif args.action == 'map-reduce':
