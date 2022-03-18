@@ -21,7 +21,7 @@ class Benchmark(BaseBenchmark):
           #enough information
           pfile = f'{self._root}/data/power_512x8'
           tfile = f'{self._root}/data/temp_512x8'
-          command = f'{c} {l} {i} {pfile} {tfile} out_{i}_{c}_{l}'
+          command = f'{c} {l} {i} {pfile} {tfile}'
           self._inputs.append(command)
     self._executable = f'main'
 

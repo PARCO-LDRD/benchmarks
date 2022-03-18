@@ -9,7 +9,7 @@ class Benchmark(BaseBenchmark):
     self._root = os.path.split(os.path.realpath(__file__))[0]
     compile_flags=system.get_compile_flags()
     if system.name != 'corona':
-        self._build = f'cd src; FOPENMP="{compile_flags}" make CC=clang CXX=clang++ CUDA_LDFLAGS=' +'-"L${CUDA_HOME}/lib64/ -lcuda -lcudart"; cp qs ../; cd ..;'
+        self._build = f'cd src; FOPENMP="{compile_flags}" make CC=clang CXX=clang++ CUDA_LDFLAGS=-"L${CUDA_HOME}/lib64/ -lcuda -lcudart"; cp qs ../; cd ..;'
     else:
         self._build = f'cd src; FOPENMP="{compile_flags}" make CC=clang CXX=clang++; cp qs ../; cd ..;'
     self._clean = 'cd src; make clean; cd ..'
@@ -60,6 +60,8 @@ class Benchmark(BaseBenchmark):
     fig, ax = plt.subplots(figsize=sizes)
     print(df)
     g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', hue='Policy', style='Policy', kind='line')
+    g.set(xscale="log")
+    g.set(yscale="log")
     plt.savefig(f'{outfile}')
     plt.close()
 

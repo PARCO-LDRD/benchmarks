@@ -45,17 +45,17 @@ void usage(int argc, char **argv)
 
 int main(int argc, char** argv)
 {
-  if (argc != 7)
+  if (argc != 6)
   {
     usage(argc,argv);
   }
 
-  char *pfile, *tfile, *ofile;
+  char *pfile, *tfile;// *ofile;
   int iterations = atoi(argv[3]);
 
   pfile            = argv[4];
   tfile            = argv[5];
-  ofile            = argv[6];
+  //ofile            = argv[6];
   int numCols      = atoi(argv[1]);
   int numRows      = atoi(argv[1]);
   int layers       = atoi(argv[2]);
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
   float* pIn      = (float*) calloc(size,sizeof(float));
   float* tCopy = (float*)malloc(size * sizeof(float));
   float* tOut  = (float*) calloc(size,sizeof(float));
-  float* sel; // select tIn or tOut as the output of the computation
+//  float* sel; // select tIn or tOut as the output of the computation
 
   readinput(tIn,numRows, numCols, layers, tfile);
   readinput(pIn,numRows, numCols, layers, pfile);
@@ -152,12 +152,15 @@ int main(int argc, char** argv)
     }
     if (iterations & 01) {
 #pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target update from (tIn[0:size]))
-     sel = tIn;
+//     sel = tIn;
     }
     else {
 #pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target update from (tOut[0:size]))
-     sel = tOut;
+//     sel = tOut;
     }
+
+
+#pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target exit data map(delete: tIn[0:size], pIn[0:size]) map(delete: tOut[0:size])) 
 
 #pragma omp end declare adaptation model_name(hotspot)
 
