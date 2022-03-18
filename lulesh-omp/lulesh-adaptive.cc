@@ -915,6 +915,25 @@ void CalcTimeConstraintsForElems(Domain& domain) {
 
 int main(int argc, char *argv[])
 {
+#ifdef _OPENMP  
+  int runningOnGPU = 0;
+  /* Test if GPU is available using OpenMP4.5 */
+#pragma omp target map(from:runningOnGPU)
+  {
+    // This function returns true if currently running on the host device, false otherwise.
+    if (!omp_is_initial_device())
+      runningOnGPU = 1;
+  }
+  /* If still running on CPU, GPU must not be available */
+  if (runningOnGPU == 1)
+    printf("### Able to use the GPU! ### \n");
+  else
+  {
+    printf("### Unable to use the GPU, using CPU! ###\n");
+//    assert (false);
+  }
+#endif
+
   Domain *locDom ;
   Int_t numRanks ;
   Int_t myRank ;
