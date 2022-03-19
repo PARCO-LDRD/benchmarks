@@ -15,7 +15,7 @@ DEBUG     = no
 
 program = main.cpu
 
-source = main.cpp GSimulation.cpp
+source = main.cpp GSimulation-ompcpu.cpp #GSimulation.cpp
 
 obj = $(source:.cpp=.o)
 
