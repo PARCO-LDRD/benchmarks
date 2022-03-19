@@ -8,6 +8,7 @@ sys.path.append(script)
 import bench_modules
 from bench_modules import util
 from bench_modules import jobScheduler
+from bench_modules import apollo_dynamic
 import argparse
 import socket
 import subprocess
@@ -136,11 +137,11 @@ def reduce_partial_results(data, bench):
       pending_experiments.append(e)
       continue
 
-    if e['type'] == 'csv' and (not (os.path.isdir(f'{exp_dir}/trace/'))):
+    if ('csv' in e['type'])  and (not (os.path.isdir(f'{exp_dir}/trace/'))):
       pending_experiments.append(e)
       continue
 
-    if e['type'] == 'Application Time':
+    if 'Application Time' in e['type']:
       with open ( e['stdout'], 'r') as fd:
         print(e['stdout'])
         stdout = fd.read()
@@ -157,6 +158,71 @@ def reduce_partial_results(data, bench):
     json.dump(data, fd, indent=4)
 
   return pending_experiments
+
+def append_to_scenarios(root_dir, scenario):
+  scenarios = f'{root_dir}/scenaria.json'
+  if (os.path.exists(scenarios)):
+    already_performed=0
+    pending = 0
+    with open(scenarios, 'r') as fd:
+      experiments = json.load(fd)['experiments']
+      hashes = []
+      for e in experiments:
+        hashes.append(e['hash'])
+
+      for s in list(scenario):
+        if s['hash'] in hashes:
+          already_performed += 1
+          scenario.remove(s)
+        else:
+          pending+= 1
+          experiments.append(s)
+      print('Already Performed ', already_performed, 'Pending:', pending)
+      return experiments
+  return scenario
+
+def createDynamicRuns(root_dir, space, repeats):
+  execTypes = [ { 'type' : 'Dynamic csv',
+                  'apollo_env' : {  'APOLLO_TRACE_CSV' : '1',
+                                    'APOLLO_POLICY_MODEL' : 'DecisionTree,load-dataset',
+                                    'repeats' : 1
+                                    },
+                  'repeats' : 1 },
+                { 'type' : 'Dynamic Application Time',
+                  'apollo_env' : { 'APOLLO_POLICY_MODEL' : 'DecisionTree,load-dataset' },
+                  'repeats' : repeats }
+             ]
+  dynamic_scenario = []
+  for ds in space:
+    for e in execTypes:
+      for r in range(0,e['repeats']):
+        exp = dict(ds)
+        code=''
+        for k,v in exp['regions'].items():
+          code += '|' + k
+          code += '|' + v['policy']
+          code += '|' + v['model_hash']
+        code += '|'
+        exp['repeat'] = str(r)
+        exp['executed'] = False
+        exp['type'] = e['type']
+        code += exp['cmd'] + exp['repeat'] + exp['type']
+        hs = hashlib.sha256(code.encode('utf-8')).hexdigest()
+        exp['stdout'] = f'{root_dir}/runs/{hs}/stdout.txt'
+        exp['stderr'] = f'{root_dir}/runs/{hs}/stderr.txt'
+        exp['hash'] = hs
+        exp['apollo_env'] = {}
+        for k,v in e['apollo_env'].items():
+          exp['apollo_env'][k] = v
+        dynamic_scenario.append(exp)
+  scenario_db = f'{root_dir}/scenaria.json'
+  scenario = append_to_scenarios(root_dir, dynamic_scenario)
+
+  campaign_descr= { 'root_dir' : root_dir,
+                    'experiments': scenario}
+
+  with open(scenario_db, 'w') as fd:
+    json.dump(campaign_descr, fd,indent=4)
 
 def createStaticRuns(root_dir, bench, regions, space, repeats):
   scenario = []
@@ -198,27 +264,13 @@ def createStaticRuns(root_dir, bench, regions, space, repeats):
             for k,v in e['apollo_env'].items():
               tmp['apollo_env'][k] = v.format(policy)
             scenario.append(tmp)
-  scenarios = f'{root_dir}/scenaria.json'
-  if (os.path.exists(scenarios)):
-    with open(scenarios, 'r') as fd:
-      experiments = json.load(fd)['experiments']
-      hashes = []
-      for e in experiments:
-        hashes.append(e['hash'])
-
-      deletions = []
-      for s in list(scenario):
-        if s['hash'] in hashes:
-          scenario.remove(s)
-        else:
-          experiments.append(s)
-      scenario = experiments
-
+  scenario_db = f'{root_dir}/scenaria.json'
+  scenario = append_to_scenarios(root_dir, scenario)
 
   campaign_descr= { 'root_dir' : root_dir,
-                    'experiments': scenario }
+                    'experiments': scenario}
 
-  with open(scenarios, 'w') as fd:
+  with open(scenario_db, 'w') as fd:
     json.dump(campaign_descr, fd,indent=4)
 
 def execute_experiment(root,system,e):
@@ -227,6 +279,13 @@ def execute_experiment(root,system,e):
 
   hs = e['hash']
   os.makedirs(f'{root}/runs/{hs}', exist_ok=True)
+  print(f'{root}/runs/{hs}')
+
+#I need to go and create yaml file
+  if 'Dynamic' in e['type']:
+    for k, v in e['regions'].items():
+      with open(f'{root}/runs/{hs}/Dataset-{k}.yaml', 'w') as fd:
+        fd.write(v['model'])
 
   apollo_env = ''
   cmd = e['cmd']
@@ -252,7 +311,8 @@ def main():
   parser.add_argument('-f', '--first-element', dest='first', type=int, help='Give index of the first worker item')
   parser.add_argument('-l', '--last-element', dest='last', type=int, help='Give index of the last worker item')
   parser.add_argument('-d', '--dry-run', dest='fake', type=int, help='Do not deploy jobs, just create everything and print command', default=0)
-  parser.add_argument('-R', '--Repearts', dest='repeats', type=int, help='Number of repetitions of each experiment', default=5)
+  parser.add_argument('-R', '--Repeats', dest='repeats', type=int, help='Number of repetitions of each experiment', default=5)
+  parser.add_argument('-e', '--experiment-type', dest='type', type=str.lower, choices=('static', 'adaptive', 'oracle'),  help='Perform static or dynamic runs', default='static')
 
   args = parser.parse_args()
   host = "".join(filter(lambda x: not x.isdigit(), socket.gethostname()))
@@ -270,12 +330,23 @@ def main():
   print(experiment_root_dir)
 
   if args.action == 'setup':
-    out, err = compile(bench)
-    print(out)
-    regions = get_apollo_regions_variants( err )
-    setup_directories(experiment_root_dir)
-    createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, args.repeats)
-    shutil.copy(f'{bench.root}/{bench.executable}', f'{experiment_root_dir}/bin/')
+    if args.type == 'static':
+      out, err = compile(bench)
+      print(out)
+      regions = get_apollo_regions_variants( err )
+      setup_directories(experiment_root_dir)
+      createStaticRuns(experiment_root_dir, bench, regions, bench.inputs, args.repeats)
+      shutil.copy(f'{bench.root}/{bench.executable}', f'{experiment_root_dir}/bin/')
+    else:
+      #TODO I SHOULD CHECK FIRST IF STATIC HAS FINISHED.
+      with open(f'{experiment_root_dir}/scenaria.json', 'r') as fd:
+        experiments = json.load(fd)
+      if args.type == 'adaptive':
+        dSpace = apollo_dynamic.get_adaptive_apollo_runs(experiments,num_folds=5)
+      if args.type == 'oracle':
+        dSpace = apollo_dynamic.get_oracle_apollo_runs(experiments)
+
+      createDynamicRuns(experiment_root_dir, dSpace, args.repeats)
 
   elif args.action == 'map-reduce':
     with open(f'{experiment_root_dir}/scenaria.json', 'r') as fd:
@@ -335,6 +406,8 @@ def main():
     for d in glob.glob(f'{args.results_dir}/*/{bench.name}/'):
       system_name = d.split('/')[-3]
       print(system_name)
+      if system_name != 'lassen':
+        continue
       with open(f'{d}/scenaria.json','r') as fd:
         experiments = json.load(fd)
 
@@ -343,13 +416,11 @@ def main():
         print (f'Skipping {system_name}')
         continue
       for e in experiments['experiments']:
-        if e['type'] == 'Application Time':
-          print(e)
+        if 'Application Time' in e['type']:
           packed = pack(e, bench)
           packed_exp.append([system_name] + packed)
     columns = ['System', 'Region',  'Policy','Input', 'Id', 'Execution time (micro-seconds)']
     df = pd.DataFrame(packed_exp, columns=columns)
-    print(df)
     print(df.groupby(['System', 'Region',  'Policy','Input']).mean())
     df.to_json(f'{args.results_dir}/{bench.name}_gathered.json')
 

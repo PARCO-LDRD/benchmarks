@@ -58,9 +58,8 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
-    df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
-    df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
+    df[['Outer', 'Inner']] = df['Input'].str.split(':', expand=True).astype(int)
+    df['N'] = df['Outer'] * df['Inner']
     g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
     g.set(xscale="log")
     g.set(yscale="log")

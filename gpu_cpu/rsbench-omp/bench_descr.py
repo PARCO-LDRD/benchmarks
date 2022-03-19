@@ -60,7 +60,7 @@ class Benchmark(BaseBenchmark):
     fig, ax = plt.subplots(figsize=sizes)
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df['lookups'] = df['lookups'].astype(int)
-    g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='System', hue='Policy', style='Type', kind='line')
+    g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='Type', row='System', hue='Policy', kind='line')
     g.set(xscale="log")
     g.set(yscale="log")
     plt.savefig(f'{outfile}')

@@ -1,20 +1,19 @@
 import os
-import sys
 from bench_modules.benchmark import BaseBenchmark
 import re
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
-    super().__init__('SW')
+    super().__init__('LULESH')
     self._root = os.path.split(os.path.realpath(__file__))[0]
     compile_flags=system.get_compile_flags()
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    #5000 x 5000 -> 30 000 30 000 , stride : 512
-    for i in range(4*1024,30*1024+1,512):
-      self._inputs.append(f'{i} {i}')
-    self._executable = f'SW'
+    for s in range(20,101, 5):
+      self.inputs.append(f'-s {s}')
+
+    self._executable = f'lulesh'
 
   @property
   def build(self):
@@ -38,16 +37,13 @@ class Benchmark(BaseBenchmark):
 
   def getTime(self, stdout):
     print(' I am trying t find execution time')
-    exec_time_pattern = '__ExecutionTime__:(.*)'
-    tmp =  re.findall(exec_time_pattern, stdout)
-    if len(tmp) == 0:
-      return None
-    return tmp[0]
+    exec_time_pattern = 'Elapsed time\s*=\s* (.*) \(s\)'
+    tmp =  re.findall(exec_time_pattern, stdout)[0]
+    print(tmp, type(tmp))
+    return tmp
 
   def extractInputFromCMD(self, cmd):
-    vals=cmd.split(' ')
-    cmd=':'.join(vals[1:3])
-    return cmd
+    return int(cmd.split(' ')[-1])
 
   def visualize(self, df, outfile, sizes):
     import pandas as pd
@@ -55,11 +51,10 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df[['N', 'M']] = df['Input'].str.split(':', expand=True)
-    df['N'] = df['N'].astype(int)
-    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
-    g.set(xscale="log")
-    g.set(yscale="log")
+    df['size'] = df['Input'].astype(int)
+    df['Execution time (s)'] = df['Execution time (micro-seconds)'] * 1000000
+    g = sns.relplot(data=df, x='size', y='Execution time (s)', col='System', hue='Policy', kind='line')
     plt.savefig(f'{outfile}')
     plt.close()
+
 

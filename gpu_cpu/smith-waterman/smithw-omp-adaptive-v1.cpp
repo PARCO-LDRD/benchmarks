@@ -293,7 +293,7 @@ int main(int argc, char* argv[]) {
 
 #pragma omp metadirective \
       when (user={adaptation(mymodel==cpu)}: parallel for  ) \
-      default(target teams distribute parallel for map(tofrom:maxPos) )
+      when (user={adaptation(mymodel==gpu)}: target teams distribute parallel for map(tofrom:maxPos) )
       for (int j = 0; j < nEle; ++j) 
       {  // going upwards : anti-diagnol direction
         long long int ai = si - j ; // going up vertically
