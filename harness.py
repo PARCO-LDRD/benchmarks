@@ -419,7 +419,7 @@ def main():
         if 'Application Time' in e['type']:
           packed = pack(e, bench)
           packed_exp.append([system_name] + packed)
-    columns = ['System', 'Region',  'Policy','Input', 'Id', 'Execution time (micro-seconds)']
+    columns = ['System', 'Region',  'Policy','Input', 'Id', 'Execution time (s)']
     df = pd.DataFrame(packed_exp, columns=columns)
     print(df.groupby(['System', 'Region',  'Policy','Input']).mean())
     df.to_json(f'{args.results_dir}/{bench.name}_gathered.json')
@@ -429,7 +429,6 @@ def main():
     pd.set_option('display.max_rows', None)
     data = f'{args.results_dir}/{bench.name}_gathered.json'
     df = pd.read_json(data)
-    df['Execution time (s)'] = df['Execution time (micro-seconds)'] / 1000000
     sizes=set_size(width=textWidth)
     bench.visualize(df, f'{args.results_dir}/{bench.name}.pdf', sizes)
     print(df)
