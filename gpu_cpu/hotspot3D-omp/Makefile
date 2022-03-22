@@ -8,7 +8,7 @@ OPTIMIZE  = yes
 DEBUG     = no 
 DEVICE    = apollo
 
-FOPENMP?= -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+FOPENMP?= -fopenmp -fopenmp-version=51 -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 #===============================================================================
 # Program name & source code list

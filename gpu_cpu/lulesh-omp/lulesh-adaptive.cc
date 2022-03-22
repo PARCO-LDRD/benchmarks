@@ -2515,6 +2515,76 @@ int main(int argc, char *argv[])
     opts.iteration_cap -= 1;
   }
 
+#pragma omp metadirective \
+  when(user={adaptation(by_dims==gpu)} : \
+      target exit data map(delete: \
+        x[0:numNode], \
+        y[0:numNode], \
+        z[0:numNode], \
+        fx[0:numNode], \
+        fy[0:numNode], \
+        fz[0:numNode], \
+        xd[0:numNode], \
+        yd[0:numNode], \
+        zd[0:numNode], \
+        xdd[0:numNode], \
+        ydd[0:numNode], \
+        zdd[0:numNode], \
+        nodelist[0:numElem8], \
+        nodeElemStart[0:len1],\
+        nodeElemCornerList[0:len2], \
+        gamma[0:32]) \
+      map (delete: \
+        determ[0:numElem], \
+        fx_elem[0:numElem8], \
+        fy_elem[0:numElem8], \
+        fz_elem[0:numElem8], \
+        dvdx[0:numElem8], \
+        dvdy[0:numElem8], \
+        dvdz[0:numElem8], \
+        x8n[0:numElem8], \
+        y8n[0:numElem8], \
+        z8n[0:numElem8], \
+        sigxx [0:numElem], \
+        sigyy [0:numElem], \
+        sigzz [0:numElem], \
+        delv_xi [0:numElem], \
+        delx_xi [0:numElem], \
+        delv_eta [0:numElem], \
+        delx_eta [0:numElem], \
+        delv_zeta [0:numElem], \
+        delx_zeta [0:numElem], \
+        p [0:numElem], \
+  q [0:numElem], \
+  volo[0:numElem], \
+  v[0:numElem], \
+  vol_error[0:1], \
+  ss[0:numElem], \
+  elemMass[0:numElem], \
+  nodalMass[0:numNode], \
+  symmX[0:numNodeBC], \
+  symmY[0:numNodeBC], \
+  symmZ[0:numNodeBC], \
+  vdov [0:numElem], \
+  delv [0:numElem], \
+  arealg [0:numElem], \
+  dxx [0:numElem], \
+  dyy [0:numElem], \
+  dzz [0:numElem], \
+  vnew [0:numElem], \
+  lzetam[0:numElem], \
+  lzetap[0:numElem], \
+  letap[0:numElem], \
+  letam[0:numElem], \
+  lxip[0:numElem], \
+  lxim[0:numElem], \
+  elemBC[0:numElem], \
+  ql[0:numElem], \
+  qq[0:numElem], \
+  e [0:numElem], \
+  elemRep [0:numElem], \
+  elemElem [0:numElem]))
+
 #pragma omp end declare adaptation model_name(by_dims)
 
   // Use reduced max elapsed time
