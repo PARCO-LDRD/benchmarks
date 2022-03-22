@@ -51,7 +51,7 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 ifeq ($(DEVICE),gpu)
-  CFLAGS += -fopenmp -fopenmp-targets=nvptx64
+  CFLAGS += $(FOPENMP)
 else
   CFLAGS +=-fopenmp
 endif
