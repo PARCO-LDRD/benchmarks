@@ -10,12 +10,11 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make clean'
     self._inputs = [
-        '--niterations 1 --ncell_x 4 --ncell_y 4 --ncell_z 64 --ne 64 --na 32 --nblock_z 64'
-        '--niterations 1 --ncell_x 8 --ncell_y 8 --ncell_z 64 --ne 64 --na 32 --nblock_z 64'
-        '--niterations 1 --ncell_x 16 --ncell_y 16 --ncell_z 64 --ne 64 --na 32 --nblock_z 64'
-#        '--niterations 1 --ncell_x 32 --ncell_y 32 --ncell_z 64 --ne 64 --na 32 --nblock_z 64'
-#        '--niterations 1 --ncell_x 64 --ncell_y 64 --ncell_z 64 --ne 64 --na 32 --nblock_z 64'
-#        '--niterations 1 --ncell_x 128 --ncell_y 128 --ncell_z 64 --ne 64 --na 32 --nblock_z 64'
+        '--niterations 1 --ncell_x 4 --ncell_y 4 --ncell_z 64 --ne 64 --na 32 --nblock_z 64',
+        '--niterations 1 --ncell_x 8 --ncell_y 8 --ncell_z 64 --ne 64 --na 32 --nblock_z 64',
+        '--niterations 1 --ncell_x 16 --ncell_y 16 --ncell_z 64 --ne 64 --na 32 --nblock_z 64',
+        '--niterations 1 --ncell_x 32 --ncell_y 32 --ncell_z 64 --ne 64 --na 32 --nblock_z 64',
+        '--niterations 1 --ncell_x 64 --ncell_y 64 --ncell_z 64 --ne 64 --na 32 --nblock_z 64',
         ]
     self._executable = f'main'
 
@@ -47,5 +46,17 @@ class Benchmark(BaseBenchmark):
     return tmp
 
   def extractInputFromCMD(self, cmd):
-    return int(cmd.split(' ')[-1])
+    print(cmd)
+    tmp = cmd.split(' ')
+    data = int(tmp[4])
+    return data
 
+  def visualize(self, df, outfile, sizes):
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    import seaborn as sns
+    fig, ax = plt.subplots(figsize=sizes)
+    df['ncell_x/y/z'] = df['Input'].astype(int)
+    g = sns.relplot(data=df, x='ncell_x/y/z', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    plt.savefig(f'{outfile}')
+    plt.close()
