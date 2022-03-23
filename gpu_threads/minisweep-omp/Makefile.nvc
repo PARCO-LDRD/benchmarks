@@ -3,11 +3,11 @@
 #===============================================================================
 
 # Compiler can be set below, or via environment variable
-CC        = clang++
+CC        = nvc++
 OPTIMIZE  = yes
 DEBUG     = no
 DEVICE    = gpu
-FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+SM        = cc70
 
 
 #===============================================================================
@@ -25,11 +25,11 @@ obj = $(source:.cpp=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -std=c++14 -Wall 
+CFLAGS := -Wall 
 
 
 # Linker Flags
-LDFLAGS = -lapollo
+LDFLAGS = 
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
@@ -44,9 +44,9 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 ifeq ($(DEVICE),gpu)
-  CFLAGS += $(FOPENMP)
+  CFLAGS +=-Minfo -mp=gpu -gpu=$(SM)
 else
-  CFLAGS +=-fopenmp
+  CFLAGS +=-qopenmp
 endif
 #===============================================================================
 # Targets to Build
