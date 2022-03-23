@@ -150,17 +150,30 @@ def create_apollo_model(tracedirs, agg = 'mean-min'):
     return models
 
 def get_adaptive_apollo_runs(scenarios,num_folds=5):
-    experiments_csv = np.array([s for s in scenarios['experiments'] if s['type'] == 'csv' ])
+    # Find CSV experiments.
+    experiments_csv = [s for s in scenarios['experiments'] if s['type'] == 'csv' ]
+    # Extract the unique cmds of CSV experiments that correspond to the unique inputs.
+    set_commands_csv = np.array(list(set([e['cmd'] for e in experiments_csv])))
 
     kfold = KFold(n_splits=int(num_folds), shuffle=True, random_state=1)
 
     index = 0
     dynamic_experiments = []
-    for train, test in kfold.split(experiments_csv):
-        tracedirs = [scenarios['root_dir'] + '/runs/' + e['hash'] + '/trace' for e in experiments_csv[train]]
+    # Split to k-folds the cmds (inputs).
+    for train, test in kfold.split(set_commands_csv):
+        # Stores the training experiments including all Static policies for each unique cmd (input).
+        experiments_train = []
+        for c in set_commands_csv[train]:
+            experiments_train += [e for e in experiments_csv if e['cmd'] == c]
+        tracedirs = [scenarios['root_dir'] + '/runs/' + e['hash'] + '/trace' for e in experiments_train]
         models = create_apollo_model(tracedirs)
-        train_hash = [e['hash'] for e in experiments_csv[train]]
-        for e in experiments_csv[test]:
+        train_hash = [e['hash'] for e in experiments_train]
+
+        # Stores the testing experiments.
+        experiments_test = []
+        for c in set_commands_csv[test]:
+            experiments_test += [e for e in experiments_csv if e['cmd'] == c]
+        for e in experiments_test:
             dExp = {}
             dExp['train_hash'] = train_hash
             dExp['cmd'] = e['cmd']
