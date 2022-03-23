@@ -1,0 +1,109 @@
+==42243== NVPROF is profiling process 42243, command: ./XSBench -m event -s small
+==42244== NVPROF is profiling process 42244, command: ./XSBench -m event -s small
+================================================================================
+                   __   __ ___________                 _                        
+                   \ \ / //  ___| ___ \               | |                       
+                    \ V / \ `--.| |_/ / ___ _ __   ___| |__                     
+                    /   \  `--. \ ___ \/ _ \ '_ \ / __| '_ \                    
+                   / /^\ \/\__/ / |_/ /  __/ | | | (__| | | |                   
+                   \/   \/\____/\____/ \___|_| |_|\___|_| |_|                   
+
+================================================================================
+                    Developed at Argonne National Laboratory
+                                   Version: 20
+================================================================================
+                                  INPUT SUMMARY
+================================================================================
+Programming Model:            OpenMP Target Offloading
+Simulation Method:            Event Based
+Grid Type:                    Unionized Grid
+Materials:                    12
+H-M Benchmark Size:           small
+Total Nuclides:               68
+Gridpoints (per Nuclide):     11,303
+Unionized Energy Gridpoints:  768,604
+Total XS Lookups:             17,000,000
+MPI Ranks:                    2
+Mem Usage per MPI Rank (MB):  241
+Binary File Mode:             Off
+================================================================================
+                         INITIALIZATION - DO NOT PROFILE
+================================================================================
+Intializing nuclide grids...
+Intializing unionized grid...
+Intializing material data...
+Intialization complete. Allocated 240 MB of data.
+
+== APOLLO: Looked for APOLLO_POLICY_MODEL with getenv(), found nothing, using 'Static,policy=0' (default) instead.
+== APOLLO: Looked for APOLLO_COLLECTIVE_TRAINING with getenv(), found nothing, using '0' (default) instead.
+================================================================================
+                                   SIMULATION
+================================================================================
+== APOLLO: Looked for APOLLO_LOCAL_TRAINING with getenv(), found nothing, using '1' (default) instead.
+== APOLLO: Looked for APOLLO_SINGLE_MODEL with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_REGION_MODEL with getenv(), found nothing, using '1' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_MEASURES with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_GLOBAL_TRAIN_PERIOD with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_PER_REGION_TRAIN_PERIOD with getenv(), found nothing, using '0' (default) instead.
+Beginning event based simulation...
+== APOLLO: Looked for APOLLO_POLICY_MODEL with getenv(), found nothing, using 'Static,policy=0' (default) instead.
+== APOLLO: Looked for APOLLO_COLLECTIVE_TRAINING with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_POLICY with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_STORE_MODELS with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_RETRAIN with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_ALLGATHER with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_BEST_POLICIES with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_RETRAIN_ENABLE with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_LOCAL_TRAINING with getenv(), found nothing, using '1' (default) instead.
+== APOLLO: Looked for APOLLO_SINGLE_MODEL with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_REGION_MODEL with getenv(), found nothing, using '1' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_MEASURES with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_GLOBAL_TRAIN_PERIOD with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_PER_REGION_TRAIN_PERIOD with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_POLICY with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_STORE_MODELS with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_RETRAIN with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_ALLGATHER with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_RETRAIN_TIME_THRESHOLD with getenv(), found nothing, using '2.0' (default) instead.
+== APOLLO: Looked for APOLLO_RETRAIN_REGION_THRESHOLD with getenv(), found nothing, using '0.5' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_CSV with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_CSV_FOLDER_SUFFIX with getenv(), found nothing, using '' (default) instead.
+CREATE region by_lookups num_features 1 num policies 5
+== APOLLO: Looked for APOLLO_TRACE_BEST_POLICIES with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_RETRAIN_ENABLE with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_RETRAIN_TIME_THRESHOLD with getenv(), found nothing, using '2.0' (default) instead.
+== APOLLO: Looked for APOLLO_RETRAIN_REGION_THRESHOLD with getenv(), found nothing, using '0.5' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_CSV with getenv(), found nothing, using '0' (default) instead.
+== APOLLO: Looked for APOLLO_TRACE_CSV_FOLDER_SUFFIX with getenv(), found nothing, using '' (default) instead.
+CREATE region by_lookups num_features 1 num policies 5
+__ExecutionTime__:618168
+
+Simulation complete.
+__ExecutionTime__:618252
+================================================================================
+                                     RESULTS
+================================================================================
+NOTE: Timings are estimated -- use nvprof/nsys/iprof/rocprof for formal analysis
+MPI ranks:   2
+Total Lookups/s:            54,997,492
+Avg Lookups/s per MPI rank: 27,498,746
+Verification checksum: 945990 (Valid)
+================================================================================
+Apollo: total region executions: 1
+Apollo: total region executions: 1
+==42243== Profiling application: ./XSBench -m event -s small
+==42243== Profiling result:
+
+==42243== Device "Tesla V100-SXM2-16GB (0)"
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   77.05%  230.13ms         1  230.13ms  230.13ms  230.13ms  __omp_offloading_4d_fe9d109c_run_event_based_simulation_l61
+                   12.07%  36.056ms         7  5.1508ms  1.5040us  36.046ms  [CUDA memcpy DtoH]
+                   10.88%  32.508ms        15  2.1672ms  1.0560us  26.967ms  [CUDA memcpy HtoD]
+==42244== Profiling application: ./XSBench -m event -s small
+==42244== Profiling result:
+
+==42244== Device "Tesla V100-SXM2-16GB (0)"
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   77.21%  231.74ms         1  231.74ms  231.74ms  231.74ms  __omp_offloading_4d_fe9d109c_run_event_based_simulation_l61
+                   12.05%  36.180ms         7  5.1686ms  1.5040us  36.170ms  [CUDA memcpy DtoH]
+                   10.73%  32.217ms        15  2.1478ms  1.0560us  26.846ms  [CUDA memcpy HtoD]
