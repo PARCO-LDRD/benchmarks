@@ -182,10 +182,16 @@ def get_adaptive_apollo_runs(scenarios,num_folds=5):
 def get_oracle_apollo_runs(scenarios):
     oracle_experiments = []
     experiments_csv = np.array([s for s in scenarios['experiments'] if s['type'] == 'csv' ])
+    print(len(experiments_csv))
     tracedirs = [scenarios['root_dir'] + '/runs/' + e['hash'] + '/trace' for e in experiments_csv]
     models = create_apollo_model(tracedirs)
     train_hash = [e['hash'] for e in experiments_csv]
+    unique_inputs = set()
     for e in experiments_csv:
+        if e['cmd'] in unique_inputs:
+          continue
+        else:
+          unique_inputs.add(e['cmd'])
         dExp = {}
         dExp['train_hash'] = train_hash
         dExp['cmd'] = e['cmd']
@@ -202,4 +208,5 @@ def get_oracle_apollo_runs(scenarios):
             tmp[k]['model_hash'] = hashlib.sha256(models[k].encode('utf-8')).hexdigest()
         dExp['regions'] = tmp
         oracle_experiments.append(dExp)
+    print('Number of oracle experiments are:', len(oracle_experiments))
     return oracle_experiments
