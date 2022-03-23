@@ -3,11 +3,10 @@
 #===============================================================================
 
 # Compiler can be set below, or via environment variable
-CC        = clang++
+CC        = icpx
 OPTIMIZE  = yes
 DEBUG     = no
 DEVICE    = gpu
-FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 
 #===============================================================================
@@ -29,7 +28,7 @@ CFLAGS := -std=c++14 -Wall
 
 
 # Linker Flags
-LDFLAGS = -lapollo
+LDFLAGS = 
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
@@ -44,9 +43,9 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 ifeq ($(DEVICE),gpu)
-  CFLAGS += $(FOPENMP)
+  CFLAGS +=-fiopenmp -fopenmp-targets=spir64 -D__STRICT_ANSI__
 else
-  CFLAGS +=-fopenmp
+  CFLAGS +=-qopenmp
 endif
 #===============================================================================
 # Targets to Build
@@ -62,6 +61,6 @@ clean:
 	rm -rf $(program) $(obj)
 
 run: $(program)
-	./$(program) --niterations 2
-	#./$(program) --niterations 1 --ncell_x 32 --ncell_y 32 --ncell_z 64 --ne 64 --na 32 --nblock_z 64
+	./$(program) --niterations 100
+	./$(program) --niterations 1 --ncell_x 32 --ncell_y 32 --ncell_z 64 --ne 64 --na 32 --nblock_z 64
 
