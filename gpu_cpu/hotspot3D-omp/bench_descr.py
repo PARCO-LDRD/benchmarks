@@ -1,7 +1,7 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-
+import matplotlib
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
@@ -17,7 +17,7 @@ class Benchmark(BaseBenchmark):
     for i in iterations:
       for c in numCols:
         for l in layers:
-          #Code operates the same as long as the input file has 
+          #Code operates the same as long as the input file has
           #enough information
           pfile = f'{self._root}/data/power_512x8'
           tfile = f'{self._root}/data/temp_512x8'
@@ -70,9 +70,13 @@ class Benchmark(BaseBenchmark):
     df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
-    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
-    g.set(xscale="log")
-    g.set(yscale="log")
+    df['Execution time (s)'] = df['Execution time (s)']/1e6
+    g = sns.relplot(data=df, x='N', y='Execution time (s)',
+                    col='System', hue='Policy', kind='line', marker='o')
+    g.set_axis_labels('N\nlog2', 'Execution time (s)\nlog2')
+    plt.yscale('log', base=2)
+    plt.xscale('log', base=2)
+    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
     plt.savefig(f'{outfile}')
     plt.close()
-
