@@ -12,7 +12,7 @@ class Benchmark(BaseBenchmark):
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
     #5000 x 5000 -> 30 000 30 000 , stride : 512
-    for i in range(512, 15000,512):
+    for i in range(512, 15000,2048):
       self._inputs.append(f'{i} {i}')
     self._executable = f'SW'
 
