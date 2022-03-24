@@ -1,7 +1,7 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-
+import matplotlib
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
     super().__init__('ga')
@@ -50,8 +50,16 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    df['Input'] = df['Input'].str.split(',', expand=True)[0].astype(int) / 1000000
+    df['Input'] = df['Input'].astype(int).astype(str)
+    g = sns.relplot(data=df, x='Input', y='Execution time (s)',
+                    col='System', hue='Policy', kind='line', marker='o')
+    g.set_axis_labels('Input (millions)', 'Execution time (s)\nlog2')
+    g.set_xticklabels(rotation=-90)
+    plt.yscale('log', base=2)
+    #plt.xscale('log', base=2)
+    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    #plt.gca().xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
     plt.savefig(f'{outfile}')
     plt.close()
-
-

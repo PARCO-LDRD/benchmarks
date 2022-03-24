@@ -2,6 +2,7 @@ import os
 import sys
 from bench_modules.benchmark import BaseBenchmark
 import re
+import matplotlib
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
@@ -57,9 +58,12 @@ class Benchmark(BaseBenchmark):
     fig, ax = plt.subplots(figsize=sizes)
     df[['N', 'M']] = df['Input'].str.split(':', expand=True)
     df['N'] = df['N'].astype(int)
-    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
-    g.set(xscale="log")
-    g.set(yscale="log")
+    df['Execution time (s)'] = df['Execution time (s)']/1e6
+    g = sns.relplot(data=df, x='N', y='Execution time (s)',
+                    col='System', hue='Policy', kind='line', marker='o')
+    g.set_axis_labels('Size', 'Execution time (s)\nlog2')
+    plt.yscale('log', base=2)
+    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
     plt.savefig(f'{outfile}')
     plt.close()
-
