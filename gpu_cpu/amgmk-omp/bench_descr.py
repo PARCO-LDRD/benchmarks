@@ -52,8 +52,12 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = '$' + df['Input'].str.split(',', expand=True)[0] + '^3$'
-    g = sns.relplot(data=df, x='Input', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
+    markers = ['D', '*', 's']
+    style_to_markers = {}
+    for k, v in zip(sorted(df['Policy'].unique()), markers):
+        style_to_markers[k] = v
+    print(style_to_markers)
+    g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', hue='Policy', kind='line', style='Policy', markers=style_to_markers, alpha=0.5,)
     g.set_axis_labels('Grid', 'Execution time (s)\nlog2')
     g.set_xticklabels(rotation=-90)
     plt.yscale('log', base=2)
