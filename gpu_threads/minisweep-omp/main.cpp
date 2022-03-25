@@ -149,7 +149,7 @@ int main( int argc, char** argv )
       {
         m_from_a[M_FROM_A_ADDR(dims.na, im, ia, octant)] /= NOCTANT;
         // scale factor angle
-        m_from_a[M_FROM_A_ADDR(dims.na, im, ia, octant)] /= 1 << ( ia & ( (1<<3) - 1 ) ); 
+        m_from_a[M_FROM_A_ADDR(dims.na, im, ia, octant)] /= 1 << ( ia & ( (1<<3) - 1 ) );
       }
 #ifdef DEBUG
   for (int i = 0; i < n/sizeof(P); i++) printf("m_from_a %d %f\n", i, m_from_a[i]);
@@ -191,7 +191,7 @@ int main( int argc, char** argv )
   sweeper.stepscheduler.noctant_per_block_ = NOCTANT / sweeper.nblock_octant;
   //sweeper.faces.noctant_per_block_         = sweeper.noctant_per_block;
 
-  const int noctant_per_block = sweeper.noctant_per_block; 
+  const int noctant_per_block = sweeper.noctant_per_block;
 
   int facexy_size = Dimensions_size_facexy( sweeper.dims_b, NU, noctant_per_block ) ;
   n = facexy_size * sizeof(P);
@@ -209,12 +209,10 @@ int main( int argc, char** argv )
 
   int vslocal_size = dims.na * NU * dims.ne * NOCTANT * dims.ncell_x * dims.ncell_y;
   n = vslocal_size * sizeof(P);
-  P* vslocal = (P*) malloc ( n ); 
+  P* vslocal = (P*) malloc ( n );
 
   double t1, t2, time;
 
-#pragma omp begin declare adaptation feature(a_from_m_size) model_name(by_size) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp target enter data map(to: a_from_m[0:a_from_m_size],\
     m_from_a[0:a_from_m_size],\
@@ -259,9 +257,9 @@ int main( int argc, char** argv )
       for(int octant_in_block=0; octant_in_block<noctant_per_block; ++octant_in_block )
       {
         stepinfoall.stepinfo[octant_in_block] = StepScheduler_stepinfo(
-            &(sweeper.stepscheduler), step, octant_in_block, 
-            0, //proc_x, 
-            0  //proc_y 
+            &(sweeper.stepscheduler), step, octant_in_block,
+            0, //proc_x,
+            0  //proc_y
             );
       }
 
@@ -278,16 +276,21 @@ int main( int argc, char** argv )
 #pragma omp target update to(vo[0:v_size])
 
 
+#pragma omp begin declare adaptation feature(a_from_m_size) model_name(main_cpp_279_by_size) \
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+
 #pragma omp metadirective \
-	  when(user={adaptation(by_size==threads_64)} : \
+	  when(user={adaptation(main_cpp_279_by_size==threads_32)} : \
+	      target teams distribute parallel for collapse(3) thread_limit(32)) \
+	  when(user={adaptation(main_cpp_279_by_size==threads_64)} : \
 	      target teams distribute parallel for collapse(3) thread_limit(64)) \
-	  when(user={adaptation(by_size==threads_128)} : \
+	  when(user={adaptation(main_cpp_279_by_size==threads_128)} : \
 	      target teams distribute parallel for collapse(3) thread_limit(128)) \
-	  when(user={adaptation(by_size==threads_256)} : \
+	  when(user={adaptation(main_cpp_279_by_size==threads_256)} : \
 	      target teams distribute parallel for collapse(3) thread_limit(256)) \
-	  when(user={adaptation(by_size==threads_512)} : \
+	  when(user={adaptation(main_cpp_279_by_size==threads_512)} : \
 	      target teams distribute parallel for collapse(3) thread_limit(512)) \
-	  when(user={adaptation(by_size==threads_1024)} : \
+	  when(user={adaptation(main_cpp_279_by_size==threads_1024)} : \
 	      target teams distribute parallel for collapse(3) thread_limit(1024))
          for( int octant=0; octant<NOCTANT; ++octant )
          for( int iy=0; iy<dims_b_ncell_y; ++iy )
@@ -314,6 +317,8 @@ int main( int argc, char** argv )
                    = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
                } /*---for---*/
 
+#pragma omp end declare adaptation model_name(main_cpp_279_by_size)
+
 #ifdef DEBUG
          #pragma omp target update from (facexy[0:facexy_size])
          for (int i = 0; i < facexy_size; i++)
@@ -321,16 +326,19 @@ int main( int argc, char** argv )
 #endif
       }
 
+#pragma omp begin declare adaptation feature(a_from_m_size) model_name(main_cpp_329_by_size) \
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+
 #pragma omp metadirective \
-      when(user={adaptation(by_size==threads_64)} : \
+      when(user={adaptation(main_cpp_329_by_size==threads_64)} : \
           target teams distribute parallel for collapse(3) thread_limit(64)) \
-      when(user={adaptation(by_size==threads_128)} : \
+      when(user={adaptation(main_cpp_329_by_size==threads_128)} : \
           target teams distribute parallel for collapse(3) thread_limit(128)) \
-      when(user={adaptation(by_size==threads_256)} : \
+      when(user={adaptation(main_cpp_329_by_size==threads_256)} : \
           target teams distribute parallel for collapse(3) thread_limit(256)) \
-      when(user={adaptation(by_size==threads_512)} : \
+      when(user={adaptation(main_cpp_329_by_size==threads_512)} : \
           target teams distribute parallel for collapse(3) thread_limit(512)) \
-      when(user={adaptation(by_size==threads_1024)} : \
+      when(user={adaptation(main_cpp_329_by_size==threads_1024)} : \
           target teams distribute parallel for collapse(3) thread_limit(1024))
       for( int octant=0; octant<NOCTANT; ++octant )
       for( int iz=0; iz<dims_b_ncell_z; ++iz )
@@ -358,22 +366,28 @@ int main( int argc, char** argv )
                   = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
               } /*---if---*/
             } /*---for---*/
+
+#pragma omp end declare adaptation model_name(main_cpp_329_by_size)
+
 #ifdef DEBUG
       #pragma omp target update from (facexz[0:facexz_size])
       for (int i = 0; i < facexz_size; i++)
         printf("facexz: %d %f\n", i, facexz[i]);
 #endif
 
+#pragma omp begin declare adaptation feature(a_from_m_size) model_name(main_cpp_378_by_size) \
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+
 #pragma omp metadirective \
-      when(user={adaptation(by_size==threads_64)} : \
+      when(user={adaptation(main_cpp_378_by_size==threads_64)} : \
           target teams distribute parallel for collapse(3) thread_limit(64)) \
-      when(user={adaptation(by_size==threads_128)} : \
+      when(user={adaptation(main_cpp_378_by_size==threads_128)} : \
           target teams distribute parallel for collapse(3) thread_limit(128)) \
-      when(user={adaptation(by_size==threads_256)} : \
+      when(user={adaptation(main_cpp_378_by_size==threads_256)} : \
           target teams distribute parallel for collapse(3) thread_limit(256)) \
-      when(user={adaptation(by_size==threads_512)} : \
+      when(user={adaptation(main_cpp_378_by_size==threads_512)} : \
           target teams distribute parallel for collapse(3) thread_limit(512)) \
-      when(user={adaptation(by_size==threads_1024)} : \
+      when(user={adaptation(main_cpp_378_by_size==threads_1024)} : \
           target teams distribute parallel for collapse(3) thread_limit(1024))
       for( int octant=0; octant<NOCTANT; ++octant )
       for( int iz=0; iz<dims_b_ncell_z; ++iz )
@@ -403,22 +417,27 @@ int main( int argc, char** argv )
               } /*---if---*/
             } /*---for---*/
 
+#pragma omp end declare adaptation model_name(main_cpp_378_by_size)
+
 #ifdef DEBUG
       #pragma omp target update from (faceyz[0:faceyz_size])
       for (int i = 0; i < faceyz_size; i++)
         printf("faceyz: %d %f\n", i, faceyz[i]);
 #endif
 
+#pragma omp begin declare adaptation feature(a_from_m_size) model_name(main_cpp_428_by_size) \
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+
 #pragma omp metadirective \
-      when(user={adaptation(by_size==threads_64)} : \
+      when(user={adaptation(main_cpp_428_by_size==threads_64)} : \
           target teams distribute parallel for collapse(2) thread_limit(64)) \
-      when(user={adaptation(by_size==threads_128)} : \
+      when(user={adaptation(main_cpp_428_by_size==threads_128)} : \
           target teams distribute parallel for collapse(2) thread_limit(128)) \
-      when(user={adaptation(by_size==threads_256)} : \
+      when(user={adaptation(main_cpp_428_by_size==threads_256)} : \
           target teams distribute parallel for collapse(2) thread_limit(256)) \
-      when(user={adaptation(by_size==threads_512)} : \
+      when(user={adaptation(main_cpp_428_by_size==threads_512)} : \
           target teams distribute parallel for collapse(2) thread_limit(512)) \
-      when(user={adaptation(by_size==threads_1024)} : \
+      when(user={adaptation(main_cpp_428_by_size==threads_1024)} : \
           target teams distribute parallel for collapse(2) thread_limit(1024))
       for( int ie=0; ie<dims_b_ne; ++ie )
       for( int octant=0; octant<NOCTANT; ++octant )
@@ -463,7 +482,9 @@ int main( int argc, char** argv )
 
       } /*--- wavefront ---*/
 
-      if (is_last_step) { 
+#pragma omp end declare adaptation model_name(main_cpp_428_by_size)
+
+      if (is_last_step) {
 
 #pragma omp target update from (vo[0:v_size])
 #ifdef DEBUG
@@ -478,10 +499,9 @@ int main( int argc, char** argv )
   }
   t2 = get_time();
   time = t2 - t1;
-} 
-#pragma omp end declare adaptation model_name(by_size)
+}
 
-  // Verification (input and output vectors are equal) 
+  // Verification (input and output vectors are equal)
   P normsq = (P)0;
   P normsqdiff = (P)0;
   for (size_t i = 0; i < Dimensions_size_state( dims, NU ); i++) {

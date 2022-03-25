@@ -7,7 +7,7 @@
  *EHEADER****************************************************************/
 
 //--------------
-//  A micro kernel 
+//  A micro kernel
 //--------------
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,11 +23,11 @@
 // CUDA/HIP block size or OpenCL work-group size
 #define BLOCK_SIZE 256
 
-// 
+//
 const int testIter   = 500;
 double totalWallTime = 0.0;
 
-// 
+//
 void test_Matvec();
 void test_Relax(int nx, int ny, int nz);
 void test_Axpy();
@@ -65,11 +65,11 @@ int main(int argc, char *argv[])
   printf("// \n");
   printf("//------------ \n");
 
-  printf("\n testIter   = %d \n\n", testIter );  
+  printf("\n testIter   = %d \n\n", testIter );
 
- 
+
 #ifdef _OPENMP
-  printf("\n testIter   = %d \n\n", testIter );  
+  printf("\n testIter   = %d \n\n", testIter );
   #pragma omp parallel
      #pragma omp master
         max_num_threads = omp_get_num_threads();
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
   // Matvec
   //totalWallTime = 0.0;
- 
+
   //test_Matvec();
 
   //printf("\n");
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 
   // Axpy
   //totalWallTime = 0.0;
- 
+
   //test_Axpy();
 
   //printf("\n");
@@ -161,7 +161,7 @@ void test_Matvec()
   nz = 50;
 
   values = hypre_CTAlloc(double, 4);
-  values[0] = 6; 
+  values[0] = 6;
   values[1] = -1;
   values[2] = -1;
   values[3] = -1;
@@ -189,7 +189,7 @@ void test_Matvec()
   totalWallTime += tdiff.count();
 #endif
 
- 
+
   y_data = hypre_VectorData(y);
   sol_data = hypre_VectorData(sol);
 
@@ -199,7 +199,7 @@ void test_Matvec()
       diff = fabs(y_data[i]-sol_data[i]);
       if (diff > error) error = diff;
   }
-     
+
   if (error > 0) printf(" \n Matvec: error: %e\n", error);
 
   hypre_TFree(values);
@@ -228,7 +228,7 @@ void test_Relax(int nx, int ny, int nz)
   //nz = 50;
 
   values = hypre_CTAlloc(double, 4);
-  values[0] = 6; 
+  values[0] = 6;
   values[1] = -1;
   values[2] = -1;
   values[3] = -1;
@@ -266,9 +266,11 @@ void test_Relax(int nx, int ny, int nz)
   for (int ti=0; ti<testIter; ++ti) {
 
 #pragma omp begin declare adaptation feature(n) model_name(by_grid_size) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(by_grid_size==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(by_grid_size==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(by_grid_size==threads_128)} : \
@@ -284,7 +286,7 @@ void test_Relax(int nx, int ny, int nz)
           /*-----------------------------------------------------------
           * If diagonal is nonzero, relax point i; otherwise, skip it.
           *-----------------------------------------------------------*/
-          
+
           if ( A_diag_data[A_diag_i[i]] != 0.0)
           {
             double res = f_data[i];
@@ -298,7 +300,7 @@ void test_Relax(int nx, int ny, int nz)
        }
 
 #pragma omp end declare adaptation model_name(by_grid_size)
-    } 
+    }
   }
 
 #pragma omp target exit data map(from: u_data[0:grid_size])
@@ -318,7 +320,7 @@ void test_Relax(int nx, int ny, int nz)
       diff = fabs(u_data[i]-1);
       if (diff > error) error = diff;
   }
-     
+
   printf(" \n Relax: error: %e\n", error);
 
   hypre_TFree(values);
@@ -354,7 +356,7 @@ void test_Axpy()
   hypre_SeqVectorSetConstantValues(x,1);
   hypre_SeqVectorSetConstantValues(y,1);
 
- 
+
 #ifdef _OPENMP
   t0 = omp_get_wtime();
 #else
@@ -368,7 +370,7 @@ void test_Axpy()
 #else
   auto t1 = std::chrono::steady_clock::now();
 #endif
-  
+
 
   y_data = hypre_VectorData(y);
   error = 0;
@@ -377,11 +379,11 @@ void test_Axpy()
     diff = fabs(y_data[i]-1-0.5*(double)testIter);
       if (diff > error) error = diff;
   }
-     
+
   if (error > 0) printf(" \n Axpy: error: %e\n", error);
 
 #ifdef _OPENMP
-  totalWallTime += t1 - t0; 
+  totalWallTime += t1 - t0;
 #else
   std::chrono::duration<double> tdiff = t1 - t0;
   totalWallTime += tdiff.count();

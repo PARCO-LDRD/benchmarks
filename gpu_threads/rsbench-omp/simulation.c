@@ -25,7 +25,7 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 
 	// Main simulation loop over macroscopic cross section lookups
 #pragma omp begin declare adaptation feature(total_lookups, nuclides) model_name(lookups) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp target data \
 	map(to:data.n_poles[:data.length_n_poles])\
@@ -43,6 +43,8 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 	map(from:verification[:input.lookups])
 	{
 #pragma omp metadirective \
+	  when(user={adaptation(lookups==threads_32)} : \
+	      target teams distribute parallel for thread_limit(32)) \
 	  when(user={adaptation(lookups==threads_64)} : \
 	      target teams distribute parallel for thread_limit(64)) \
 	  when(user={adaptation(lookups==threads_128)} : \
@@ -56,7 +58,7 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 	  for( int i = 0; i < input.lookups; i++ )
 	  {
 	    // Set the initial seed value
-	    uint64_t seed = STARTING_SEED;	
+	    uint64_t seed = STARTING_SEED;
 
 	    // Forward seed to lookup index (we need 2 samples per lookup)
 	    seed = fast_forward_LCG(seed, 2*i);
@@ -95,7 +97,7 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 	}
 
 #pragma omp end declare adaptation model_name(lookups)
-  
+
   // Reduce validation hash on the host
   unsigned long long validation_hash = 0;
 	for( int i = 0; i < input.lookups; i++ )
@@ -110,7 +112,7 @@ void run_event_based_simulation(Input input, SimulationData data, unsigned long 
 	*vhash_result = validation_hash;
 }
 
-void calculate_macro_xs( double * macro_xs, int mat, double E, Input input, int * num_nucs, int * mats, int max_num_nucs, double * concs, int * n_windows, double * pseudo_K0Rs, Window * windows, Pole * poles, int max_num_windows, int max_num_poles ) 
+void calculate_macro_xs( double * macro_xs, int mat, double E, Input input, int * num_nucs, int * mats, int max_num_nucs, double * concs, int * n_windows, double * pseudo_K0Rs, Window * windows, Pole * poles, int max_num_windows, int max_num_poles )
 {
 	// zero out macro vector
 	for( int i = 0; i < 4; i++ )
@@ -254,7 +256,7 @@ void calculate_micro_xs_doppler( double * micro_xs, int nuc, double E, Input inp
 int pick_mat( uint64_t * seed )
 {
 	// I have a nice spreadsheet supporting these numbers. They are
-	// the fractions (by volume) of material in the core. Not a 
+	// the fractions (by volume) of material in the core. Not a
 	// *perfect* approximation of where XS lookups are going to occur,
 	// but this will do a good job of biasing the system nonetheless.
 
@@ -314,7 +316,7 @@ void calculate_sig_T( int nuc, double E, Input input, double * pseudo_K0RS, RSCo
 // Only expected to use Abrarov ~0.5% of the time.
 RSComplex fast_nuclear_W( RSComplex Z )
 {
-	// Abrarov 
+	// Abrarov
 	if( c_abs(Z) < 6.0 )
 	{
 		// Precomputed parts for speeding things up
@@ -402,7 +404,7 @@ double LCG_random_double(uint64_t * seed)
 	const uint64_t c = 1ULL;
 	*seed = (a * (*seed) + c) % m;
 	return (double) (*seed) / (double) m;
-}	
+}
 
 uint64_t LCG_random_int(uint64_t * seed)
 {
@@ -411,7 +413,7 @@ uint64_t LCG_random_int(uint64_t * seed)
 	const uint64_t c = 1ULL;
 	*seed = (a * (*seed) + c) % m;
 	return *seed;
-}	
+}
 
 uint64_t fast_forward_LCG(uint64_t seed, uint64_t n)
 {
@@ -424,7 +426,7 @@ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n)
 	uint64_t a_new = 1;
 	uint64_t c_new = 0;
 
-	while(n > 0) 
+	while(n > 0)
 	{
 		if(n & 1)
 		{
@@ -522,4 +524,4 @@ RSComplex fast_cexp( RSComplex z )
 	RSComplex t5 = {t1, 0};
 	RSComplex result = c_mul(t5, (t4));
 	return result;
-}	
+}

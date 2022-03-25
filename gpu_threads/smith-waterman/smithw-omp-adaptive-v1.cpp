@@ -7,9 +7,9 @@
  *              gcc omp_smithW.c -O3 -o omp_smithW -fopenmp // production run
  * Execution:   ./omp_smithW <number_of_col> <number_of_rows>
  *
- * Updated by C. Liao, Dec, 2021,  
+ * Updated by C. Liao, Dec, 2021,
  * using OpenMP directives with the following pattern to optimize data transfers
- *   enter data + target + exit data 
+ *   enter data + target + exit data
  *  also several functions are inlined in the OpenMP code region.
  *
  * Updated March 4th, 2022
@@ -27,7 +27,7 @@
 #include <stdbool.h> // C99 does not support the boolean data type
 
 //#include "parameters.h"
-#define FACTOR 128 
+#define FACTOR 128
 #define CUTOFF 1024
 
 /*--------------------------------------------------------------------
@@ -82,7 +82,7 @@ double get_time(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec; 
+  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
 }
 
 
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
   P = (int *)calloc(m * n, sizeof(int));
   //    printf ("debug: P's address=%p\n", P);
 
-  unsigned long long sz = (m+n +2*m*n)*sizeof(int)/1024/1024; 
+  unsigned long long sz = (m+n +2*m*n)*sizeof(int)/1024/1024;
   if (sz>=1024)
     printf("Total memory footprint is:%llu GB\n", sz/1024) ;
   else
@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
 
   // The way to generate all wavefront is to go through the top edge elements
   // starting from the left top of the matrix, go to the bottom top -> down, then left->right
-  // total top edge element count =  dim1_size + dim2_size -1 
+  // total top edge element count =  dim1_size + dim2_size -1
   //Because now we have zeros ((m-1) + (n-1) - 1)
   long long int nDiag = m + n - 3;
 
@@ -214,15 +214,15 @@ int main(int argc, char* argv[]) {
 #endif
 
 #ifdef _OPENMP
-#pragma omp parallel 
+#pragma omp parallel
   {
-#pragma omp master          
+#pragma omp master
     {
       thread_count = omp_get_num_threads();
       printf ("Using %d out of max %d threads...\n", thread_count, omp_get_max_threads());
     }
   }
-  // detect GPU support 
+  // detect GPU support
   int runningOnGPU = 0;
 
   printf ("The number of target devices =%d\n", omp_get_num_devices());
@@ -253,9 +253,9 @@ int main(int argc, char* argv[]) {
 
 
   double start = get_time();
-//Choice 3: map the entire region to gpu, preparing data regions  
+//Choice 3: map the entire region to gpu, preparing data regions
 #pragma omp target enter data map(to:a[0:m-1], b[0:n-1]) map(to: H[0:asz], P[0:asz], maxPos)
- 
+
   {
     for (int i = 1; i <= nDiag; ++i) // start from 1 since 0 is the boundary padding
     {
@@ -285,13 +285,15 @@ int main(int argc, char* argv[]) {
         sj = 1; // start from the j==1 since j==0 is the padding
       } else {  // now we sweep horizontally at the bottom of the matrix
         si = n - 1;  // i is fixed
-        sj = i - n + 2; // j position is the nDiag (id -n) +1 +1 // first +1 
+        sj = i - n + 2; // j position is the nDiag (id -n) +1 +1 // first +1
       }
 
 #pragma omp begin declare adaptation feature(nEle) model_name(by_nelements) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(by_nelements==threads_32)} : \
+    target teams distribute parallel for map(tofrom:maxPos) thread_limit(32)) \
   when(user={adaptation(by_nelements==threads_64)} : \
     target teams distribute parallel for map(tofrom:maxPos) thread_limit(64)) \
   when(user={adaptation(by_nelements==threads_128)} : \
@@ -302,7 +304,7 @@ int main(int argc, char* argv[]) {
     target teams distribute parallel for map(tofrom:maxPos) thread_limit(512)) \
   when(user={adaptation(by_nelements==threads_1024)} : \
     target teams distribute parallel for map(tofrom:maxPos) thread_limit(1024))
-      for (int j = 0; j < nEle; ++j) 
+      for (int j = 0; j < nEle; ++j)
       {  // going upwards : anti-diagnol direction
         long long int ai = si - j ; // going up vertically
         long long int aj = sj + j;  //  going right in horizontal
@@ -381,7 +383,7 @@ int main(int argc, char* argv[]) {
   finalTime = omp_get_wtime();
   printf("Elapsed time for backtracking: %f\n", finalTime - initialTime);
 #endif
-  
+
 #ifdef DEBUG
   printf("\nSimilarity Matrix:\n");
   printMatrix(H);
@@ -394,11 +396,11 @@ int main(int argc, char* argv[]) {
   {
     printf ("Verifying results using the builtinIn data: %s\n", (H[n*m-1]==7)?"true":"false");
     assert (H[n*m-1]==7);
-#if !SKIP_BACKTRACK      
+#if !SKIP_BACKTRACK
     printf ("maxPos= %lld\n", maxPos);
     assert (maxPos==69);
     assert (H[maxPos]==13);
-#endif      
+#endif
   }
   //Frees similarity matrixes
   free(H);
@@ -426,7 +428,7 @@ void calcFirstDiagElement(long long int i, long long int *si, long long int *sj)
         *sj = 1; // start from the j==1 since j==0 is the padding
     } else {  // now we sweep horizontally at the bottom of the matrix
         *si = n - 1;  // i is fixed
-        *sj = i - n + 2; // j position is the nDiag (id -n) +1 +1 // first +1 
+        *sj = i - n + 2; // j position is the nDiag (id -n) +1 +1 // first +1
     }
 }
 
@@ -457,7 +459,7 @@ Then we have the first elements like
 (3,1)
 ..
 (6,1) (6,2)
- 
+
  */
 
 /*--------------------------------------------------------------------
@@ -493,7 +495,7 @@ void printMatrix(int* matrix) {
     }
     printf("\n-\t");
     for (i = 0; i < n; i++) { //Lines
-        for (j = 0; j < m; j++) {  
+        for (j = 0; j < m; j++) {
                 if (j==0 && i>0) printf("%c\t", b[i-1]);
             printf("%d\t", matrix[m * i + j]);
         }
