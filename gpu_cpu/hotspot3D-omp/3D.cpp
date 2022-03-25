@@ -56,14 +56,14 @@ int main(int argc, char** argv)
   pfile            = argv[4];
   tfile            = argv[5];
   //ofile            = argv[6];
-  int numCols      = atoi(argv[1]);
-  int numRows      = atoi(argv[1]);
+  long numCols      = atol(argv[1]);
+  long numRows      = atol(argv[1]);
   int layers       = atoi(argv[2]);
 
   /* calculating parameters*/
 
-  float dx         = chip_height/numRows;
-  float dy         = chip_width/numCols;
+  float dx         = chip_height/512.0; //numRows;
+  float dy         = chip_width/512.0; //numCols;
   float dz         = t_chip/layers;
 
   float Cap        = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * dx * dy;
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
   cc               = 1.0 - (2.0*ce + 2.0*cn + 3.0*ct);
 
 
-  int size = numCols * numRows * layers;
+  long size = numCols * numRows * layers;
   float* tIn      = (float*) calloc(size,sizeof(float));
   float* pIn      = (float*) calloc(size,sizeof(float));
   float* tCopy = (float*)malloc(size * sizeof(float));
@@ -102,12 +102,12 @@ int main(int argc, char** argv)
     for(int j = 0; j < iterations; j++)
     {
 #pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target teams distribute parallel for collapse(2)) \
-                          when(user={adaptation(hotspot==cpu)} : parallel for collapse(2) firstprivate(numRows, numCols)) 
-    for (int j = 0; j < numRows; j++)  
+                          when(user={adaptation(hotspot==cpu)} : parallel for collapse(2) firstprivate(numRows, numCols, stepDivCap, ce, cn, ct, cc)) 
+    for (long j = 0; j < numRows; j++)  
       {
-        for (int i = 0; i < numCols; i++)  
+        for (long i = 0; i < numCols; i++)  
         {
-          float amb_temp = 80.0;
+          double amb_temp = 80.0;
 
           int c = i + j * numCols;
           int xy = numCols * numRows;
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
           int N = (j == 0)        ? c : c - numCols;
           int S = (j == numRows-1)     ? c : c + numCols;
 
-          float temp1, temp2, temp3;
+          double temp1, temp2, temp3;
           temp1 = temp2 = tIn[c];
           temp3 = tIn[c+xy];
           tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]
@@ -129,9 +129,9 @@ int main(int argc, char** argv)
           S += xy;
 
           for (int k = 1; k < layers-1; ++k) {
+            temp3 = tIn[c+xy];
             temp1 = temp2;
             temp2 = temp3;
-            temp3 = tIn[c+xy];
             tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]
               + cn * tIn[N] + cb * temp1 + ct * temp3 + stepDivCap * pIn[c] + ct * amb_temp;
             c += xy;
@@ -152,11 +152,11 @@ int main(int argc, char** argv)
     }
     if (iterations & 01) {
 #pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target update from (tIn[0:size]))
-//     sel = tIn;
+     //sel = tIn;
     }
     else {
 #pragma omp metadirective when(user={adaptation(hotspot==gpu)} : target update from (tOut[0:size]))
-//     sel = tOut;
+     //sel = tOut;
     }
 
 
@@ -172,8 +172,8 @@ int main(int argc, char** argv)
 //  computeTempCPU(pIn, tCopy, answer, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, amb_temp, iterations);
 //
 //  float acc = accuracy(sel,answer,numRows*numCols*layers);
-//  float time = (float)((stop - start)/(1000.0 * 1000.0));
-//  printf("Device offloading time: %.3f (s)\n",time);
+  float time = (float)((stop - start)/(1000.0 * 1000.0));
+  printf("Device offloading time: %.3f (s)\n",time);
 //  printf("Root-mean-square error: %e\n",acc);
 
   //writeoutput(tOut,numRows,numCols,layers,ofile);

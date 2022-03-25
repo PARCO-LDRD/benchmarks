@@ -57,7 +57,7 @@ class Benchmark(BaseBenchmark):
     for k, v in zip(sorted(df['Policy'].unique()), markers):
         style_to_markers[k] = v
     print(style_to_markers)
-    g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', hue='Policy', kind='line', style='Policy', markers=style_to_markers, alpha=0.5,)
+    g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', hue='Policy', kind='line', style='Policy', markers=style_to_markers, alpha=0.5, facet_kws={'sharey': False, 'sharex': True})
     g.set_axis_labels('Grid', 'Execution time (s)\nlog2')
     g.set_xticklabels(rotation=-90)
     plt.yscale('log', base=2)

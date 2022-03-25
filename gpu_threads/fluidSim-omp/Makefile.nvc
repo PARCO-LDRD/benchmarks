@@ -3,46 +3,35 @@
 #===============================================================================
 
 # Compiler can be set below, or via environment variable
-CC        = clang++
+CC        = nvc++
 OPTIMIZE  = yes
 DEBUG     = no
+VERIFY    = yes
 DEVICE    = gpu
-#VERIFY    = yes
-FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+SM        = cc70
 
 #===============================================================================
 # Program name & source code list
 #===============================================================================
 
-program = lulesh
+program = main
 
-source = lulesh.cc \
-        lulesh-viz.cc \
-        lulesh-util.cc \
-        lulesh-init.cc
-
-obj = $(source:.cc=.o)
-
+obj = main.o kernels.o reference.o
 
 #===============================================================================
 # Sets Flags
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -std=c++14 -Wall 
+CFLAGS := -std=c++14 -Wall -include utils.h
 
 # Linker Flags
-LDFLAGS = -lm -lapollo
+LDFLAGS = 
 
 # Debug Flags
 ifeq ($(DEBUG),yes)
-  CFLAGS += -g
+  CFLAGS += -g -DDEBUG
   LDFLAGS  += -g
-endif
-
-# Verify kernel results
-ifeq ($(VERIFY),yes)
-  CFLAGS += -DVERIFY
 endif
 
 
@@ -51,27 +40,33 @@ ifeq ($(OPTIMIZE),yes)
   CFLAGS += -O3
 endif
 
+ifeq ($(VERIFY),yes)
+  CFLAGS += -DVERIFY
+endif
+
 ifeq ($(DEVICE),gpu)
-  CFLAGS += $(FOPENMP)
+  CFLAGS +=-Minfo -mp=gpu -gpu=$(SM)
 else
-  CFLAGS +=-fopenmp
+  CFLAGS +=-qopenmp
 endif
 #===============================================================================
 # Targets to Build
 #===============================================================================
 
-$(program): $(obj) Makefile.adaptive
+$(program): $(obj)
 	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
-%.o: %.cc Makefile.adaptive
+kernels.o: kernels.cpp utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+main.o: ../fluidSim-cuda/main.cpp utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+reference.o: ../fluidSim-sycl/reference.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(program) $(obj)
 
-test: $(program)
-	./$(program) -i 1 -s 32 -r 11 -b 1 -c 1
-
 run: $(program)
-	./$(program) -i 100 -s 128 -r 11 -b 1 -c 1
-
+	./$(program) 10000

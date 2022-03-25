@@ -2,7 +2,6 @@ import os
 import sys
 from bench_modules.benchmark import BaseBenchmark
 import re
-import matplotlib
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
@@ -51,6 +50,7 @@ class Benchmark(BaseBenchmark):
     return cmd
 
   def visualize(self, df, outfile, sizes):
+    import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
@@ -60,7 +60,8 @@ class Benchmark(BaseBenchmark):
     df['N'] = df['N'].astype(int)
     df['Execution time (s)'] = df['Execution time (s)']/1e6
     g = sns.relplot(data=df, x='N', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
+                    col='System', hue='Policy', kind='line', marker='o',
+                    facet_kws={'sharey':False, 'sharex':True})
     g.set_axis_labels('Size', 'Execution time (s)\nlog2')
     plt.yscale('log', base=2)
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))

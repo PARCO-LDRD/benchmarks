@@ -5,7 +5,7 @@
 #include <sys/time.h>
 
 void  fatal(const char* s);
-void  readinput(float* v, int r, int c,int l,char*);
+void  readinput(float* v, long r, long c,int l,char*);
 void  writeoutput(float* v,int r,int c,int l,char*);
 float accuracy(float* arr1, float* arr2, int len);
 void computeTempCPU(float* pIn, float *tIn, float *tOut, 

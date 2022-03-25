@@ -15,9 +15,11 @@ void ga(const char *__restrict target,
               int current_position)
 {
 #pragma omp begin declare adaptation feature(length) model_name(by_grid_size) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(by_grid_size==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(by_grid_size==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(by_grid_size==threads_128)} : \
@@ -28,7 +30,7 @@ void ga(const char *__restrict target,
     target teams distribute parallel for thread_limit(512)) \
   when(user={adaptation(by_grid_size==threads_1024)} : \
     target teams distribute parallel for thread_limit(1024))
-  for (uint tid = 0; tid < length; tid++) { 
+  for (uint tid = 0; tid < length; tid++) {
     bool match = false;
     int max_length = query_sequence_length - coarse_match_length;
 
@@ -54,7 +56,7 @@ void ga(const char *__restrict target,
 
 }
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   if (argc != 5) {
     printf("Usage: %s <target sequence length> <query sequence length> "
@@ -68,7 +70,7 @@ int main(int argc, char* argv[])
   const int qseq_size = atoi(argv[2]);
   const int coarse_match_length = atoi(argv[3]);
   const int coarse_match_threshold = atoi(argv[4]);
-  
+
   std::vector<char> target_sequence(tseq_size);
   std::vector<char> query_sequence(qseq_size);
 
@@ -76,7 +78,7 @@ int main(int argc, char* argv[])
   for (int i = 0; i < tseq_size; i++) target_sequence[i] = seq[rand()%4];
   for (int i = 0; i < qseq_size; i++) query_sequence[i] = seq[rand()%4];
 
-  char *d_target = target_sequence.data(); 
+  char *d_target = target_sequence.data();
   char *d_query = query_sequence.data();
 
   uint32_t max_searchable_length = tseq_size - coarse_match_length;
@@ -100,7 +102,7 @@ int main(int argc, char* argv[])
       #pragma omp target teams distribute parallel for thread_limit(256)
       for (int i = 0; i < kBatchSize; i++)
         d_batch_result[i] = 0;
-      
+
       memset(batch_result_ref, 0, kBatchSize);
 
       uint32_t end_position = current_position + kBatchSize;
@@ -129,7 +131,7 @@ int main(int argc, char* argv[])
 
   printf("Execution time %.3lf\n", omp_get_wtime() - start);
 #ifdef VERIFY
-  printf("%s\n", ok ? "PASS" : "FAIL");  
+  printf("%s\n", ok ? "PASS" : "FAIL");
 #endif
   return 0;
 }
