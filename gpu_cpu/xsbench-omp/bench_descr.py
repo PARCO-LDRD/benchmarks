@@ -1,7 +1,6 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-import matplotlib
 
 
 class Benchmark(BaseBenchmark):
@@ -53,6 +52,7 @@ class Benchmark(BaseBenchmark):
     return f'{vals[4]}:{vals[6]}'
 
   def visualize(self, df, outfile, sizes):
+    import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap

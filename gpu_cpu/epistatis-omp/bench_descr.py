@@ -1,7 +1,6 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-import matplotlib
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
@@ -47,6 +46,7 @@ class Benchmark(BaseBenchmark):
     return ','.join(cmd.split(' ')[1:])
 
   def visualize(self, df, outfile, sizes):
+    import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap

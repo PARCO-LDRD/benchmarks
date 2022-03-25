@@ -1,7 +1,6 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-import matplotlib
 
 
 class Benchmark(BaseBenchmark):
@@ -53,6 +52,7 @@ class Benchmark(BaseBenchmark):
 
   def visualize(self, df, outfile, sizes):
     import pandas as pd
+    import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns

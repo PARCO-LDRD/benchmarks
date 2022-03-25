@@ -1,7 +1,7 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-import matplotlib
+
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
     super().__init__('hotspot3D')
@@ -62,6 +62,7 @@ class Benchmark(BaseBenchmark):
     return cmd
 
   def visualize(self, df, outfile, sizes):
+    import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
