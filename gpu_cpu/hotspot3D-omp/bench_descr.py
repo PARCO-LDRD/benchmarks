@@ -10,18 +10,16 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make'
     self._clean = 'make clean'
     self._inputs = []
-    iterations = [128, 256, 512, 1024, 2048, 4096]
-    numCols = [64, 128, 256, 512]
+    numCols = range(1024,4097,512)
     layers=[2,4,8]
-    for i in iterations:
-      for c in numCols:
-        for l in layers:
-          #Code operates the same as long as the input file has
-          #enough information
-          pfile = f'{self._root}/data/power_512x8'
-          tfile = f'{self._root}/data/temp_512x8'
-          command = f'{c} {l} {i} {pfile} {tfile}'
-          self._inputs.append(command)
+    for c in numCols:
+      for l in layers:
+        #Code operates the same as long as the input file has
+        #enough information
+        pfile = f'{self._root}/data/power_512x8'
+        tfile = f'{self._root}/data/temp_512x8'
+        command = f'{c} {l} 4 {pfile} {tfile}'
+        self._inputs.append(command)
     self._executable = f'main'
 
   @property
