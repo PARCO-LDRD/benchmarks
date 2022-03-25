@@ -51,6 +51,7 @@ endif
 ifeq ($(COMPILER),llvm)
   CC = clang
   CFLAGS += -O3 ${FOPENMP}
+	CPP = clang++
 endif
 
 # IBM XL Compiler
@@ -99,7 +100,7 @@ endif
 #===============================================================================
 
 $(program): $(obj) XSbench_header.h Makefile
-	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
+	$(CPP) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
 %.o: %.c XSbench_header.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
