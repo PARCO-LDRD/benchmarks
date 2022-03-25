@@ -27,15 +27,15 @@ void mem_free (T* p) {
 
 #pragma omp declare target
 float gammafunction(unsigned int n)
-{   
+{
   if(n == 0) return 0.0f;
-  float x = ((float)n + 0.5f) * logf((float)n) - 
+  float x = ((float)n + 0.5f) * logf((float)n) -
             ((float)n - 1.0f) * logf(expf((float) 1.0f));
   return x;
 }
 
 
-// naive 
+// naive
 inline unsigned int popcount (unsigned int x)
 {
   // return __builtin_popcount(v);
@@ -72,8 +72,8 @@ int main(int argc, char **argv)
   // transpose the SNP data
   unsigned char *SNP_Data_trans = mem_alloc<unsigned char>(64, num_pac * num_snp);
 
-  for (i = 0; i < num_pac; i++) 
-    for(j = 0; j < num_snp; j++) 
+  for (i = 0; i < num_pac; i++)
+    for(j = 0; j < num_snp; j++)
       SNP_Data_trans[j * num_pac + i] = SNP_Data[i * num_snp + j];
 
   int phen_ones = 0;
@@ -175,14 +175,16 @@ int main(int argc, char **argv)
 
   // epistasis detection kernel
   for (int i = 0; i < iteration; i++) {
-  
+
     memcpy(dev_scores, scores, sizeof(float) * num_snp * num_snp);
     #pragma omp target update to (dev_scores[0:num_snp*num_snp])
 
 #pragma omp begin declare adaptation feature(num_snp) model_name(by_size) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(by_size==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(by_size==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(by_size==threads_128)} : \
@@ -194,7 +196,7 @@ int main(int argc, char **argv)
   when(user={adaptation(by_size==threads_1024)} : \
     target teams distribute parallel for thread_limit(1024))
     for (int n = 0; n < num_snp_m * num_snp_m; n++) {
-      int i = n / num_snp_m; 
+      int i = n / num_snp_m;
       int j = n % num_snp_m;
 
       float score = FLT_MAX;
@@ -352,7 +354,7 @@ int main(int argc, char **argv)
 
   std::cout << "Score: " << score << std::endl;
   std::cout << "Solution: " << solution / num_snp << ", " << solution % num_snp << std::endl;
-  if ( (fabsf(score - 83.844f) > 1e-3f) || (solution / num_snp != 1253) || 
+  if ( (fabsf(score - 83.844f) > 1e-3f) || (solution / num_snp != 1253) ||
        (solution % num_snp != 25752) )
     std::cout << "FAIL\n";
   else

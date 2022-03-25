@@ -5,7 +5,7 @@
 ** PURPOSE: This program will explore use of an explicit
 **          finite difference method to solve the heat
 **          equation under a method of manufactured solution (MMS)
-**          scheme. The solution has been set to be a simple 
+**          scheme. The solution has been set to be a simple
 **          function based on exponentials and trig functions.
 **
 **          A finite difference scheme is used on a 1000x1000 cube.
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
   double tic, toc;
   const int block_size = 256;
 
-#pragma omp target data map(tofrom: u[0:n*n], u_tmp[0:n*n]) 
+#pragma omp target data map(tofrom: u[0:n*n], u_tmp[0:n*n])
 {
   // Set the initial value of the grid under the MMS scheme
   #pragma omp target teams distribute parallel for simd collapse(2) thread_limit(block_size)
@@ -154,9 +154,11 @@ int main(int argc, char *argv[]) {
     // given the value of u at the current timestep
     // Loop over the nxn grid
 #pragma omp begin declare adaptation feature(n) model_name(by_grid_size) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(by_grid_size==threads_32)} : \
+    target teams distribute parallel for simd collapse(2) thread_limit(32)) \
   when(user={adaptation(by_grid_size==threads_64)} : \
     target teams distribute parallel for simd collapse(2) thread_limit(64)) \
   when(user={adaptation(by_grid_size==threads_128)} : \

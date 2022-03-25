@@ -15,9 +15,9 @@ DIFFERENCES BETWEEN THIS VERSION (2.x) AND EARLIER VERSIONS:
  * Addition of regions to make work more representative of multi-material codes
  * Default size of each domain is 30^3 (27000 elem) instead of 45^3. This is
  more representative of our actual working set sizes
- * Single source distribution supports pure serial, pure OpenMP, MPI-only, 
+ * Single source distribution supports pure serial, pure OpenMP, MPI-only,
  and MPI+OpenMP
- * Addition of ability to visualize the mesh using VisIt 
+ * Addition of ability to visualize the mesh using VisIt
 https://wci.llnl.gov/codes/visit/download.html
  * Various command line options (see ./lulesh2.0 -h)
  -q              : quiet mode - suppress stdout
@@ -61,7 +61,7 @@ https://wci.llnl.gov/codes/visit/download.html
  *   Four of the LULESH routines are now performed on a region-by-region basis,
  *     making the memory access patterns non-unit stride
  *   Artificial load imbalances can be easily introduced that could impact
- *     parallelization strategies.  
+ *     parallelization strategies.
  * The load balance flag changes region assignment.  Region number is raised to
  *   the power entered for assignment probability.  Most likely regions changes
  *   with MPI process id.
@@ -790,7 +790,7 @@ void CalcCourantConstraintForElems(Domain &domain, Index_t length,
 
     for (Index_t thread_num = 0; thread_num < NT; thread_num++) {
 
-      //#pragma omp for 
+      //#pragma omp for
       for (Index_t i = 0 ; i < length ; ++i) {
         Index_t indx = regElemlist[i] ;
         Real_t dtf = domain.ss(indx) * domain.ss(indx) ;
@@ -1092,7 +1092,7 @@ int main(int argc, char *argv[])
   Real_t *y8n  = Allocate<Real_t>(numElem8) ;
   Real_t *z8n  = Allocate<Real_t>(numElem8) ;
   Real_t *determ = Allocate<Real_t>(numElem) ;
-  Real_t *vnew = Allocate<Real_t>(numElem) ;  
+  Real_t *vnew = Allocate<Real_t>(numElem) ;
   Real_t *sigxx  = Allocate<Real_t>(numElem) ;
   Real_t *sigyy  = Allocate<Real_t>(numElem) ;
   Real_t *sigzz  = Allocate<Real_t>(numElem) ;
@@ -1152,7 +1152,7 @@ int main(int argc, char *argv[])
 
   Real_t *arealg = &locDom->m_arealg[0];
 
-  int vol_error[1]; 
+  int vol_error[1];
 
 
 #pragma omp target data map(to: \
@@ -1232,7 +1232,7 @@ int main(int argc, char *argv[])
 
     //=============================================================
     // calculate nodal forces, accelerations, velocities, positions, with
-    // applied boundary conditions and slide surface considerations 
+    // applied boundary conditions and slide surface considerations
     //LagrangeNodal(domain);
     //=============================================================
 
@@ -1243,27 +1243,29 @@ int main(int argc, char *argv[])
 
     //=============================================================================
     // time of boundary condition evaluation is beginning of step for force and
-    // acceleration boundary conditions. 
-    //CalcForceForNodes(domain);  
+    // acceleration boundary conditions.
+    //CalcForceForNodes(domain);
     //=============================================================================
 
     //=====================================================================
-    // CalcVolumeForceForElems(domain) 
+    // CalcVolumeForceForElems(domain)
     //=====================================================================
 
 
     Real_t  hgcoef = domain.hgcoef() ;
 
-    // Sum contributions to total stress tensor 
+    // Sum contributions to total stress tensor
 
 #pragma omp target update to (p[0:numElem])
 #pragma omp target update to (q[0:numElem])
 
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l1262) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1262==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1262==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1262==threads_128)} : \
@@ -1285,9 +1287,11 @@ int main(int argc, char *argv[])
     //==============================================================================================
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l1284) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1284==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1284==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1284==threads_128)} : \
@@ -1360,9 +1364,11 @@ int main(int argc, char *argv[])
 #pragma omp end declare adaptation model_name(lulesh_cc_l1284)
 
 #pragma omp begin declare adaptation feature(numNode) model_name(lulesh_cc_l1357) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1357==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1357==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1357==threads_128)} : \
@@ -1408,7 +1414,7 @@ int main(int argc, char *argv[])
     }
 
     //=================================================================================
-    // CalcHourglassControlForElems(device_queue, domain, determ, hgcoef) ;  
+    // CalcHourglassControlForElems(device_queue, domain, determ, hgcoef) ;
     //=================================================================================
 
     vol_error[0] = -1;
@@ -1419,9 +1425,11 @@ int main(int argc, char *argv[])
 #pragma omp target update to (v[0:numElem])
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l1414) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1414==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1414==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1414==threads_128)} : \
@@ -1511,7 +1519,7 @@ int main(int argc, char *argv[])
 
     // volumn derivative
     for (int i = 0; i < numElem8; i++) {
-      printf("vd %d %f %f %f %f %f %f %f\n", 
+      printf("vd %d %f %f %f %f %f %f %f\n",
           i, dvdx[i], dvdy[i], dvdz[i], x8n[i], y8n[i], z8n[i], determ[i/8]);
     }
 #endif
@@ -1545,9 +1553,11 @@ int main(int argc, char *argv[])
 #pragma omp target update to (elemMass[0:numElem])
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l1538) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1538==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1538==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1538==threads_128)} : \
@@ -1747,9 +1757,11 @@ int main(int argc, char *argv[])
 #pragma omp end declare adaptation model_name(lulesh_cc_l1538)
 
 #pragma omp begin declare adaptation feature(numNode) model_name(lulesh_cc_l1738) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1738==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1738==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1738==threads_128)} : \
@@ -1787,9 +1799,9 @@ int main(int argc, char *argv[])
 #pragma omp target update from (fz[0:numNode])
 
       for (int i = 0; i < numNode; i++)
-        printf("fb: %d %f %f %f\n", i, fx[i], fy[i], fz[i]); 
-#endif 
-    } // if ( hgcoef > Real_t(0.) ) 
+        printf("fb: %d %f %f %f\n", i, fx[i], fy[i], fz[i]);
+#endif
+    } // if ( hgcoef > Real_t(0.) )
 
 
     //===========================================================================
@@ -1800,9 +1812,11 @@ int main(int argc, char *argv[])
 #pragma omp target update to (nodalMass[0:numNode])
 
 #pragma omp begin declare adaptation feature(numNode) model_name(lulesh_cc_l1788) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1788==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1788==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1788==threads_128)} : \
@@ -1837,9 +1851,11 @@ int main(int argc, char *argv[])
     Index_t s3 = domain.symmZempty();
 
 #pragma omp begin declare adaptation feature(numNodeBC) model_name(lulesh_cc_l1824) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1824==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1824==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1824==threads_128)} : \
@@ -1862,9 +1878,11 @@ int main(int argc, char *argv[])
     // CalcVelocityForNodes( domain, delt, u_cut, domain.numNode()) ; //uses m_xd and m_xdd
     //=================================================================
 #pragma omp begin declare adaptation feature(numNode) model_name(lulesh_cc_l1847) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1847==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1847==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1847==threads_128)} : \
@@ -1898,12 +1916,14 @@ int main(int argc, char *argv[])
 
 
     //=================================================================================
-    // CalcPositionForNodes( domain, delt, domain.numNode() );  //uses m_xd and m_x 
+    // CalcPositionForNodes( domain, delt, domain.numNode() );  //uses m_xd and m_x
     //=================================================================================
 #pragma omp begin declare adaptation feature(numNode) model_name(lulesh_cc_l1883) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1883==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1883==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1883==threads_128)} : \
@@ -1931,12 +1951,12 @@ int main(int argc, char *argv[])
 #pragma omp target update from (z[0:numNode])
 
     for (int i = 0; i < numNode; i++)
-      printf("CalcPositionForNodes: %d %f %f %f %f %f %f\n", 
-          i, x[i], y[i], z[i], xd[i], yd[i], zd[i]); 
-#endif 
+      printf("CalcPositionForNodes: %d %f %f %f %f %f %f\n",
+          i, x[i], y[i], z[i], xd[i], yd[i], zd[i]);
+#endif
 
     //=========================================================
-    // calculate element quantities (i.e. velocity gradient & q), and update material states 
+    // calculate element quantities (i.e. velocity gradient & q), and update material states
     // LagrangeElements(domain);
     //=========================================================
     //domain.AllocateStrains(numElem);
@@ -1950,12 +1970,14 @@ int main(int argc, char *argv[])
 #pragma omp target update to (dzz[0:numElem])
 
     //========================================================================
-    // void CalcKinematicsForElems( Domain &domain, Real_t *vnew, 
+    // void CalcKinematicsForElems( Domain &domain, Real_t *vnew,
     //========================================================================
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l1934) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l1934==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l1934==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l1934==threads_128)} : \
@@ -1968,7 +1990,7 @@ int main(int argc, char *argv[])
     target teams distribute parallel for thread_limit(1024))
     for (Index_t k = 0; k < numElem; k++) {
 
-      Real_t B[3][8] ; // shape function derivatives 
+      Real_t B[3][8] ; // shape function derivatives
       Real_t D[6] ;
       Real_t x_local[8] ;
       Real_t y_local[8] ;
@@ -2065,9 +2087,11 @@ int main(int argc, char *argv[])
 #pragma omp target update to (vol_error[0:1])
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l2044) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l2044==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l2044==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l2044==threads_128)} : \
@@ -2113,9 +2137,9 @@ int main(int argc, char *argv[])
       exit(VolumeError);
     }
 
-    //======================================================= 
+    //=======================================================
     //CalcQForElems(domain, vnew) ;
-    //======================================================= 
+    //=======================================================
     //Int_t allElem = numElem +  /* local elem */
       //2*domain.sizeX()*domain.sizeY() + /* plane ghosts */
       //2*domain.sizeX()*domain.sizeZ() + /* row ghosts */
@@ -2124,13 +2148,15 @@ int main(int argc, char *argv[])
     //domain.AllocateGradients(numElem, allElem);
 
     //================================================================
-    // Calculate velocity gradients 
+    // Calculate velocity gradients
     //CalcMonotonicQGradientsForElems(domain, vnew);
     //================================================================
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l2105) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l2105==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l2105==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l2105==threads_128)} : \
@@ -2302,9 +2328,11 @@ int main(int argc, char *argv[])
 #pragma omp target update to (elemMass[0:numElem])
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l2276) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l2276==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l2276==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l2276==threads_128)} : \
@@ -2375,7 +2403,7 @@ int main(int argc, char *argv[])
         case 0:          delvp = delv_eta[letap[i]] ; break ;
         case ETA_P_SYMM: delvp = delv_eta[i] ;        break ;
         case ETA_P_FREE: delvp = Real_t(0.0) ;        break ;
-        default: 
+        default:
              delvp = 0; /* ERROR - but quiets the compiler */
              break;
       }
@@ -2401,7 +2429,7 @@ int main(int argc, char *argv[])
         case 0:           delvm = delv_zeta[lzetam[i]] ; break ;
         case ZETA_M_SYMM: delvm = delv_zeta[i] ;         break ;
         case ZETA_M_FREE: delvm = Real_t(0.0) ;          break ;
-        default: 
+        default:
               delvm = 0; /* ERROR - but quiets the compiler */
               break;
       }
@@ -2472,7 +2500,7 @@ int main(int argc, char *argv[])
 
 
     /* Don't allow excessive artificial viscosity */
-    Index_t idx = -1; 
+    Index_t idx = -1;
     for (Index_t i=0; i<numElem; ++i) {
       if ( domain.q(i) > domain.qstop() ) {
         idx = i ;
@@ -2506,9 +2534,11 @@ int main(int argc, char *argv[])
 #pragma omp target update to (elemElem[0:numElem])
 
 #pragma omp begin declare adaptation feature(numElem) model_name(lulesh_cc_l2478) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(lulesh_cc_l2478==threads_32)} : \
+    target teams distribute parallel for thread_limit(32)) \
   when(user={adaptation(lulesh_cc_l2478==threads_64)} : \
     target teams distribute parallel for thread_limit(64)) \
   when(user={adaptation(lulesh_cc_l2478==threads_128)} : \

@@ -4,21 +4,17 @@ import re
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
-    super().__init__('hotspot3D')
+    super().__init__('fluidSim')
     self._root = os.path.split(os.path.realpath(__file__))[0]
     compile_flags=system.get_compile_flags()
-    self._build = f'FOPENMP="{compile_flags}" make'
+    self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make clean'
     self._inputs = []
-    numCols = range(1024,4097,512)
-    layers=[2,4,8]
-    for c in numCols:
-      for l in layers:
-        #Code operates the same as long as the input file has
-        #enough information
-        pfile = f'{self._root}/data/power_512x8'
-        tfile = f'{self._root}/data/temp_512x8'
-        command = f'{c} {l} 4 {pfile} {tfile}'
+    dimX = [64, 128, 256, 512]
+    dimY = [64, 128, 256, 512]
+    for x in dimX:
+      for y in dimY:
+        command = f'10000 {x} {y}'
         self._inputs.append(command)
     self._executable = f'main'
 
@@ -56,11 +52,10 @@ class Benchmark(BaseBenchmark):
 
   def extractInputFromCMD(self, cmd):
     vals=cmd.split(' ')
-    cmd=':'.join(vals[1:4])
+    cmd=':'.join(vals[1:])
     return cmd
 
   def visualize(self, df, outfile, sizes):
-    import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
@@ -68,14 +63,9 @@ class Benchmark(BaseBenchmark):
     df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
-    df['Execution time (s)'] = df['Execution time (s)']/1e6
-    g = sns.relplot(data=df, x='N', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o',
-                    facet_kws={'sharey':False, 'sharex':True})
-    g.set_axis_labels('N\nlog2', 'Execution time (s)\nlog2')
-    plt.yscale('log', base=2)
-    plt.xscale('log', base=2)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-    plt.tight_layout()
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
+    g.set(xscale="log")
+    g.set(yscale="log")
     plt.savefig(f'{outfile}')
     plt.close()
+

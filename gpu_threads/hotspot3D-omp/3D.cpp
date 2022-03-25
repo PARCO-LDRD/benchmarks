@@ -24,7 +24,7 @@ double get_time(void)
 	struct timeval tv;
 
 	gettimeofday(&tv, NULL);
-  return tv.tv_sec*((uint64_t)1000000)+tv.tv_usec; 
+  return tv.tv_sec*((uint64_t)1000000)+tv.tv_usec;
 }
 
 
@@ -101,9 +101,11 @@ int main(int argc, char** argv)
     for(int j = 0; j < iterations; j++)
     {
 #pragma omp begin declare adaptation feature(iterations, numRows, numCols) model_name(by_input) \
-  variants(threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
 
 #pragma omp metadirective \
+  when(user={adaptation(by_input==threads_32)} : \
+    target teams distribute parallel for collapse(2) thread_limit(32)) \
   when(user={adaptation(by_input==threads_64)} : \
     target teams distribute parallel for collapse(2) thread_limit(64)) \
   when(user={adaptation(by_input==threads_128)} : \
@@ -115,9 +117,9 @@ int main(int argc, char** argv)
   when(user={adaptation(by_input==threads_1024)} : \
     target teams distribute parallel for collapse(2) thread_limit(1024))
 
-    for (int j = 0; j < numRows; j++)  
+    for (int j = 0; j < numRows; j++)
       {
-        for (int i = 0; i < numCols; i++)  
+        for (int i = 0; i < numCols; i++)
         {
           float amb_temp = 80.0;
 

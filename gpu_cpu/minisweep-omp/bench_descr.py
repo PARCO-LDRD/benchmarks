@@ -59,7 +59,8 @@ class Benchmark(BaseBenchmark):
     fig, ax = plt.subplots(figsize=sizes)
     df['ncell_x/y/z'] = df['Input'].astype(int)
     g = sns.relplot(data=df, x='ncell_x/y/z', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
+                    col='System', hue='Policy', kind='line', marker='o',
+                    facet_kws={'sharey':False, 'sharex':True})
     g.set_axis_labels('ncell x/y/z', 'Execution time (s)\nlog2')
     plt.yscale('log', base=2)
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
