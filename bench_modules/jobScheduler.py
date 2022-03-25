@@ -3,6 +3,7 @@ from bench_modules import util
 from string import Template
 import json
 import re
+import sys
 
 @dataclass
 class System:
@@ -13,6 +14,7 @@ class System:
   num_cores: int
   scheduler: str
   system_compile_flags: str
+  scratch: str
 
   def __post_init__(self):
     if self.scheduler == 'slurm':
@@ -22,6 +24,9 @@ class System:
     else:
       print('Scheduler not supported')
       sys.exit()
+
+  def get_scratch(self):
+    return self.scratch
 
   def get_parallel_cmd(self):
     return f'OMP_NUM_THREADS={self.num_cores} OMP_PROC_BIND=close OMP_PLACES=cores'
