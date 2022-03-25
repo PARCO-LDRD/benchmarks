@@ -23,7 +23,7 @@ inline int8 make_int8(int s)
   return {s,s,s,s,s,s,s,s};
 }
 
-// Calculates equivalent distribution 
+// Calculates equivalent distribution
 #pragma omp declare target
 double ced(double rho, double weight, double2 dir, double2 u)
 {
@@ -66,7 +66,7 @@ void lbm (
     const uint width,
     const uint height,
     const double *__restrict if0,
-          double *__restrict of0, 
+          double *__restrict of0,
     const double4 *__restrict if1234,
           double4 *__restrict of1234,
     const double4 *__restrict if5678,
@@ -77,9 +77,22 @@ void lbm (
     const double *__restrict weight,
     double omega)
 {
-#pragma omp metadirective when(user={adaptation(simulation==gpu)} : target teams distribute parallel for collapse(2) \
-    thread_limit(256) dist_schedule(static,1024)) \
-                          when(user={adaptation(simulation==cpu)} : parallel for collapse(2))
+#pragma omp begin declare adaptation feature(width, height) model_name(kernel_cpp_80_by_dims) \
+  variants(threads_32, threads_64, threads_128, threads_256, threads_512, threads_1024) model(dtree)
+
+#pragma omp metadirective                                        \
+    when(user = {adaptation(kernel_cpp_80_by_dims == threads_32)} \
+         : target teams distribute parallel for collapse(2) thread_limit(32)) \
+    when(user = {adaptation(kernel_cpp_80_by_dims == threads_64)} \
+         : target teams distribute parallel for collapse(2) thread_limit(64)) \
+    when(user = {adaptation(kernel_cpp_80_by_dims == threads_128)} \
+         : target teams distribute parallel for collapse(2) thread_limit(128)) \
+    when(user = {adaptation(kernel_cpp_80_by_dims == threads_256)} \
+         : target teams distribute parallel for collapse(2) thread_limit(256)) \
+    when(user = {adaptation(kernel_cpp_80_by_dims == threads_512)} \
+         : target teams distribute parallel for collapse(2) thread_limit(512)) \
+    when(user = {adaptation(kernel_cpp_80_by_dims == threads_1024)} \
+         : target teams distribute parallel for collapse(2) thread_limit(1024))
   for (uint idy = 0; idy < height; idy++) {
     for (uint idx = 0; idx < width; idx++) {
       uint pos = idx + width * idy;
@@ -100,7 +113,7 @@ void lbm (
       // Collide
       if(type[pos]) // Boundary
       {
-        // Swap directions 
+        // Swap directions
         // f1234.xyzw = f1234.zwxy;
         e1234.x = f1234.z;
         e1234.y = f1234.w;
@@ -188,6 +201,10 @@ void lbm (
       }
     }
   }
+
+
+#pragma omp end declare adaptation model_name(kernel_cpp_80_by_dims)
+
 }
 
 void fluidSim (
@@ -208,7 +225,7 @@ void fluidSim (
         double *h_of5678)
 {
   uint width = dims[0];
-  uint height = dims[1]; 
+  uint height = dims[1];
   size_t temp = width * height;
   size_t dbl_size = temp * sizeof(double);
   size_t dbl4_size = dbl_size * 4;
@@ -216,20 +233,20 @@ void fluidSim (
   memcpy(h_of0, h_if0, dbl_size);
   memcpy(h_of1234, h_if1234, dbl4_size);
   memcpy(h_of5678, h_if5678, dbl4_size);
-#pragma omp metadirective when(user={adaptation(simulation==gpu)} : \
-                                   target enter data map (to: h_if0[0:temp],\
-                                   h_of0[0:temp],\
-                                   h_if1234[0:temp*4],\
-                                   h_of1234[0:temp*4],\
-                                   h_if5678[0:temp*4],\
-                                   h_of5678[0:temp*4],\
-                                   h_weight[0:9],\
-                                   h_type[0:temp]))
+#pragma omp target enter data map(to                       \
+                                  : h_if0 [0:temp],        \
+                                    h_of0 [0:temp],        \
+                                    h_if1234 [0:temp * 4], \
+                                    h_of1234 [0:temp * 4], \
+                                    h_if5678 [0:temp * 4], \
+                                    h_of5678 [0:temp * 4], \
+                                    h_weight [0:9],        \
+                                    h_type [0:temp])
   {
     for(int i = 0; i < iterations; ++i) {
-      lbm(width, height, h_if0, h_of0, 
+      lbm(width, height, h_if0, h_of0,
           (double4*)h_if1234, (double4*)h_of1234,
-          (double4*)h_if5678, (double4*)h_of5678, 
+          (double4*)h_if5678, (double4*)h_of5678,
           h_type, dirX, dirY, h_weight, omega
       );
 
@@ -246,20 +263,18 @@ void fluidSim (
       h_if1234 = temp1234;
       h_if5678 = temp5678;
     }
-#pragma omp metadirective when(user={adaptation(simulation==gpu)} : \
-    target update from(h_if0[0:temp],h_if1234[0:temp*4],h_if5678[0:temp*4]))
-
+#pragma omp target update from(h_if0 [0:temp], h_if1234 [0:temp * 4], h_if5678 [0:temp * 4])
   }
 
-#pragma omp metadirective when(user={adaptation(simulation==gpu)} : \
-                                   target exit data map (delete: h_if0[0:temp],\
-                                   h_of0[0:temp],\
-                                   h_if1234[0:temp*4],\
-                                   h_of1234[0:temp*4],\
-                                   h_if5678[0:temp*4],\
-                                   h_of5678[0:temp*4],\
-                                   h_weight[0:9],\
-                                   h_type[0:temp]))
+#pragma omp target exit data map(delete                   \
+                                 : h_if0 [0:temp],        \
+                                   h_of0 [0:temp],        \
+                                   h_if1234 [0:temp * 4], \
+                                   h_of1234 [0:temp * 4], \
+                                   h_if5678 [0:temp * 4], \
+                                   h_of5678 [0:temp * 4], \
+                                   h_weight [0:9],        \
+                                   h_type [0:temp])
 
   if (iterations % 2 == 0) {
     memcpy(h_of0, h_if0, dbl_size);

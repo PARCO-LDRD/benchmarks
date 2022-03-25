@@ -9,7 +9,7 @@ double get_time(void)
 	struct timeval tv;
 
 	gettimeofday(&tv, NULL);
-  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec; 
+  return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
 }
 
 
@@ -29,7 +29,7 @@ int main(int argc, char * argv[])
 
    // Directions
    double e[9][2] = {{0,0}, {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1}};
-   
+
    // Weights
    double w[9] = {4.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/9.0, 1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0};
 
@@ -57,10 +57,10 @@ int main(int argc, char * argv[])
 
   // Cell Type - Boundary = 1 or Fluid = 0
   bool *h_type = (bool*)malloc(sizeof(bool) * temp);
-  
+
   // Density
   double *rho = (double*)malloc(sizeof(double) * temp);
-  
+
   // Velocity
   double2 *u = (double2*)malloc(sizeof(double2) * temp);
 
@@ -74,8 +74,8 @@ int main(int argc, char * argv[])
     {
       int pos = x + y * dims[0];
 
-      // Random values for verification 
-      double den = rand() % 10 + 1; 
+      // Random values for verification
+      double den = rand() % 10 + 1;
 
       // Initialize the velocity buffer
       u[pos].x = u0[0];
@@ -118,11 +118,9 @@ int main(int argc, char * argv[])
 #endif
 
   double start = omp_get_wtime();
-#pragma omp begin declare adaptation feature(iterations, lbm_width, lbm_height ) model_name(simulation) variants(cpu, gpu) model(dtree)
   fluidSim (iterations, omega, dims, h_type, u, rho, dirX, dirY, w,
             h_if0, h_if1234, h_if5678,
             h_of0, h_of1234, h_of5678);
-#pragma omp end declare adaptation model_name(simulation)
   double stop = omp_get_wtime();
   printf("__ExecutionTime__:%g\n" , (stop - start));
 
@@ -134,7 +132,7 @@ int main(int argc, char * argv[])
   if(v_of1234) free(v_of1234);
   if(v_of5678) free(v_of5678);
 #endif
-  
+
   if(h_if0)    free(h_if0);
   if(h_if1234) free(h_if1234);
   if(h_if5678) free(h_if5678);
