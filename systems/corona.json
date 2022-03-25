@@ -3,5 +3,6 @@
   "num_nodes": 1,
   "num_cores": 48, 
   "system_compile_flags" : "-fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx906",
-  "scheduler": "slurm"
+  "scheduler": "slurm",
+  "scratch" : "/dev/shm/adaptation"
 }
