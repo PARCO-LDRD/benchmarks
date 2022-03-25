@@ -52,12 +52,14 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
+    df = df[df['Input'] >= 50]
     df['size'] = df['Input'].astype(int)
     g = sns.relplot(data=df, x='size', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
+                    col='System', hue='Policy', kind='line', marker='o',
+                    facet_kws={'sharey': False, 'sharex': True})
     g.set_axis_labels('Size', 'Execution time (s)\nlog2')
-    plt.yscale('log', base=2)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    #plt.yscale('log', base=2)
+    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
     plt.tight_layout()
     plt.savefig(f'{outfile}')
     plt.close()

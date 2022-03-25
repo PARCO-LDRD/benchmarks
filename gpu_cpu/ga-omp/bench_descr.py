@@ -53,7 +53,8 @@ class Benchmark(BaseBenchmark):
     df['Input'] = df['Input'].str.split(',', expand=True)[0].astype(int) / 1000000
     df['Input'] = df['Input'].astype(int).astype(str)
     g = sns.relplot(data=df, x='Input', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
+                    col='System', hue='Policy', kind='line', marker='o',
+                    facet_kws={'sharey':False, 'sharex':True})
     g.set_axis_labels('Input (millions)', 'Execution time (s)\nlog2')
     g.set_xticklabels(rotation=-90)
     plt.yscale('log', base=2)

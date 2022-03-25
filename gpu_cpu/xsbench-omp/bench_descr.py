@@ -62,7 +62,8 @@ class Benchmark(BaseBenchmark):
     df['lookups'] = df['lookups'].astype(int)
     df['Execution time (s)'] = df['Execution time (s)']/1e6
     g = sns.relplot(data=df, x='lookups', y='Execution time (s)',
-                    col='System', hue='Policy', style='Type', kind='line', marker='o')
+                    col='System', hue='Policy', style='Type', kind='line',
+                    marker='o', facet_kws={'sharey': False, 'sharex': True})
     g.set_axis_labels('Lookups\nlog2', 'Execution time (s)\nlog')
     plt.xscale('log', base=2)
     plt.yscale('log', base=10)

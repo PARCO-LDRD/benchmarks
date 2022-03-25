@@ -70,7 +70,8 @@ class Benchmark(BaseBenchmark):
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
     df['Execution time (s)'] = df['Execution time (s)']/1e6
     g = sns.relplot(data=df, x='N', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
+                    col='System', hue='Policy', kind='line', marker='o',
+                    facet_kws={'sharey':False, 'sharex':True})
     g.set_axis_labels('N\nlog2', 'Execution time (s)\nlog2')
     plt.yscale('log', base=2)
     plt.xscale('log', base=2)
