@@ -8,6 +8,7 @@ OPTIMIZE  = yes
 DEBUG     = no
 DEVICE    = gpu
 #VERIFY    = yes
+FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
 
 #===============================================================================
 # Program name & source code list
