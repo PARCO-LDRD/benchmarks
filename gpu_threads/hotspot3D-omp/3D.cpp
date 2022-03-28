@@ -56,14 +56,14 @@ int main(int argc, char** argv)
   pfile            = argv[4];
   tfile            = argv[5];
   //ofile            = argv[6];
-  int numCols      = atoi(argv[1]);
-  int numRows      = atoi(argv[1]);
+  long numCols      = atol(argv[1]);
+  long numRows      = atol(argv[1]);
   int layers       = atoi(argv[2]);
 
   /* calculating parameters*/
 
-  float dx         = chip_height/numRows;
-  float dy         = chip_width/numCols;
+  float dx         = chip_height/512.0; //numRows;
+  float dy         = chip_width/512.0; //numCols;
   float dz         = t_chip/layers;
 
   float Cap        = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * dx * dy;
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
   cc               = 1.0 - (2.0*ce + 2.0*cn + 3.0*ct);
 
 
-  int size = numCols * numRows * layers;
+  long size = numCols * numRows * layers;
   float* tIn      = (float*) calloc(size,sizeof(float));
   float* pIn      = (float*) calloc(size,sizeof(float));
   float* tCopy = (float*)malloc(size * sizeof(float));

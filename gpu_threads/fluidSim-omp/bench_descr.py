@@ -8,7 +8,7 @@ class Benchmark(BaseBenchmark):
     self._root = os.path.split(os.path.realpath(__file__))[0]
     compile_flags=system.get_compile_flags()
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
-    self._clean = 'make clean'
+    self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
     dimX = [64, 128, 256, 512]
     dimY = [64, 128, 256, 512]

@@ -10,7 +10,7 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    for s in range(60,130, 10):
+    for s in range(50,130, 10):
       self.inputs.append(f'-s {s}')
 
     self._executable = f'lulesh'
