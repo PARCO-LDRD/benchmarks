@@ -63,9 +63,17 @@ class Benchmark(BaseBenchmark):
     df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
-    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
-    g.set(xscale="log")
-    g.set(yscale="log")
+    markers = ['D', '^', 's']
+    style_to_markers = {}
+    for k, v in zip(sorted(df['Policy'].unique()), markers):
+        style_to_markers[k] = v
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', 
+            col='System', hue='Policy',
+            markers=style_to_markers, markeredgecolor=None, 
+            alpha=0.5, lw=0.1, kind='line', style='Policy',
+            facet_kws={'sharey': False, 'sharex': True})
+#    g.set(xscale="log")
+#    g.set(yscale="log")
     plt.savefig(f'{outfile}')
     plt.close()
 
