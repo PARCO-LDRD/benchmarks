@@ -60,10 +60,12 @@ class Benchmark(BaseBenchmark):
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df['lookups'] = df['lookups'].astype(int)
     g = sns.relplot(data=df, x='lookups', y='Execution time (s)',
-                    col='System', hue='Policy', style='Type', kind='line', marker='o')
+                    col='System', hue='Policy', row='Type', style='Policy', kind='line', marker='o',
+                    facet_kws={'sharey': False, 'sharex': True}
+                    )
     g.set_axis_labels('Lookups\nlog2', 'Execution time (s)\nlog')
     plt.xscale('log', base=2)
-    plt.yscale('log', base=10)
+    plt.yscale('log', base=2)
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
     plt.tight_layout()
     plt.savefig(f'{outfile}')
