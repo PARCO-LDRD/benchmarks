@@ -52,8 +52,10 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = df['Input'].str.split(',', expand=True)[0]
+    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    print(df)
     g = sns.relplot(data=df, x='Input', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o',
+                    col='System', hue='Execution Type', kind='line', marker='o',
                     facet_kws={'sharey': False, 'sharex': True})
     g.set_axis_labels('Size', 'Execution time (s)\nlog2')
     g.set_xticklabels(rotation=-90)

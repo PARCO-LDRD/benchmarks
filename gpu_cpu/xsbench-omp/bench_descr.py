@@ -57,17 +57,63 @@ class Benchmark(BaseBenchmark):
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
-    fig, ax = plt.subplots(figsize=sizes)
-    df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
+#    fig, ax = plt.subplots(figsize=sizes)
+    df[['Size', 'lookups']] = df['Input'].str.split(':', expand=True)
     df['lookups'] = df['lookups'].astype(int)
     df['Execution time (s)'] = df['Execution time (s)']/1e6
+    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+
+#    static_df = df[df['Execution Type'] == 'Static']
+#    oracle = df[df['Execution Type'] == 'Oracle']
+#    static_df = static_df.groupby(['System', 'Input', 'Policy', 'Execution Type', 'Size', 'lookups']).mean().reset_index()
+#    oracle = oracle.groupby(['System', 'Input', 'Policy', 'Execution Type', 'Size', 'lookups']).mean().reset_index()
+#    best = static_df.loc[static_df.groupby(['System', 'Input'])['Execution time (s)'].idxmin()]
+#    worst = static_df.loc[static_df.groupby(['System', 'Input'])['Execution time (s)'].idxmax()]
+#    worst['Execution Type'] = 'Static-Worst'
+#    best['Execution Type'] = 'Static-Best'
+#    oracle['Execution Type'] = 'Oracle'
+#    artificial = pd.concat([worst, best, oracle], axis = 0).reset_index()
+#    artificial = artificial.rename(columns = {'Policy' : 'Execution Device'})
+#    print(artificial)
+#
+#    fig, ax = plt.subplots(figsize=sizes)
+#    g = sns.relplot(data=artificial, x='lookups', 
+#                    y='Execution time (s)',
+#                    col='System', 
+#                    hue='Execution Type', 
+#                    row='Size', 
+#                    style='Execution Device', 
+#                    kind='scatter',
+#                    edgecolor='black',
+#                    alpha=0.3,
+#                    facet_kws={'sharey': False, 'sharex': True}
+#                    )
+#
+#    for r in g.axes:
+#        for c in r:
+#            c.set_yscale('log', base=10)
+#            c.set_xscale('log', base=2)
+#            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+#
+#    g.set_axis_labels('Lookups\nlog2', 'Execution time (s)\nlog')
+#    plt.tight_layout()
+#    plt.savefig(f'{outfile}')
+#    plt.close()
+
+#    for k, v in zip(sorted(df['Policy'].unique()), markers):
+#        style_to_markers[k] = v
     g = sns.relplot(data=df, x='lookups', y='Execution time (s)',
-                    col='System', hue='Policy', style='Type', kind='line',
-                    marker='o', facet_kws={'sharey': False, 'sharex': True})
+                    col='System', hue='Execution Type', row='Size', kind='line',
+                    markeredgecolor='black', 
+                    alpha=0.5, lw=0.1,
+                    facet_kws={'sharey': False, 'sharex': True})
     g.set_axis_labels('Lookups\nlog2', 'Execution time (s)\nlog')
-    plt.xscale('log', base=2)
-    plt.yscale('log', base=10)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    for r in g.axes:
+        for c in r:
+            c.set_yscale('log', base=10)
+            c.set_xscale('log', base=2)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+
     plt.tight_layout()
     plt.savefig(f'{outfile}')
     plt.close()
