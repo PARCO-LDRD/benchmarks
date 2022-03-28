@@ -10,16 +10,17 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make'
     self._clean = 'make clean'
     self._inputs = []
-    numCols = range(1024,4097,512)
+    numCols = range(4096,8192,256)
     layers=[2,4,8]
-    for c in numCols:
-      for l in layers:
-        #Code operates the same as long as the input file has
-        #enough information
-        pfile = f'{self._root}/data/power_512x8'
-        tfile = f'{self._root}/data/temp_512x8'
-        command = f'{c} {l} 4 {pfile} {tfile}'
-        self._inputs.append(command)
+    for i in range(4,20, 4):
+        for c in numCols:
+          for l in layers:
+            #Code operates the same as long as the input file has
+            #enough information
+            pfile = f'{self._root}/data/power_512x8'
+            tfile = f'{self._root}/data/temp_512x8'
+            command = f'{c} {l} {i} {pfile} {tfile}'
+            self._inputs.append(command)
     self._executable = f'main'
 
   @property
@@ -68,9 +69,14 @@ class Benchmark(BaseBenchmark):
     df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
+    df['Cols'] = df['Cols'].astype(int)
+    df['Layers'] = df['Layers'].astype(int)
+    df['Iterations'] = df['Iterations'].astype(int)
     df['Execution time (s)'] = df['Execution time (s)']/1e6
-    g = sns.relplot(data=df, x='N', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o',
+    g = sns.relplot(data=df, x='Cols', y='Execution time (s)',
+                    col='System', hue='Policy', row='Iterations', 
+                    style='Layers', kind='line',
+                    marker='o',
                     facet_kws={'sharey':False, 'sharex':True})
     g.set_axis_labels('N\nlog2', 'Execution time (s)\nlog2')
     plt.yscale('log', base=2)

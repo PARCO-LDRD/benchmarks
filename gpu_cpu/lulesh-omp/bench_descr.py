@@ -10,7 +10,7 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    for s in range(50,120, 10):
+    for s in range(40,130, 10):
       self.inputs.append(f'-s {s}')
 
     self._executable = f'lulesh'
@@ -52,7 +52,7 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df = df[df['Input'] >= 50]
+#    df = df[df['Input'] >= 50]
     df['size'] = df['Input'].astype(int)
     g = sns.relplot(data=df, x='size', y='Execution time (s)',
                     col='System', hue='Policy', kind='line', marker='o',

@@ -10,8 +10,8 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    for i in range(1, 16+1):
-      self._inputs.append('%d 1000'%(i*1024))
+    for i in range(20, 32+1):
+      self._inputs.append('%d 1000'%(i*512))
     self._executable = f'heat'
 
   @property
