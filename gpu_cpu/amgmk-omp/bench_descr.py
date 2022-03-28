@@ -52,16 +52,21 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = '$' + df['Input'].str.split(',', expand=True)[0] + '^3$'
-    markers = ['D', '*', 's']
-    style_to_markers = {}
-    for k, v in zip(sorted(df['Policy'].unique()), markers):
-        style_to_markers[k] = v
-    print(style_to_markers)
-    g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', hue='Policy', kind='line', style='Policy', markers=style_to_markers, alpha=0.5, facet_kws={'sharey': False, 'sharex': True})
+    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    print(df)
+    g = sns.relplot(data=df, x='Input', y='Execution time (s)', col='System', 
+                    hue='Execution Type', 
+                    kind='line',  
+#                    edgecolor='black', 
+                    alpha=0.5, facet_kws={'sharey': False, 'sharex': True}, lw=0.1)
     g.set_axis_labels('Grid', 'Execution time (s)\nlog2')
+    axes = g.axes
+    for r in g.axes:
+        for c in r:
+            c.set_yscale('log', base=2)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
     g.set_xticklabels(rotation=-90)
-    plt.yscale('log', base=2)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    
     plt.tight_layout()
     plt.savefig(f'{outfile}')
     plt.close()
