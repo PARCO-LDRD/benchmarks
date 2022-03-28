@@ -11,7 +11,7 @@ class Benchmark(BaseBenchmark):
     self._clean = 'make -f Makefile.adaptive clean'
     # input: samples SNPs iterations
     self._inputs = []
-    for i in range(1,8+1):
+    for i in range(4,11+1):
       self._inputs.append('100 %d 10'%(i*5000))
     self._executable = f'main'
 
