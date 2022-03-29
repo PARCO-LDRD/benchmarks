@@ -7,8 +7,8 @@ CC        = clang++
 OPTIMIZE  = yes
 DEBUG     = no
 DEVICE    = gpu
-VERIFY 	  = no
-FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+VERIFY 	  = yes 
+FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_60
 
 #===============================================================================
 # Program name & source code list
