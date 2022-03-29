@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
   double start = omp_get_wtime();
 
 #pragma omp begin declare adaptation feature(tseq_size, qseq_size, kBatchSize) model_name(by_grid_size) \
-  variants(gpu100, gpu96, gpu92, gpu88, gpu84, gpu80, gpu76, gpu72, gpu68, gpu64, gpu60, gpu0) model(dtree)
+  variants(cpu100, cpu96, cpu92, cpu88, cpu84, cpu80, cpu76, cpu72, cpu68, cpu64, cpu60, cpu0) model(dtree)
 
 
   const float cpu_iters_per_policy[] = { 
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     1.0
   };
 
-  int gpu_end_i = kBatchSize -  static_cast<int>(cpu_iters_per_policy[__omp_adaptation_policy_by_grid_size]*kBatchSize);
+  int gpu_end_i = static_cast<int>(cpu_iters_per_policy[__omp_adaptation_policy_by_grid_size]*kBatchSize);
 
   printf("(batch) gpu %d - %d, cpu %d - %d\n", 0, gpu_end_i, gpu_end_i,
       kBatchSize);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
           coarse_match_length, 
           coarse_match_threshold, 
           current_position,
-          length - static_cast<int>(length*cpu_iters_per_policy[__omp_adaptation_policy_by_grid_size]));
+          static_cast<int>(length*cpu_iters_per_policy[__omp_adaptation_policy_by_grid_size]));
 
 #pragma omp metadirective \
       when(user={adaptation(by_grid_size!=gpu0)} : \
