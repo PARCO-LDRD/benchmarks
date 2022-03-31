@@ -67,15 +67,17 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
+    print(df['Input'].unique())
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
-    df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
-    df['Cols'] = df['Cols'].astype(int)
-    df['Layers'] = df['Layers'].astype(int)
+#    df=df[df['Iterations'] == 16]
+    df = df[(df['Cols'] % 512) == 0]
+    print(df)
+    df['N'] = df['Cols'] * df['Layers']
     df['Iterations'] = df['Iterations'].astype(int)
     df['Execution time (s)'] = df['Execution time (s)']/1e6
     g = sns.relplot(data=df, x='Cols', y='Execution time (s)',
-                    col='System', hue='Policy', row='Iterations', 
-                    style='Layers', kind='line',
+                    col='System', hue='Policy', row='Layers', 
+                    kind='line',
                     marker='o',
                     facet_kws={'sharey':False, 'sharex':True})
     g.set_axis_labels('N\nlog2', 'Execution time (s)\nlog2')
@@ -83,5 +85,5 @@ class Benchmark(BaseBenchmark):
     plt.xscale('log', base=2)
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
     plt.tight_layout()
-    plt.savefig(f'{outfile}')
+    plt.savefig(f'{outfile}.pdf')
     plt.close()

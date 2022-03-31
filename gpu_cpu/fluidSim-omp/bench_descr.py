@@ -64,6 +64,23 @@ class Benchmark(BaseBenchmark):
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
     df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+
+    stats_df = df.copy(deep=True)
+    unique_policies = stats_df['Execution Type'].unique()
+    stats_df = stats_df.groupby(['System', 'Execution Type',  'Input']).mean().reset_index()
+    stats_df = stats_df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
+#    tmp = df.groupby(['System', 'Execution Type']).mean()['Execution time (s)'].reset_index() 
+    print(stats_df)
+    for u in unique_policies:
+        stats_df[f'Speed Up {u}'] = stats_df['gpu']/stats_df[u] 
+
+    for u in unique_policies:
+        stats_df[u] = stats_df[f'Speed Up {u}']
+        stats_df = stats_df.drop([f'Speed Up {u}'], axis=1)
+    print(stats_df)
+    stats_df['Benchmark'] = self._name
+    stats_df.to_pickle(f'{self._name}.pkl')
+
     print(df)
     g = sns.relplot(data=df, x='N', y='Execution time (s)', 
             col='System', hue='Execution Type',

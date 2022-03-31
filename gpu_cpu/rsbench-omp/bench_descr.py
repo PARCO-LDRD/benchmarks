@@ -60,6 +60,28 @@ class Benchmark(BaseBenchmark):
     fig, ax = plt.subplots(figsize=sizes)
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df['lookups'] = df['lookups'].astype(int)
+    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    print(df)
+
+    stats_df = df.copy(deep=True)
+    unique_policies = stats_df['Execution Type'].unique()
+    print(unique_policies)
+    stats_df = stats_df.groupby(['System', 'Execution Type',  'Input']).mean().reset_index()
+    stats_df = stats_df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
+#    tmp = df.groupby(['System', 'Execution Type']).mean()['Execution time (s)'].reset_index() 
+    print(stats_df)
+    for u in unique_policies:
+        stats_df[f'Speed Up {u}'] = stats_df['gpu']/stats_df[u] 
+
+    for u in unique_policies:
+        stats_df[u] = stats_df[f'Speed Up {u}']
+        stats_df = stats_df.drop([f'Speed Up {u}'], axis=1)
+    print(stats_df)
+    stats_df['Benchmark'] = self._name
+    stats_df.to_pickle(f'{self._name}.pkl')
+    return
+
+
     g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='Type',
             row='System', hue='Policy', kind='line', facet_kws={'sharey': False,
                 'sharex': True})

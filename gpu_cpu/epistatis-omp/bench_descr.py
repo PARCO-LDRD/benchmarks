@@ -53,6 +53,36 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = df['Input'].str.split(',', expand=True)[1]
+    df['Input'] = df['Input'].astype(int)
+    df = df[df.Input  < 45001]
+    print(df)
+
+    stats_df = df.copy(deep=True)
+    unique_policies = stats_df['Execution Type'].unique()
+    stats_df = stats_df.groupby(['System', 'Execution Type',  'Input']).mean().reset_index()
+    stats_df = stats_df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
+#    tmp = df.groupby(['System', 'Execution Type']).mean()['Execution time (s)'].reset_index() 
+    print(stats_df)
+    for u in unique_policies:
+        stats_df[f'Speed Up {u}'] = stats_df['gpu']/stats_df[u] 
+
+    for u in unique_policies:
+        stats_df[u] = stats_df[f'Speed Up {u}']
+        stats_df = stats_df.drop([f'Speed Up {u}'], axis=1)
+    print(stats_df)
+    stats_df['Benchmark'] = self._name
+    stats_df.to_pickle(f'{self._name}.pkl')
+
+
+    count_df = df[df['Policy'].isin(['gpu', 'cpu'])].copy(deep=True)
+    count_df= count_df.groupby(['System', 'Policy', 'Input']).mean().reset_index()
+    count_df= count_df.pivot(index=['System', 'Input'], columns='Policy', values='Execution time (s)').reset_index()
+    count_df['diff'] = count_df['cpu'] > count_df['gpu']
+    tmp = count_df.groupby('System').sum().reset_index().set_index('System')
+    tmp1 = count_df.groupby('System').size()
+    print(tmp['diff'].divide(tmp1))
+    return
+
     g = sns.relplot(data=df, x='Input', y='Execution time (s)',
                     col='System', hue='Policy', kind='line', marker='o',
                     facet_kws={'sharey':False, 'sharex':True})
@@ -60,5 +90,47 @@ class Benchmark(BaseBenchmark):
     plt.yscale('log', base=2)
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
     plt.tight_layout()
-    plt.savefig(f'{outfile}')
+    plt.savefig(f'{outfile}.pdf')
     plt.close()
+    return
+    print(df)
+    unique_policies = df['Execution Type'].unique()
+    print(df)
+    df = df.groupby(['System', 'Execution Type', 'Input', 'Policy']).mean().reset_index()
+    print(df)
+    df = df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
+    print(df)
+    print(unique_policies)
+    unique_policies = unique_policies[ unique_policies != 'gpu']
+#    unique_policies=['Oracle', 'cpu']
+    for u in unique_policies:
+        df[f'Speed Up {u}'] = df['gpu']/df[u] 
+
+    for u in unique_policies:
+        df[u] = df[f'Speed Up {u}']
+        df = df.drop([f'Speed Up {u}'], axis=1)
+    df = df.drop(['gpu'], axis = 1)
+    df = pd.melt(df, id_vars=['System', 'Input'], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
+
+    g = sns.relplot(data=df, x='Input', y='Speedup',
+                    col='System', hue='Policy',
+                    col_order = ['lassen', 'pascal', 'corona'],
+                    markers=True,
+                    style='Policy',
+                    edgecolor='black', 
+                    aspect=1.6,
+                    alpha=0.7,
+                    lw=2, kind='scatter',
+                    facet_kws={'sharey': False, 'sharex': True})
+    axes = g.axes
+    for r in g.axes:
+        for c in r:
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+            c.axhline(y=1.0, c='gray')
+    print(axes.shape)
+    g.set_axis_labels('Size', 'speedup')
+    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
+    plt.savefig(f'{outfile}_speedup.pdf')
+    plt.close()
+
