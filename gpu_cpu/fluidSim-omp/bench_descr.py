@@ -10,12 +10,10 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    dimX = [64, 128, 256, 512]
-    dimY = [64, 128, 256, 512]
+    dimX = [512, 1024, 2048, 3192, 4096, 5120, 6144, 7168, 8192]
     for x in dimX:
-      for y in dimY:
-        command = f'10000 {x} {y}'
-        self._inputs.append(command)
+     command = f'100 {x} {x}'
+     self._inputs.append(command)
     self._executable = f'main'
 
   @property
