@@ -53,6 +53,7 @@ class Benchmark(BaseBenchmark):
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = df['Input'].str.split(',', expand=True)[0] 
     df['Input'] = df['Input'].astype(int)
+    df = df[(df['Input'] > 4*16) & (df['Input'] < 12 * 16)]
 
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
     unique_policies = df['Execution Type'].unique()
@@ -92,7 +93,7 @@ class Benchmark(BaseBenchmark):
         leg = g._legend
         leg.set_bbox_to_anchor([0.95,0.75]) 
         for lh in g._legend.legendHandles:
-            lh.set_alpha(1)
+            lh.set_alpha(0.7)
             lh._sizes = [120]
             lh
         axes = g.axes

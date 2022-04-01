@@ -55,16 +55,39 @@ class Benchmark(BaseBenchmark):
   def visualize(self, df, outfile, sizes):
     import pandas as pd
     import matplotlib.pyplot as plt
+    import matplotlib
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
+    df['Execution time (s)'] = df['Execution time (s)'] / 1000000
+    print(df)
+    return
+    df = df.loc[df['Type'] == 'large',]
+    df = df.drop(['Input'],axis=1)
     df['lookups'] = df['lookups'].astype(int)
-    g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='Type',
-            row='System', hue='Policy', kind='line', facet_kws={'sharey': False,
-                'sharex': True})
-    g.set(xscale="log")
-    g.set(yscale="log")
-    plt.savefig(f'{outfile}')
+    df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
+    df = df.drop(['Id'], axis=1)
+    df = df.groupby(['System', 'Execution Type', 'lookups']).mean().reset_index()
+
+    g = sns.relplot(data=df, x='lookups', y='Execution time (s)',
+                    col='System', hue='Execution Type',
+                    col_order = ['lassen', 'pascal'],
+                    markers=True,
+                    edgecolor='black', 
+                    aspect=1.6,
+                    alpha=0.7,
+                    lw=2, kind='scatter',
+                    facet_kws={'sharey': False, 'sharex': True})
+    axes = g.axes
+    for r in g.axes:
+        for c in r:
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+            c.set_xscale('log', base=2)
+    print(axes.shape)
+    g.set_axis_labels('lookups', 'Execution time (s)')
+    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
+    plt.savefig(f'{outfile}_execution_time_coexec.pdf')
     plt.close()
 

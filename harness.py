@@ -430,8 +430,7 @@ def main():
     data = f'{args.results_dir}/{bench.name}_gathered.json'
     df = pd.read_json(data)
     sizes=set_size(width=textWidth)
-    bench.visualize(df, f'{args.results_dir}/{bench.name}.pdf', sizes)
-    print(df)
+    bench.visualize(df, f'{args.results_dir}/{bench.name}', sizes)
 
 
 if __name__ == '__main__':

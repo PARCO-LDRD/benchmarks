@@ -57,36 +57,49 @@ class Benchmark(BaseBenchmark):
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
+    import matplotlib 
     fig, ax = plt.subplots(figsize=sizes)
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df['lookups'] = df['lookups'].astype(int)
-    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    df['Execution time (s)'] = df['Execution time (s)'] / 1000000
     print(df)
-
-    stats_df = df.copy(deep=True)
-    unique_policies = stats_df['Execution Type'].unique()
-    print(unique_policies)
-    stats_df = stats_df.groupby(['System', 'Execution Type',  'Input']).mean().reset_index()
-    stats_df = stats_df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
-#    tmp = df.groupby(['System', 'Execution Type']).mean()['Execution time (s)'].reset_index() 
-    print(stats_df)
-    for u in unique_policies:
-        stats_df[f'Speed Up {u}'] = stats_df['gpu']/stats_df[u] 
-
-    for u in unique_policies:
-        stats_df[u] = stats_df[f'Speed Up {u}']
-        stats_df = stats_df.drop([f'Speed Up {u}'], axis=1)
-    print(stats_df)
-    stats_df['Benchmark'] = self._name
-    stats_df.to_pickle(f'{self._name}.pkl')
     return
 
+    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    df = df.groupby(['System', 'Execution Type', 'lookups', 'Policy']).mean().reset_index()
+    unique_policies = df['Execution Type'].unique()
+    df = df.pivot(index=['System', 'lookups'], columns='Execution Type', values='Execution time (s)').reset_index()
+    unique_policies = unique_policies[ unique_policies != 'gpu']
+    for u in unique_policies:
+        df[f'Speed Up {u}'] = df['gpu']/df[u] 
 
-    g = sns.relplot(data=df, x='lookups', y='Execution time (s)', col='Type',
-            row='System', hue='Policy', kind='line', facet_kws={'sharey': False,
-                'sharex': True})
-    g.set(xscale="log")
-    g.set(yscale="log")
-    plt.savefig(f'{outfile}')
+    for u in unique_policies:
+        df[u] = df[f'Speed Up {u}']
+        df = df.drop([f'Speed Up {u}'], axis=1)
+    df = df.drop(['gpu'], axis = 1)
+    df = pd.melt(df, id_vars=['System', 'lookups'], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
+
+    g = sns.relplot(data=df, x='lookups', y='Speedup',
+                    col='System', hue='Policy',
+                    col_order = ['lassen', 'pascal'],
+                    markers=True,
+                    style='Policy',
+                    edgecolor='black', 
+                    aspect=1.6,
+                    alpha=0.7,
+                    lw=2, kind='scatter',
+                    facet_kws={'sharey': False, 'sharex': True})
+    axes = g.axes
+    for r in g.axes:
+        for c in r:
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+            c.set_xscale('log', base=2)
+            c.axhline(y=1.0, c='gray')
+    print(axes.shape)
+    g.set_axis_labels('lookups', 'speedup')
+    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
+    plt.savefig(f'{outfile}_speedup.pdf')
     plt.close()
+
 

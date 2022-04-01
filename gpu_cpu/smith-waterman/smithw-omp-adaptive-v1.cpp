@@ -29,6 +29,7 @@
 //#include "parameters.h"
 #define FACTOR 128 
 #define CUTOFF 1024
+#define SKIP_BACKTRACK 1
 
 /*--------------------------------------------------------------------
  * Text Tweaks
