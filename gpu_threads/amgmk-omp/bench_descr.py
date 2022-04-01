@@ -10,7 +10,7 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    for i in range(1, 16+1):
+    for i in range(4, 12+1):
       self._inputs.append('%d %d %d'%(i*16, i*16, i*16))
     self._executable = f'AMGMk'
 
@@ -37,9 +37,10 @@ class Benchmark(BaseBenchmark):
   def getTime(self, stdout):
     print(' I am trying t find execution time')
     exec_time_pattern = 'Wall time = (.*) seconds'
-    tmp =  re.findall(exec_time_pattern, stdout)[0]
-    print(tmp, type(tmp))
-    return tmp
+    tmp =  re.findall(exec_time_pattern, stdout)
+    if len(tmp) == 0:
+      return None
+    return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     return ','.join(cmd.split(' ')[1:])

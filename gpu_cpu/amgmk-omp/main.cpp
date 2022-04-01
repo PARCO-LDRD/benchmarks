@@ -24,7 +24,7 @@
 #define BLOCK_SIZE 256
 
 // 
-const int testIter   = 500;
+const int testIter   = 5000;
 double totalWallTime = 0.0;
 
 // 
