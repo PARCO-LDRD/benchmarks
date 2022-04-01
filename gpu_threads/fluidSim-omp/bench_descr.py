@@ -10,12 +10,10 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    dimX = [64, 128, 256, 512]
-    dimY = [64, 128, 256, 512]
+    dimX = [512, 1024, 2048, 3192, 4096, 5120, 6144, 7168, 8192]
     for x in dimX:
-      for y in dimY:
-        command = f'10000 {x} {y}'
-        self._inputs.append(command)
+     command = f'100 {x} {x}'
+     self._inputs.append(command)
     self._executable = f'main'
 
   @property
@@ -63,9 +61,15 @@ class Benchmark(BaseBenchmark):
     df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
     df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
     df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
-    g = sns.relplot(data=df, x='N', y='Execution time (s)', col='System', hue='Policy', kind='line')
-    g.set(xscale="log")
-    g.set(yscale="log")
+    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    print(df)
+    g = sns.relplot(data=df, x='N', y='Execution time (s)', 
+            col='System', hue='Execution Type',
+            markeredgecolor='black', 
+            alpha=0.5, lw=0.1, kind='line', style='Execution Type',
+            facet_kws={'sharey': False, 'sharex': True})
+#    g.set(xscale="log")
+#    g.set(yscale="log")
     plt.savefig(f'{outfile}')
     plt.close()
 

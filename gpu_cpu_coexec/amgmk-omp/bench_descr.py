@@ -1,7 +1,6 @@
 import os
 from bench_modules.benchmark import BaseBenchmark
 import re
-import matplotlib
 
 class Benchmark(BaseBenchmark):
   def __init__(self, system):
@@ -38,9 +37,10 @@ class Benchmark(BaseBenchmark):
   def getTime(self, stdout):
     print(' I am trying t find execution time')
     exec_time_pattern = 'Wall time = (.*) seconds'
-    tmp =  re.findall(exec_time_pattern, stdout)[0]
-    print(tmp, type(tmp))
-    return tmp
+    tmp =  re.findall(exec_time_pattern, stdout)
+    if len(tmp) == 0:
+        return None
+    return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     return ','.join(cmd.split(' ')[1:])
@@ -48,6 +48,7 @@ class Benchmark(BaseBenchmark):
   def visualize(self, df, outfile, sizes):
     import pandas as pd
     import matplotlib.pyplot as plt
+    import matplotlib
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)

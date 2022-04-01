@@ -69,7 +69,7 @@ class Benchmark(BaseBenchmark):
 #    tmp = df.groupby(['System', 'Execution Type']).mean()['Execution time (s)'].reset_index() 
     print(stats_df)
     for u in unique_policies:
-        stats_df[f'Speed Up {u}'] = stats_df['gpu']/stats_df[u] 
+        stats_df[f'Speed Up {u}'] = stats_df['gpu']/stats_df[u]
 
     for u in unique_policies:
         stats_df[u] = stats_df[f'Speed Up {u}']
@@ -78,63 +78,6 @@ class Benchmark(BaseBenchmark):
     stats_df['Benchmark'] = self._name
     stats_df.to_pickle(f'{self._name}.pkl')
 
-
-
-    return
-#    style_to_markers = {}
-#    g = sns.relplot(data=df, x='size', y='Execution time (s)',
-#                    row='System', hue='Execution Type',
-#                    markeredgecolor='black', 
-#                    alpha=0.5, lw=2, kind='line', style='Execution Type',
-#                    facet_kws={'sharey': False, 'sharex': True})
-#    axes = g.axes
-#    for r in g.axes:
-#        for c in r:
-#            c.set_yscale('log', base=2)
-#            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-#    print(axes.shape)
-#    g.set_axis_labels('Size', 'Execution time (s)\nlog2')
-#    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-#    plt.tight_layout()
-#    plt.savefig(f'{outfile}.pdf')
-#    plt.close()
-#
-#    g = sns.relplot(data=df, x='size', y='Execution time (s)',
-#                    row='System', hue='Execution Type',
-#                    markeredgecolor='black', 
-#                    alpha=0.5, lw=2, kind='line', style='Execution Type',
-#                    err_style='bars',
-#                    facet_kws={'sharey': False, 'sharex': True})
-#    axes = g.axes
-#    for r in g.axes:
-#        for c in r:
-#            c.set_yscale('log', base=2)
-#            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-#    print(axes.shape)
-#    g.set_axis_labels('Size', 'Execution time (s)\nlog2')
-#    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-#    plt.tight_layout()
-#    plt.savefig(f'{outfile}_bars.pdf')
-#    plt.close()
-#
-#    df = df[df['Execution Type'].isin(['Adaptive-25', 'Oracle', 'gpu', 'cpu']) == True] 
-#    g = sns.relplot(data=df, x='size', y='Execution time (s)',
-#                    row='System', hue='Execution Type',
-#                    markeredgecolor='black', 
-#                    alpha=0.5, lw=2, kind='line', style='Execution Type',
-#                    err_style='bars',
-#                    facet_kws={'sharey': False, 'sharex': True})
-#    axes = g.axes
-#    for r in g.axes:
-#        for c in r:
-#            c.set_yscale('log', base=2)
-#            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-#    print(axes.shape)
-#    g.set_axis_labels('Size', 'Execution time (s)\nlog2')
-#    #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-#    plt.tight_layout()
-#    plt.savefig(f'{outfile}_drop.pdf')
-#    plt.close()
     unique_policies = df['Execution Type'].unique()
     print(df)
     df = df.groupby(['System', 'Execution Type', 'size', 'Policy']).mean().reset_index()
@@ -145,7 +88,7 @@ class Benchmark(BaseBenchmark):
     unique_policies = unique_policies[ unique_policies != 'gpu']
 #    unique_policies=['Oracle', 'cpu']
     for u in unique_policies:
-        df[f'Speed Up {u}'] = df['gpu']/df[u] 
+        df[f'Speed Up {u}'] = df['gpu']/df[u]
 
     for u in unique_policies:
         df[u] = df[f'Speed Up {u}']
@@ -158,7 +101,7 @@ class Benchmark(BaseBenchmark):
                     col_order = ['lassen', 'pascal', 'corona'],
                     markers=True,
                     style='Policy',
-                    edgecolor='black', 
+                    edgecolor='black',
                     aspect=1.6,
                     alpha=0.7,
                     lw=2, kind='scatter',
