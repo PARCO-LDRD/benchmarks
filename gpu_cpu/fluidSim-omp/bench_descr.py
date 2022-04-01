@@ -87,6 +87,6 @@ class Benchmark(BaseBenchmark):
             facet_kws={'sharey': False, 'sharex': True})
 #    g.set(xscale="log")
 #    g.set(yscale="log")
-    plt.savefig(f'{outfile}')
+    plt.savefig(f'{outfile}_speedup.pdf')
     plt.close()
 

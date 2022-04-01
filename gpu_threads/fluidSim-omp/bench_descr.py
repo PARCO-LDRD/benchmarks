@@ -54,22 +54,61 @@ class Benchmark(BaseBenchmark):
     return cmd
 
   def visualize(self, df, outfile, sizes):
+    import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
+    import pandas as pd
     fig, ax = plt.subplots(figsize=sizes)
-    df[['Cols', 'Layers', 'Iterations']] = df['Input'].str.split(':', expand=True)
-    df[['Cols', 'Layers', 'Iterations']] = df[['Cols', 'Layers', 'Iterations']].astype(int)
-    df['N'] = df['Cols'] * df['Layers'] * df['Iterations']
-    df.loc[df['Execution Type'] =='Static', 'Execution Type'] = df.loc[df['Execution Type'] == 'Static', 'Policy']
+    df[['Iterations', 'Height', 'Width']] = df['Input'].str.split(':', expand=True)
+    df[['Iterations', 'Height', 'Width']] = df[['Iterations', 'Height', 'Width']].astype(int)
+    df = df[ df['Height'] >= df['Width']]
+    df['Input'] = df['Input'].str.replace('10000:', '')
+    df['Input'] = df['Input'].str.replace('X', 'X')
+    df['N'] = df['Height'] * df['Width']
+    df = df.rename(columns={'Policy' : 'Num Team Threads'})
+    df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
+    oracle = df[df['Execution Type'] == 'Oracle']
+    online = df[df['Execution Type'] == 'Online']
+    online['Num Team Threads'] = 'Varies'
+    default = df[((df['Num Team Threads'] == 128) & (df['Execution Type'] == 'Static'))]
+    default = default.groupby(['System', 'Input']).mean().reset_index()
+    default['Execution Type'] ='default'
+    online = online.groupby(['Execution Type', 'System', 'Input', 'Num Team Threads']).mean().reset_index()
+    oracle = oracle.groupby(['Execution Type','System', 'Input', 'Num Team Threads']).mean().reset_index()
+    online['Speedup'] = default['Execution time (s)'] / online['Execution time (s)']
+
+    oracle['Speedup'] = default['Execution time (s)'] / oracle['Execution time (s)']
+    df = df[((df['Execution Type'] == 'Static'))]
+    df = df.groupby(['System', 'Input', 'Num Team Threads']).mean().reset_index()
+    df['Speedup'] = -1.0
+    df = df.set_index(['System', 'Input'])
+    for d in df['Num Team Threads'].unique():
+        print('Current')
+        df.loc[df['Num Team Threads'] == d, 'Speedup'] = df.loc[df['Num Team Threads'] == 128, 'Execution time (s)'] / df.loc[df['Num Team Threads'] == d, 'Execution time (s)']
+        df.loc[df['Num Team Threads'] == d, 'Execution Type'] = f'Static,{d}'
+    print("Online")
+    df = df[df["Num Team Threads"].isin([64,256,512])]
+    df = pd.concat([online, oracle, df.reset_index()])
     print(df)
-    g = sns.relplot(data=df, x='N', y='Execution time (s)', 
-            col='System', hue='Execution Type',
-            markeredgecolor='black', 
-            alpha=0.5, lw=0.1, kind='line', style='Execution Type',
-            facet_kws={'sharey': False, 'sharex': True})
-#    g.set(xscale="log")
-#    g.set(yscale="log")
-    plt.savefig(f'{outfile}')
+    g = sns.relplot(data=df, x='N', 
+                    y='Speedup',
+                    col='System', 
+                    hue='Execution Type', 
+                    style='Num Team Threads', 
+                    kind='scatter',
+                    edgecolor='black',
+                    alpha=0.7,
+                    facet_kws={'sharey': False, 'sharex': True}
+                    )
+    for r in g.axes:
+        for c in r:
+            c.axhline(y=1.0, c='gray')
+            c.set_xscale('log', base=2)
+    g.set_axis_labels('Size', 'Execution time (s)\nlog2')
+    g.set_xticklabels(rotation=-90)
+    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
+    plt.savefig(f'{outfile}_threads_speedup.pdf')
     plt.close()
 

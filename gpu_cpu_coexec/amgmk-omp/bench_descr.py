@@ -52,7 +52,51 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df['Input'] = '$' + df['Input'].str.split(',', expand=True)[0] + '^3$'
+    df['Input'] = df['Input'].str.split(',', expand=True)[0] 
+    df['Input'] = df['Input'].astype(int)
+    oracle = df[df['Execution Type'] == 'Oracle']
+    online = df[df['Execution Type'] == 'Online']
+    print(df)
+    default = df[((df['Policy'] == 'gpu100') & (df['Execution Type'] == 'Static'))]
+    default = default.groupby(['System', 'Input']).mean().reset_index()
+    default['Execution Type'] ='default (GPU)'
+    online = online.groupby(['Execution Type', 'System', 'Input', 'Policy']).mean().reset_index()
+    oracle = oracle.groupby(['Execution Type','System', 'Input', 'Policy']).mean().reset_index()
+    online['Speedup'] = default['Execution time (s)'] / online['Execution time (s)']
+    oracle['Speedup'] = default['Execution time (s)'] / oracle['Execution time (s)']
+    df = df[((df['Execution Type'] == 'Static'))]
+    df = df.groupby(['System', 'Input', 'Policy']).mean().reset_index()
+    df['Speedup'] = -1.0
+    df = df.set_index(['System', 'Input'])
+    for d in df['Policy'].unique():
+        print('Current')
+        df.loc[df['Policy'] == d, 'Speedup'] = df.loc[df['Policy'] == 'gpu100', 'Execution time (s)'] / df.loc[df['Policy'] == d, 'Execution time (s)']
+        s = ''.join(x for x in d if x.isdigit())
+        df.loc[df['Policy'] == d, 'Execution Type'] = f'Static (GPU-{s})'
+    print("Online")
+    print(df['Policy'].unique())
+    df = df[df["Execution Type"].isin(['Static (GPU-64)', 'Static (GPU-0)'])]
+    df = pd.concat([online, oracle, df.reset_index()])
+    g = sns.relplot(data=df, x='Input', 
+                    y='Speedup',
+                    col='System', 
+                    hue='Execution Type', 
+                    kind='scatter',
+                    edgecolor='black',
+                    alpha=0.7,
+                    facet_kws={'sharey': False, 'sharex': True}
+                    )
+    for r in g.axes:
+        for c in r:
+            c.axhline(y=1.0, c='gray')
+    g.set_axis_labels('Size', 'Speedup')
+    g.set_xticklabels(rotation=-90)
+    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+    plt.tight_layout()
+    plt.savefig(f'{outfile}_coexec_speedup.pdf')
+    plt.close()
+    return   
+    print(df)
     g = sns.relplot(data=df, x='Input', y='Execution time (s)',
                     col='System', hue='Policy', kind='line', marker='o')
     g.set_axis_labels('Grid', 'Execution time (s)\nlog2')

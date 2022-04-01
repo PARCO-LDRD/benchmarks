@@ -56,18 +56,47 @@ class Benchmark(BaseBenchmark):
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
-    fig, ax = plt.subplots(figsize=sizes)
-    df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
+    df[['Size', 'lookups']] = df['Input'].str.split(':', expand=True)
     df['lookups'] = df['lookups'].astype(int)
-    g = sns.relplot(data=df, x='lookups', y='Execution time (s)',
-                    col='System', hue='Policy', row='Type', style='Policy', kind='line', marker='o',
+    df['Execution time (s)'] = df['Execution time (s)']/1e6
+    df = df.rename(columns={'Policy' : 'Num Team Threads'})
+
+    static_df = df[df['Execution Type'] == 'Static']
+    oracle = df[df['Execution Type'] == 'Oracle']
+    static_df = static_df.groupby(['System', 'Input', 'Num Team Threads', 'Size', 'lookups']).mean().reset_index()
+    oracle = oracle.groupby(['System', 'Input', 'Num Team Threads', 'Size', 'lookups']).mean().reset_index()
+    best = static_df.loc[static_df.groupby(['System', 'Input'])['Execution time (s)'].idxmin()]
+    worst = static_df.loc[static_df.groupby(['System', 'Input'])['Execution time (s)'].idxmax()]
+    worst['Execution Type'] = 'Static-Worst'
+    best['Execution Type'] = 'Static-Best'
+    oracle['Execution Type'] = 'Oracle'
+    artificial = pd.concat([worst, best, oracle], axis = 0).reset_index()
+    artificial['Num Team Threads'] = (artificial['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
+    artificial = df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
+    print(artificial)
+    return
+
+    fig, ax = plt.subplots(figsize=sizes)
+    g = sns.relplot(data=artificial, x='lookups', 
+                    y='Execution time (s)',
+                    col='System', 
+                    hue='Execution Type', 
+                    row='Size', 
+                    style='Num Team Threads', 
+                    kind='scatter',
+                    edgecolor='black',
+                    alpha=0.3,
                     facet_kws={'sharey': False, 'sharex': True}
                     )
+
+    for r in g.axes:
+        for c in r:
+            c.set_yscale('log', base=10)
+            c.set_xscale('log', base=2)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+
     g.set_axis_labels('Lookups\nlog2', 'Execution time (s)\nlog')
-    plt.xscale('log', base=2)
-    plt.yscale('log', base=2)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
     plt.tight_layout()
-    plt.savefig(f'{outfile}')
+    plt.savefig(f'{outfile}.pdf')
     plt.close()
 

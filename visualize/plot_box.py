@@ -13,7 +13,7 @@ for pk in glob.glob("./gpu_cpu/*.pkl"):
     dfs.append(df)
 
 df = pd.concat(dfs)
-df = df[df.Benchmark != 'fluidSim']
+#df = df[df.Benchmark != 'fluidSim']
 unique_policies=['Adaptive-25',  'Adaptive-50',  'Adaptive-75', 'Oracle', 'cpu']
 df = pd.melt(df, id_vars=['System', 'Benchmark'], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
 print(df)
