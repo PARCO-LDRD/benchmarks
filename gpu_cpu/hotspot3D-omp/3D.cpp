@@ -107,7 +107,7 @@ int main(int argc, char** argv)
       {
         for (long i = 0; i < numCols; i++)  
         {
-          double amb_temp = 80.0;
+          float amb_temp = 80.0;
 
           int c = i + j * numCols;
           int xy = numCols * numRows;
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
           int N = (j == 0)        ? c : c - numCols;
           int S = (j == numRows-1)     ? c : c + numCols;
 
-          double temp1, temp2, temp3;
+          float temp1, temp2, temp3;
           temp1 = temp2 = tIn[c];
           temp3 = tIn[c+xy];
           tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]
@@ -129,9 +129,9 @@ int main(int argc, char** argv)
           S += xy;
 
           for (int k = 1; k < layers-1; ++k) {
-            temp3 = tIn[c+xy];
             temp1 = temp2;
             temp2 = temp3;
+            temp3 = tIn[c+xy];
             tOut[c] = cc * temp2 + cw * tIn[W] + ce * tIn[E] + cs * tIn[S]
               + cn * tIn[N] + cb * temp1 + ct * temp3 + stepDivCap * pIn[c] + ct * amb_temp;
             c += xy;
@@ -172,8 +172,8 @@ int main(int argc, char** argv)
 //  computeTempCPU(pIn, tCopy, answer, numCols, numRows, layers, Cap, Rx, Ry, Rz, dt, amb_temp, iterations);
 //
 //  float acc = accuracy(sel,answer,numRows*numCols*layers);
-  float time = (float)((stop - start)/(1000.0 * 1000.0));
-  printf("Device offloading time: %.3f (s)\n",time);
+//  float time = (float)((stop - start)/(1000.0 * 1000.0));
+//  printf("Device offloading time: %.3f (s)\n",time);
 //  printf("Root-mean-square error: %e\n",acc);
 
   //writeoutput(tOut,numRows,numCols,layers,ofile);

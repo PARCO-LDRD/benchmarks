@@ -17,7 +17,7 @@ void ga(const char *__restrict target,
 {
 
 #pragma omp metadirective \
-  when(user={adaptation(by_grid_size!=gpu0)} : \
+  when(user={adaptation(by_grid_size!=cpu100)} : \
       target teams distribute parallel for thread_limit(256) nowait) 
   for (uint tid = 0; tid < gpu_end_tid; tid++) { 
     bool match = false;
@@ -42,7 +42,7 @@ void ga(const char *__restrict target,
   }
 
 #pragma omp metadirective \
-  when(user={adaptation(by_grid_size!=gpu100)} : \
+  when(user={adaptation(by_grid_size!=cpu0)} : \
       parallel for) 
   for (uint tid = gpu_end_tid; tid < length; tid++) { 
     bool match = false;
@@ -72,7 +72,7 @@ void ga(const char *__restrict target,
 
 int main(int argc, char* argv[]) 
 {
-  if (argc != 6) {
+  if (argc != 5) {
     printf("Usage: %s <target sequence length> <query sequence length> "
            "<coarse match length> <coarse match threshold>\n", argv[0]);
     return 1;
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   const int qseq_size = atoi(argv[2]);
   const int coarse_match_length = atoi(argv[3]);
   const int coarse_match_threshold = atoi(argv[4]);
-  int kBatchSize = atoi(argv[5]) *1024;
+  int kBatchSize = 1024;
   
   std::vector<char> target_sequence(tseq_size);
   std::vector<char> query_sequence(qseq_size);
@@ -131,26 +131,33 @@ int main(int argc, char* argv[])
 
   printf("(batch) gpu %d - %d, cpu %d - %d\n", 0, gpu_end_i, gpu_end_i,
       kBatchSize);
-
+  printf("I am going to execute %ld\n", max_searchable_length);
+  int counter = 0;
+  double tmp_start = omp_get_wtime();
 #pragma omp target enter data map (to: d_target[0:tseq_size], \
     d_query[0:qseq_size]) \
   map (alloc: d_batch_result[0:gpu_end_i])
+  double tmp_end = omp_get_wtime();
+  printf("Alloca time is %f\n", tmp_end - tmp_start);
   {
     while (current_position < max_searchable_length) {
+      counter++;
 #pragma omp metadirective \
-      when(user={adaptation(by_grid_size!=gpu0)} : \
+      when(user={adaptation(by_grid_size!=cpu100)} : \
           target teams distribute parallel for thread_limit(256) nowait) 
       for (int i = 0; i < gpu_end_i; i++)
         d_batch_result[i] = 0;
 #pragma omp metadirective \
-      when(user={adaptation(by_grid_size!=gpu100)} : \
+      when(user={adaptation(by_grid_size!=cpu0)} : \
           parallel for)
       for (int i = gpu_end_i; i < kBatchSize; i++)
         d_batch_result[i] = 0;
 
 #pragma omp taskwait
 
+#ifdef VERIFY
       memset(batch_result_ref, 0, kBatchSize);
+#endif
 
       uint32_t end_position = current_position + kBatchSize;
       if (end_position >= max_searchable_length) {
@@ -166,7 +173,7 @@ int main(int argc, char* argv[])
           static_cast<int>(length*cpu_iters_per_policy[__omp_adaptation_policy_by_grid_size]));
 
 #pragma omp metadirective \
-      when(user={adaptation(by_grid_size!=gpu0)} : \
+      when(user={adaptation(by_grid_size!=cpu100)} : \
           target update from (d_batch_result[0:gpu_end_i]))
 
 #ifdef VERIFY
@@ -182,6 +189,8 @@ int main(int argc, char* argv[])
       current_position = end_position;
     }
   }
+
+  printf("I executed %ld iterations\n", counter);
 
 
 #pragma omp end declare adaptation model_name(by_grid_size)

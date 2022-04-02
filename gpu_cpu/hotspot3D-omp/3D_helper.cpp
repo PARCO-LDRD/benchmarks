@@ -36,7 +36,6 @@ void readinput(float *vect, long grid_rows, long grid_cols, int layers, char *fi
       }
 
   fclose(fp);	
-
 }
 
 

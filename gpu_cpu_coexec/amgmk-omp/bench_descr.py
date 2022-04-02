@@ -10,7 +10,7 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    for i in range(1, 16+1):
+    for i in range(4, 12+1):
       self._inputs.append('%d %d %d'%(i*16, i*16, i*16))
     self._executable = f'AMGMk'
 
@@ -39,70 +39,76 @@ class Benchmark(BaseBenchmark):
     exec_time_pattern = 'Wall time = (.*) seconds'
     tmp =  re.findall(exec_time_pattern, stdout)
     if len(tmp) == 0:
-        return None
+      return None
     return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     return ','.join(cmd.split(' ')[1:])
 
   def visualize(self, df, outfile, sizes):
+    import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
-    import matplotlib
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = df['Input'].str.split(',', expand=True)[0] 
     df['Input'] = df['Input'].astype(int)
-    oracle = df[df['Execution Type'] == 'Oracle']
-    online = df[df['Execution Type'] == 'Online']
+    df = df[(df['Input'] > 4*16) & (df['Input'] < 12 * 16)]
+
+    df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
+    unique_policies = df['Execution Type'].unique()
+    df = df.groupby(['System', 'Execution Type', 'Input']).mean().reset_index()
     print(df)
-    default = df[((df['Policy'] == 'gpu100') & (df['Execution Type'] == 'Static'))]
-    default = default.groupby(['System', 'Input']).mean().reset_index()
-    default['Execution Type'] ='default (GPU)'
-    online = online.groupby(['Execution Type', 'System', 'Input', 'Policy']).mean().reset_index()
-    oracle = oracle.groupby(['Execution Type','System', 'Input', 'Policy']).mean().reset_index()
-    online['Speedup'] = default['Execution time (s)'] / online['Execution time (s)']
-    oracle['Speedup'] = default['Execution time (s)'] / oracle['Execution time (s)']
-    df = df[((df['Execution Type'] == 'Static'))]
-    df = df.groupby(['System', 'Input', 'Policy']).mean().reset_index()
-    df['Speedup'] = -1.0
-    df = df.set_index(['System', 'Input'])
-    for d in df['Policy'].unique():
-        print('Current')
-        df.loc[df['Policy'] == d, 'Speedup'] = df.loc[df['Policy'] == 'gpu100', 'Execution time (s)'] / df.loc[df['Policy'] == d, 'Execution time (s)']
-        s = ''.join(x for x in d if x.isdigit())
-        df.loc[df['Policy'] == d, 'Execution Type'] = f'Static (GPU-{s})'
-    print("Online")
-    print(df['Policy'].unique())
-    df = df[df["Execution Type"].isin(['Static (GPU-64)', 'Static (GPU-0)'])]
-    df = pd.concat([online, oracle, df.reset_index()])
-    g = sns.relplot(data=df, x='Input', 
-                    y='Speedup',
-                    col='System', 
-                    hue='Execution Type', 
-                    kind='scatter',
-                    edgecolor='black',
-                    alpha=0.7,
-                    facet_kws={'sharey': False, 'sharex': True}
-                    )
-    for r in g.axes:
-        for c in r:
+    df = df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
+    print(df)
+    print(unique_policies)
+    unique_policies = unique_policies[ unique_policies != 'Static,GPU']
+    for u in unique_policies:
+        df[f'Speed Up {u}'] = df['Static,GPU']/df[u] 
+
+    for u in unique_policies:
+        df[u] = df[f'Speed Up {u}']
+        df = df.drop([f'Speed Up {u}'], axis=1)
+    df = df.drop(['Static,GPU'], axis = 1)
+    df = pd.melt(df, id_vars=['System', 'Input'], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
+    sns.set(font_scale=1.25)
+    sns.set_style("whitegrid")
+    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
+    with sns.plotting_context(rc={"legend.fontsize":20, 'text.usetex' : True}):
+        g = sns.relplot(data=df, x='Input', y='Speedup',
+                        col='System', hue='Policy',
+                        col_order = ['lassen', 'pascal', 'corona'],
+                        markers=True,
+                        style='Policy',
+                        edgecolor='black', 
+                        aspect=1.6,
+                        alpha=0.7,
+                        s=120,
+                        lw=2, kind='scatter',
+                        facet_kws={'sharey': False, 'sharex': True},
+                        legend="full",
+                        )
+        plt.setp(g._legend.get_title(), fontsize=20)
+        sns.move_legend(g,loc='center', title='Policy', frameon=True)
+        leg = g._legend
+        leg.set_bbox_to_anchor([0.95,0.75]) 
+        for lh in g._legend.legendHandles:
+            lh.set_alpha(0.7)
+            lh._sizes = [120]
+            lh
+        axes = g.axes
+        for c,s in zip(g.axes.flat,systems):
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
             c.axhline(y=1.0, c='gray')
-    g.set_axis_labels('Size', 'Speedup')
-    g.set_xticklabels(rotation=-90)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-    plt.tight_layout()
-    plt.savefig(f'{outfile}_coexec_speedup.pdf')
-    plt.close()
-    return   
-    print(df)
-    g = sns.relplot(data=df, x='Input', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
-    g.set_axis_labels('Grid', 'Execution time (s)\nlog2')
-    g.set_xticklabels(rotation=-90)
-    plt.yscale('log', base=2)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-    plt.tight_layout()
-    plt.savefig(f'{outfile}')
-    plt.close()
+            c.set_xlabel("X-Axis", fontsize = 24)
+            c.set_ylabel("Y-Axis", fontsize = 24)
+            c.set_title(s, fontsize = 24)
+        print(axes.shape)
+        g.set_axis_labels(r'Grid Size ($n^3)$', 'speedup')
+        #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+        plt.tight_layout()
+        plt.savefig(f'{outfile}_speedup.pdf')
+        plt.close()
+
+

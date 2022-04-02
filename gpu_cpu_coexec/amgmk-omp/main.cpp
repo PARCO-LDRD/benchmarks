@@ -24,7 +24,7 @@
 #define BLOCK_SIZE 256
 
 // 
-const int testIter   = 500;
+const int testIter   = 5000;
 double totalWallTime = 0.0;
 
 // 
@@ -258,24 +258,12 @@ void test_Relax(int nx, int ny, int nz)
 
   int             grid_size = nx*ny*nz;
 
+  int cpu_iters_per_policy[] = { 0, static_cast<int>(n * 0.04), static_cast<int>(n*0.08), static_cast<int>(n*0.12), static_cast<int>(n*0.16), static_cast<int>(n*0.2), static_cast<int>(n*0.24), static_cast<int>(n*0.28), static_cast<int>(n*0.32), static_cast<int>(n*0.36), static_cast<int>(n*0.40), n };
 #pragma omp begin declare adaptation feature(n) model_name(by_grid_size) \
-  variants(gpu100, gpu50cpu50, cpu100) model(dtree)
+  variants(gpu100, gpu96, gpu92, gpu88, gpu84, gpu80, gpu76, gpu72, gpu68, gpu64, gpu60, gpu0) model(dtree)
 
-  int gpu_end_i;
-  switch(__omp_adaptation_policy_by_grid_size) {
-    case 0:
-      gpu_end_i = n;
-      break;
-    case 1:
-      gpu_end_i = 80*n/100;
-      break;
-    case 2:
-      gpu_end_i = 0;
-      break;
-    default:
-      printf("Unknown policy %d\n", __omp_adaptation_policy_by_grid_size);
-      abort();
-  }
+  int gpu_end_i = n - cpu_iters_per_policy[__omp_adaptation_policy_by_grid_size];
+
   printf("gpu: %d - %d, cpu %d - %d\n",
       0, gpu_end_i,
       gpu_end_i, n);
@@ -288,10 +276,8 @@ void test_Relax(int nx, int ny, int nz)
   for (int ti=0; ti<testIter; ++ti) {
 
 #pragma omp metadirective \
-  when(user={adaptation(by_grid_size==gpu100)} : \
-    target teams distribute parallel for thread_limit(BLOCK_SIZE) nowait) \
-  when(user={adaptation(by_grid_size==gpu50cpu50)} : \
-    target teams distribute parallel for thread_limit(BLOCK_SIZE) nowait)
+  when(user={adaptation(by_grid_size!=gpu0)} : \
+    target teams distribute parallel for thread_limit(BLOCK_SIZE) nowait) 
         for (int i = 0; i < gpu_end_i; i++)
 	{
           /*-----------------------------------------------------------
@@ -312,10 +298,8 @@ void test_Relax(int nx, int ny, int nz)
 
         // CPU execution
 #pragma omp metadirective \
-  when(user={adaptation(by_grid_size==cpu100)} : \
-      parallel for) \
-  when(user={adaptation(by_grid_size==gpu50cpu50)} : \
-      parallel for)
+  when(user={adaptation(by_grid_size!=gpu100)} : \
+      parallel for) 
         for (int i = gpu_end_i; i < n; i++)
 	{
           /*-----------------------------------------------------------
@@ -339,7 +323,9 @@ void test_Relax(int nx, int ny, int nz)
 #pragma omp taskwait
   }
 
-#pragma omp target exit data map(from: u_data[0:gpu_end_i])
+if (gpu_end_i != 0){
+  #pragma omp target exit data map(from: u_data[0:gpu_end_i])
+}
 #pragma omp end declare adaptation model_name(by_grid_size)
 
 #ifdef _OPENMP
