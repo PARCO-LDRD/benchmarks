@@ -29,7 +29,7 @@ class System:
     return self.scratch
 
   def get_parallel_cmd(self):
-    return f'OMP_NUM_THREADS={self.num_cores} OMP_PROC_BIND=close OMP_PLACES=cores'
+    return f'OMP_NUM_THREADS={self.num_cores} OMP_PROC_BIND=close OMP_PLACES=cores numactl --membind=0'
 
   def get_compile_flags(self):
     return self.system_compile_flags

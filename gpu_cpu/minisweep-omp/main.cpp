@@ -226,240 +226,240 @@ int main( int argc, char** argv )
         faceyz[0:faceyz_size],\
         vslocal[0:vslocal_size],\
         vo[0:v_size]))
-{
-
-  t1 = get_time();
-  for(int iteration=0; iteration<niterations; ++iteration )
   {
-    // compute the value of next step
-    const int nstep = StepScheduler_nstep( &(sweeper.stepscheduler) );
+
+    t1 = get_time();
+    for(int iteration=0; iteration<niterations; ++iteration )
+    {
+      // compute the value of next step
+      const int nstep = StepScheduler_nstep( &(sweeper.stepscheduler) );
 #ifdef DEBUG
-    printf("iteration %d next step = %d\n", iteration, nstep);
+      printf("iteration %d next step = %d\n", iteration, nstep);
 #endif
 
-    for (int step = 0; step < nstep; ++step) {
+      for (int step = 0; step < nstep; ++step) {
 
-      Dimensions dims = sweeper.dims;
-      Dimensions dims_b = sweeper.dims_b;
-      int dims_b_ncell_x = dims_b.ncell_x;
-      int dims_b_ncell_y = dims_b.ncell_y;
-      int dims_b_ncell_z = dims_b.ncell_z;
-      int dims_ncell_z = dims.ncell_z;
-      int dims_b_ne = dims_b.ne;
-      int dims_b_na = dims_b.na;
-      //int dims_b_nm = dims_b.nm;
+        Dimensions dims = sweeper.dims;
+        Dimensions dims_b = sweeper.dims_b;
+        int dims_b_ncell_x = dims_b.ncell_x;
+        int dims_b_ncell_y = dims_b.ncell_y;
+        int dims_b_ncell_z = dims_b.ncell_z;
+        int dims_ncell_z = dims.ncell_z;
+        int dims_b_ne = dims_b.ne;
+        int dims_b_na = dims_b.na;
+        //int dims_b_nm = dims_b.nm;
 
-      //int v_size = dims.ncell_x * dims.ncell_y * dims.ncell_z * dims.ne * dims.nm * NU;
-      //int a_from_m_size = sizeof(P) * dims_b.nm * dims_b.na * NOCTANT;
-      //int m_from_a_size = sizeof(P) * dims_b.nm * dims_b.na * NOCTANT;
-      //int vslocal_size = sizeof(P) * dims_b.na * NU * dims_b.ne * NOCTANT * dims_b.ncell_x * dims_b.ncell_y;
+        //int v_size = dims.ncell_x * dims.ncell_y * dims.ncell_z * dims.ne * dims.nm * NU;
+        //int a_from_m_size = sizeof(P) * dims_b.nm * dims_b.na * NOCTANT;
+        //int m_from_a_size = sizeof(P) * dims_b.nm * dims_b.na * NOCTANT;
+        //int vslocal_size = sizeof(P) * dims_b.na * NU * dims_b.ne * NOCTANT * dims_b.ncell_x * dims_b.ncell_y;
 
-      int v_b_size = dims_b.ncell_x * dims_b.ncell_y * dims_b.ncell_z * dims_b.ne * dims_b.nm * NU;
+        int v_b_size = dims_b.ncell_x * dims_b.ncell_y * dims_b.ncell_z * dims_b.ne * dims_b.nm * NU;
 
-      StepInfoAll stepinfoall;  /*---But only use noctant_per_block values---*/
+        StepInfoAll stepinfoall;  /*---But only use noctant_per_block values---*/
 
-      for(int octant_in_block=0; octant_in_block<noctant_per_block; ++octant_in_block )
-      {
-        stepinfoall.stepinfo[octant_in_block] = StepScheduler_stepinfo(
-            &(sweeper.stepscheduler), step, octant_in_block, 
-            0, //proc_x, 
-            0  //proc_y 
-            );
-      }
-
-      const int ix_base = 0;
-      const int iy_base = 0;
-
-      const int num_wavefronts = dims_b_ncell_z + dims_b_ncell_y + dims_b_ncell_x - 2;
-
-      const int is_first_step = 0 == step;
-      const int is_last_step = nstep - 1 == step;
-
-      if (is_first_step) {
-         memset(vo, 0, v_size * sizeof(P));
-#pragma omp metadirective \
-         when(user={adaptation(by_size==gpu)} : \
-             target update to(vo[0:v_size]))
-
-#pragma omp metadirective \
-         when(user={adaptation(by_size==gpu)} : \
-             target teams distribute parallel for collapse(3)) \
-         when(user={adaptation(by_size==cpu)} : \
-             parallel for collapse(3))
-         for( int octant=0; octant<NOCTANT; ++octant )
-         for( int iy=0; iy<dims_b_ncell_y; ++iy )
-         for( int ix=0; ix<dims_b_ncell_x; ++ix )
-           for(int ie=0; ie<dims_b_ne; ++ie )
-             for(int iu=0; iu<NU; ++iu )
-               for(int ia=0; ia<dims_b_na; ++ia )
-               {
-                 const int dir_z = Dir_z( octant );
-                 const int iz = dir_z == DIR_UP ? -1 : dims_b_ncell_z;
-
-                 const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
-                 const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
-                 const int iz_g = iz + (dir_z == DIR_UP ? 0 : dims_ncell_z - dims_b_ncell_z);
-                 //const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
-
-                 /*--- Quantities_scalefactor_space_ inline ---*/
-                 const int scalefactor_space
-                   = Quantities_scalefactor_space_acceldir(ix_g, iy_g, iz_g);
-
-                 /*--- ref_facexy inline ---*/
-                 facexy[FACEXY_ADDR(dims_b_ncell_x, dims_b_ncell_y)]
-                   /*--- Quantities_init_face routine ---*/
-                   = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
-               } /*---for---*/
-
-#ifdef DEBUG
-         #pragma omp target update from (facexy[0:facexy_size])
-         for (int i = 0; i < facexy_size; i++)
-           printf("facexy: %d %f\n", i, facexy[i]);
-#endif
-      }
-
-#pragma omp metadirective \
-      when(user={adaptation(by_size==gpu)} : \
-          target teams distribute parallel for collapse(3)) \
-      when(user={adaptation(by_size==cpu)} : \
-          parallel for collapse(3))
-      for( int octant=0; octant<NOCTANT; ++octant )
-      for( int iz=0; iz<dims_b_ncell_z; ++iz )
-      for( int ix=0; ix<dims_b_ncell_x; ++ix )
-        for(int ie=0; ie<dims_b_ne; ++ie )
-          for(int iu=0; iu<NU; ++iu )
-            for(int ia=0; ia<dims_b_na; ++ia )
-            {
-              const int dir_y = Dir_y( octant );
-              const int iy = dir_y == DIR_UP ? -1 : dims_b_ncell_y;
-
-              const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
-              const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
-              const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
-
-              if ((dir_y == DIR_UP) || (dir_y == DIR_DN)) {
-
-                /*--- Quantities_scalefactor_space_ inline ---*/
-                const int scalefactor_space
-                  = Quantities_scalefactor_space_acceldir(ix_g, iy_g, iz_g);
-
-                /*--- ref_facexz inline ---*/
-                facexz[FACEXZ_ADDR(dims_b_ncell_x, dims_b_ncell_z)]
-                  /*--- Quantities_init_face routine ---*/
-                  = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
-              } /*---if---*/
-            } /*---for---*/
-#ifdef DEBUG
-      #pragma omp target update from (facexz[0:facexz_size])
-      for (int i = 0; i < facexz_size; i++)
-        printf("facexz: %d %f\n", i, facexz[i]);
-#endif
-
-#pragma omp metadirective \
-      when(user={adaptation(by_size==gpu)} : \
-          target teams distribute parallel for collapse(3)) \
-      when(user={adaptation(by_size==cpu)} : \
-          parallel for collapse(3))
-      for( int octant=0; octant<NOCTANT; ++octant )
-      for( int iz=0; iz<dims_b_ncell_z; ++iz )
-      for( int iy=0; iy<dims_b_ncell_y; ++iy )
-        for(int ie=0; ie<dims_b_ne; ++ie )
-          for(int iu=0; iu<NU; ++iu )
-            for(int ia=0; ia<dims_b_na; ++ia )
-            {
-
-              const int dir_x = Dir_x( octant );
-              const int ix = dir_x == DIR_UP ? -1 : dims_b_ncell_x;
-
-              const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
-              const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
-              const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
-
-              if ((dir_x == DIR_UP) || (dir_x == DIR_DN)) {
-
-                /*--- Quantities_scalefactor_space_ inline ---*/
-                const int scalefactor_space
-                  = Quantities_scalefactor_space_acceldir(ix_g, iy_g, iz_g);
-
-                /*--- ref_faceyz inline ---*/
-                faceyz[FACEYZ_ADDR(dims_b_ncell_y, dims_b_ncell_z)]
-                  /*--- Quantities_init_face routine ---*/
-                  = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
-              } /*---if---*/
-            } /*---for---*/
-
-#ifdef DEBUG
-      #pragma omp target update from (faceyz[0:faceyz_size])
-      for (int i = 0; i < faceyz_size; i++)
-        printf("faceyz: %d %f\n", i, faceyz[i]);
-#endif
-
-#pragma omp metadirective \
-      when(user={adaptation(by_size==gpu)} : \
-          target teams distribute parallel for collapse(2)) \
-      when(user={adaptation(by_size==cpu)} : \
-          parallel for collapse(2))
-      for( int ie=0; ie<dims_b_ne; ++ie )
-      for( int octant=0; octant<NOCTANT; ++octant )
-        for ( int wavefront = 0; wavefront < num_wavefronts; wavefront++ )
+        for(int octant_in_block=0; octant_in_block<noctant_per_block; ++octant_in_block )
         {
-          for( int iywav=0; iywav<dims_b_ncell_y; ++iywav )
-            for( int ixwav=0; ixwav<dims_b_ncell_x; ++ixwav )
-            {
+          stepinfoall.stepinfo[octant_in_block] = StepScheduler_stepinfo(
+              &(sweeper.stepscheduler), step, octant_in_block, 
+              0, //proc_x, 
+              0  //proc_y 
+              );
+        }
 
-              if (stepinfoall.stepinfo[octant].is_active) {
+        const int ix_base = 0;
+        const int iy_base = 0;
 
-                /*---Decode octant directions from octant number---*/
+        const int num_wavefronts = dims_b_ncell_z + dims_b_ncell_y + dims_b_ncell_x - 2;
 
-                const int dir_x = Dir_x( octant );
-                const int dir_y = Dir_y( octant );
-                const int dir_z = Dir_z( octant );
+        const int is_first_step = 0 == step;
+        const int is_last_step = nstep - 1 == step;
 
-                const int octant_in_block = octant;
+        if (is_first_step) {
+          memset(vo, 0, v_size * sizeof(P));
+#pragma omp metadirective \
+          when(user={adaptation(by_size==gpu)} : \
+              target update to(vo[0:v_size]))
 
-                const int ix = dir_x==DIR_UP ? ixwav : dims_b_ncell_x - 1 - ixwav;
-                const int iy = dir_y==DIR_UP ? iywav : dims_b_ncell_y - 1 - iywav;
-                const int izwav = wavefront - ixwav - iywav;
-                const int iz = dir_z==DIR_UP ? izwav : (dims_b_ncell_z-1) - izwav;
+#pragma omp metadirective \
+          when(user={adaptation(by_size==gpu)} : \
+              target teams distribute parallel for collapse(3)) \
+          when(user={adaptation(by_size==cpu)} : \
+              parallel for collapse(3))
+          for( int octant=0; octant<NOCTANT; ++octant )
+            for( int iy=0; iy<dims_b_ncell_y; ++iy )
+              for( int ix=0; ix<dims_b_ncell_x; ++ix )
+                for(int ie=0; ie<dims_b_ne; ++ie )
+                  for(int iu=0; iu<NU; ++iu )
+                    for(int ia=0; ia<dims_b_na; ++ia )
+                    {
+                      const int dir_z = Dir_z( octant );
+                      const int iz = dir_z == DIR_UP ? -1 : dims_b_ncell_z;
 
-                const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
-                const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
-                const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
+                      const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
+                      const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
+                      const int iz_g = iz + (dir_z == DIR_UP ? 0 : dims_ncell_z - dims_b_ncell_z);
+                      //const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
 
-                const int v_offset = stepinfoall.stepinfo[octant].block_z * v_b_size;
+                      /*--- Quantities_scalefactor_space_ inline ---*/
+                      const int scalefactor_space
+                        = Quantities_scalefactor_space_acceldir(ix_g, iy_g, iz_g);
 
-                /*--- In-gridcell computations ---*/
-                Sweeper_sweep_cell_acceldir( dims_b, wavefront, octant, ix, iy,
-                    ix_g, iy_g, iz_g,
-                    dir_x, dir_y, dir_z,
-                    facexy, facexz, faceyz,
-                    a_from_m, m_from_a,
-                    &(vi[v_offset]), &(vo[v_offset]), vslocal,
-                    octant_in_block, noctant_per_block, ie );
-            } /*---if---*/
+                      /*--- ref_facexy inline ---*/
+                      facexy[FACEXY_ADDR(dims_b_ncell_x, dims_b_ncell_y)]
+                        /*--- Quantities_init_face routine ---*/
+                        = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
+                    } /*---for---*/
 
-          } /*---octant/ix/iy---*/
-
-      } /*--- wavefront ---*/
-
-      if (is_last_step) { 
+#ifdef DEBUG
+#pragma omp target update from (facexy[0:facexy_size])
+          for (int i = 0; i < facexy_size; i++)
+            printf("facexy: %d %f\n", i, facexy[i]);
+#endif
+        }
 
 #pragma omp metadirective \
         when(user={adaptation(by_size==gpu)} : \
-            target update from (vo[0:v_size]))
-#ifdef DEBUG
-        for (int i = 0; i < v_size; i++) printf("vo %d %f\n", i, vo[i]);
-#endif
-      }
-    } // step
+            target teams distribute parallel for collapse(3)) \
+        when(user={adaptation(by_size==cpu)} : \
+            parallel for collapse(3))
+        for( int octant=0; octant<NOCTANT; ++octant )
+          for( int iz=0; iz<dims_b_ncell_z; ++iz )
+            for( int ix=0; ix<dims_b_ncell_x; ++ix )
+              for(int ie=0; ie<dims_b_ne; ++ie )
+                for(int iu=0; iu<NU; ++iu )
+                  for(int ia=0; ia<dims_b_na; ++ia )
+                  {
+                    const int dir_y = Dir_y( octant );
+                    const int iy = dir_y == DIR_UP ? -1 : dims_b_ncell_y;
 
-    P* tmp = vo;
-    vo = vi;
-    vi = tmp;
-  }
-  t2 = get_time();
-  time = t2 - t1;
-} 
+                    const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
+                    const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
+                    const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
+
+                    if ((dir_y == DIR_UP) || (dir_y == DIR_DN)) {
+
+                      /*--- Quantities_scalefactor_space_ inline ---*/
+                      const int scalefactor_space
+                        = Quantities_scalefactor_space_acceldir(ix_g, iy_g, iz_g);
+
+                      /*--- ref_facexz inline ---*/
+                      facexz[FACEXZ_ADDR(dims_b_ncell_x, dims_b_ncell_z)]
+                        /*--- Quantities_init_face routine ---*/
+                        = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
+                    } /*---if---*/
+                  } /*---for---*/
+#ifdef DEBUG
+#pragma omp target update from (facexz[0:facexz_size])
+        for (int i = 0; i < facexz_size; i++)
+          printf("facexz: %d %f\n", i, facexz[i]);
+#endif
+
+#pragma omp metadirective \
+        when(user={adaptation(by_size==gpu)} : \
+            target teams distribute parallel for collapse(3)) \
+        when(user={adaptation(by_size==cpu)} : \
+            parallel for collapse(3))
+        for( int octant=0; octant<NOCTANT; ++octant )
+          for( int iz=0; iz<dims_b_ncell_z; ++iz )
+            for( int iy=0; iy<dims_b_ncell_y; ++iy )
+              for(int ie=0; ie<dims_b_ne; ++ie )
+                for(int iu=0; iu<NU; ++iu )
+                  for(int ia=0; ia<dims_b_na; ++ia )
+                  {
+
+                    const int dir_x = Dir_x( octant );
+                    const int ix = dir_x == DIR_UP ? -1 : dims_b_ncell_x;
+
+                    const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
+                    const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
+                    const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
+
+                    if ((dir_x == DIR_UP) || (dir_x == DIR_DN)) {
+
+                      /*--- Quantities_scalefactor_space_ inline ---*/
+                      const int scalefactor_space
+                        = Quantities_scalefactor_space_acceldir(ix_g, iy_g, iz_g);
+
+                      /*--- ref_faceyz inline ---*/
+                      faceyz[FACEYZ_ADDR(dims_b_ncell_y, dims_b_ncell_z)]
+                        /*--- Quantities_init_face routine ---*/
+                        = Quantities_init_face_acceldir(ia, ie, iu, scalefactor_space, octant);
+                    } /*---if---*/
+                  } /*---for---*/
+
+#ifdef DEBUG
+#pragma omp target update from (faceyz[0:faceyz_size])
+        for (int i = 0; i < faceyz_size; i++)
+          printf("faceyz: %d %f\n", i, faceyz[i]);
+#endif
+
+#pragma omp metadirective \
+        when(user={adaptation(by_size==gpu)} : \
+            target teams distribute parallel for collapse(2)) \
+        when(user={adaptation(by_size==cpu)} : \
+            parallel for collapse(2))
+        for( int ie=0; ie<dims_b_ne; ++ie )
+          for( int octant=0; octant<NOCTANT; ++octant )
+            for ( int wavefront = 0; wavefront < num_wavefronts; wavefront++ )
+            {
+              for( int iywav=0; iywav<dims_b_ncell_y; ++iywav )
+                for( int ixwav=0; ixwav<dims_b_ncell_x; ++ixwav )
+                {
+
+                  if (stepinfoall.stepinfo[octant].is_active) {
+
+                    /*---Decode octant directions from octant number---*/
+
+                    const int dir_x = Dir_x( octant );
+                    const int dir_y = Dir_y( octant );
+                    const int dir_z = Dir_z( octant );
+
+                    const int octant_in_block = octant;
+
+                    const int ix = dir_x==DIR_UP ? ixwav : dims_b_ncell_x - 1 - ixwav;
+                    const int iy = dir_y==DIR_UP ? iywav : dims_b_ncell_y - 1 - iywav;
+                    const int izwav = wavefront - ixwav - iywav;
+                    const int iz = dir_z==DIR_UP ? izwav : (dims_b_ncell_z-1) - izwav;
+
+                    const int ix_g = ix + ix_base; // dims_b_ncell_x * proc_x;
+                    const int iy_g = iy + iy_base; // dims_b_ncell_y * proc_y;
+                    const int iz_g = iz + stepinfoall.stepinfo[octant].block_z * dims_b_ncell_z;
+
+                    const int v_offset = stepinfoall.stepinfo[octant].block_z * v_b_size;
+
+                    /*--- In-gridcell computations ---*/
+                    Sweeper_sweep_cell_acceldir( dims_b, wavefront, octant, ix, iy,
+                        ix_g, iy_g, iz_g,
+                        dir_x, dir_y, dir_z,
+                        facexy, facexz, faceyz,
+                        a_from_m, m_from_a,
+                        &(vi[v_offset]), &(vo[v_offset]), vslocal,
+                        octant_in_block, noctant_per_block, ie );
+                  } /*---if---*/
+
+                } /*---octant/ix/iy---*/
+
+            } /*--- wavefront ---*/
+
+        if (is_last_step) { 
+
+#pragma omp metadirective \
+          when(user={adaptation(by_size==gpu)} : \
+              target update from (vo[0:v_size]))
+#ifdef DEBUG
+          for (int i = 0; i < v_size; i++) printf("vo %d %f\n", i, vo[i]);
+#endif
+        }
+      } // step
+
+      P* tmp = vo;
+      vo = vi;
+      vi = tmp;
+    }
+    t2 = get_time();
+    time = t2 - t1;
+  } 
 #pragma omp end declare adaptation model_name(by_size)
 
   // Verification (input and output vectors are equal) 

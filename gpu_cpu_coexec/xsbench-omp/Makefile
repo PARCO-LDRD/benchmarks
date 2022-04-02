@@ -7,7 +7,7 @@ OPTIMIZE    = yes
 DEBUG       = no
 PROFILE     = no
 MPI         = no
-FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+FOPENMP?=-fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_60
 
 #===============================================================================
 # Program name & source code list
@@ -50,6 +50,7 @@ endif
 # LLVM Compiler Targeting A100 -- Change SM Level to Target Other GPUs
 ifeq ($(COMPILER),llvm)
   CC = clang
+  CPP = clang++
   CFLAGS += -O3 ${FOPENMP}
 endif
 
@@ -99,7 +100,7 @@ endif
 #===============================================================================
 
 $(program): $(obj) XSbench_header.h Makefile
-	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
+	$(CPP) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
 %.o: %.c XSbench_header.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@

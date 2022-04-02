@@ -7,6 +7,7 @@ import json
 import hashlib
 import pandas as pd
 import glob
+import sys
 
 '''
 Reads data from CSV traces and creates a loadable dataset for training models.
@@ -113,11 +114,17 @@ def read_tracefiles(tracefiles):
     for f in tracefiles:
         try:
             csv = pd.read_csv(f, sep=' ', header=0, index_col=False)
+            if csv['policy'].dtypes != 'int64':
+                print(csv,f)
+                print("ERROR")
+                RuntimeError("WRONG TYPE")
+                sys.exit()
+
         except pd.errors.EmptyDataError:
             print('Warning: no data in', f)
+            sys.exit()
 
         data = pd.concat([data, csv], ignore_index=True, sort=False)
-
     return data
 
 def read_tracedirs(tracedirs):
@@ -149,18 +156,32 @@ def create_apollo_model(tracedirs, agg = 'mean-min'):
         models[r] = output
     return models
 
-def get_adaptive_apollo_runs(scenarios,num_folds=5):
+def get_adaptive_apollo_runs(scenarios,percentage, state=1):
     # Find CSV experiments.
     experiments_csv = [s for s in scenarios['experiments'] if s['type'] == 'csv' ]
     # Extract the unique cmds of CSV experiments that correspond to the unique inputs.
     set_commands_csv = np.array(list(set([e['cmd'] for e in experiments_csv])))
+    print(f'Unique commands are {len(set_commands_csv)}')
+    training_percentage = 1 - percentage
+    revert = False
+    if percentage <= 0.5:
+      folds = int(1.0 / percentage)
+    else:
+      folds = int(1.0 / ( 1-percentage))
+      revert = True
 
-    kfold = KFold(n_splits=int(num_folds), shuffle=True, random_state=1)
+    kfold = KFold(n_splits=int(folds), shuffle=True, random_state=state)
 
     index = 0
     dynamic_experiments = []
     # Split to k-folds the cmds (inputs).
-    for train, test in kfold.split(set_commands_csv):
+    for k_train, k_test in kfold.split(set_commands_csv):
+        train = k_train
+        test = k_test
+        if  revert:
+          train = k_test
+          test = k_train
+
         # Stores the training experiments including all Static policies for each unique cmd (input).
         experiments_train = []
         for c in set_commands_csv[train]:
@@ -171,8 +192,13 @@ def get_adaptive_apollo_runs(scenarios,num_folds=5):
 
         # Stores the testing experiments.
         experiments_test = []
+        unique_inputs = set()
         for c in set_commands_csv[test]:
-            experiments_test += [e for e in experiments_csv if e['cmd'] == c]
+          for e in experiments_csv:
+            if e['cmd'] == c:
+              experiments_test.append(e)
+              break
+
         for e in experiments_test:
             dExp = {}
             dExp['train_hash'] = train_hash
@@ -184,7 +210,7 @@ def get_adaptive_apollo_runs(scenarios,num_folds=5):
             tmp = {}
             for k in models.keys():
                 tmp[k] = {}
-                tmp[k]['policy'] = 'adaptive'
+                tmp[k]['policy'] = f'adaptive:{training_percentage}:{state}'
                 tmp[k]['model'] = models[k]
                 tmp[k]['execution_time'] = []
                 tmp[k]['model_hash'] = hashlib.sha256(models[k].encode('utf-8')).hexdigest()
@@ -195,7 +221,6 @@ def get_adaptive_apollo_runs(scenarios,num_folds=5):
 def get_oracle_apollo_runs(scenarios):
     oracle_experiments = []
     experiments_csv = np.array([s for s in scenarios['experiments'] if s['type'] == 'csv' ])
-    print(len(experiments_csv))
     tracedirs = [scenarios['root_dir'] + '/runs/' + e['hash'] + '/trace' for e in experiments_csv]
     models = create_apollo_model(tracedirs)
     train_hash = [e['hash'] for e in experiments_csv]
@@ -209,9 +234,8 @@ def get_oracle_apollo_runs(scenarios):
         dExp['train_hash'] = train_hash
         dExp['cmd'] = e['cmd']
         if e['regions'].keys() != models.keys():
-            print(e['regions'].keys())
-            print(models.keys())
-            raise RuntimeError('Model region names and binary (experiment) region name differ')
+            print((e['regions'].keys()))
+#            raise RuntimeError('Model region names and binary (experiment) region name differ')
         tmp = {}
         for k in models.keys():
             tmp[k] = {}

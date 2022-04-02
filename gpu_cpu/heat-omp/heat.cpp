@@ -199,14 +199,18 @@ int main(int argc, char *argv[]) {
   // Check the L2-norm of the computed solution
   // against the *known* solution from the MMS scheme
   //
+#ifdef __VERIFY__
   double norm = l2norm(n, u, nsteps, dt, alpha, dx, length);
+#endif
 
   // Stop total timer
   double stop = omp_get_wtime();
 
   // Print results
   printf("Results\n\n");
+#ifdef __VERIFY__
   printf("Error (L2norm): %E\n", norm);
+#endif 
   printf("Solve time (s): %lf\n", toc-tic);
   printf("Total time (s): %lf\n", stop-start);
   printf("Bandwidth (GB/s): %lf\n", 1.0E-9*2.0*n*n*nsteps*sizeof(double)/(toc-tic));

@@ -43,6 +43,7 @@ endif
 # LLVM Compiler Targeting A100 -- Change SM Level to Target Other GPUs
 ifeq ($(COMPILER),llvm)
   CC = clang
+  CPP = clang++
   CFLAGS += ${FOPENMP}
 endif
 
@@ -81,7 +82,7 @@ endif
 #===============================================================================
 
 $(program): $(obj) rsbench.h Makefile
-	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
+	$(CPP) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
 %.o: %.c rsbench.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@

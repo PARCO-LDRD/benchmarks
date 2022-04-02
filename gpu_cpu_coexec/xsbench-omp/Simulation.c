@@ -43,10 +43,10 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 
   int total_lus = in.lookups;
 
-  const int cpu_iters_per_policy[] = { 0, total_lus/8, total_lus };
+  const int cpu_iters_per_policy[] = { 0, total_lus * 0.04, total_lus*0.08, total_lus*0.12, total_lus*0.16, total_lus*0.2, total_lus*0.24, total_lus*0.28, total_lus*0.32, total_lus*0.36, total_lus*0.40, total_lus };
 
 #pragma omp begin declare adaptation feature(total_lus) model_name(by_lookups) \
-  variants(gpu100, gpu50cpu50, cpu100) model(dtree)
+  variants(gpu100, gpu96, gpu92, gpu88, gpu84, gpu80, gpu76, gpu72, gpu68, gpu64, gpu60, gpu0) model(dtree)
 
   printf("cpu %d - %d, gpu %d - %d, addr 0x%p\n", 0,
       cpu_iters_per_policy[__omp_adaptation_policy_by_lookups],
@@ -54,6 +54,7 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
       &verification[__omp_adaptation_policy_by_lookups]);
 
   int gpu_init_i = cpu_iters_per_policy[__omp_adaptation_policy_by_lookups];
+  int gpu_lookups = total_lus - gpu_init_i;
 
 #pragma omp target data map(to: SD.max_num_nucs)\
 	map(to: SD.num_nucs[:SD.length_num_nucs])\
@@ -67,12 +68,9 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 
 	// GPU execution
 #pragma omp metadirective \
-    when(user={adaptation(by_lookups==gpu50cpu50)} : \
+    when(user={adaptation(by_lookups != gpu0)} : \
 	target teams distribute parallel for thread_limit(256) \
-	map(from: verification[cpu_iters_per_policy[__omp_adaptation_policy_by_lookups]: \
-	  in.lookups - cpu_iters_per_policy[__omp_adaptation_policy_by_lookups]]) nowait) \
-    when(user={adaptation(by_lookups==gpu100)} : \
-	target teams distribute parallel for thread_limit(256) map(from: verification[:in.lookups]) nowait)
+	map(from: verification[gpu_init_i:gpu_lookups]) nowait) \
 	//for( int i = cpu_iters_per_policy[__omp_adaptation_policy_by_lookups]; i < in.lookups; i++ )
 	for( int i = gpu_init_i; i < in.lookups; i++ )
 	{
@@ -131,12 +129,10 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 	}
 
 #pragma omp metadirective \
-  when(user={adaptation(by_lookups==gpu50cpu50)} : \
-      parallel for) \
-  when(user={adaptation(by_lookups==cpu100)} : \
-      parallel for)
+  when(user={adaptation(by_lookups!=gpu100)} : \
+      parallel for) 
     // CPU execution
-    for( int i = 0; i < cpu_iters_per_policy[__omp_adaptation_policy_by_lookups]; i++ )
+    for( int i = 0; i < gpu_init_i; i++ )
 	{
 		// Set the initial seed value
 		uint64_t seed = STARTING_SEED;	
@@ -193,10 +189,8 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 	}
 
 #pragma omp metadirective \
-  when(user={adaptation(by_lookups==gpu50cpu50)} : \
-      taskwait) \
-  when(user={adaptation(by_lookups==gpu100)} : \
-      taskwait)
+  when(user={adaptation(by_lookups!=gpu0)} : \
+      taskwait) 
   }
 
 #pragma omp end declare adaptation model_name(by_lookups)

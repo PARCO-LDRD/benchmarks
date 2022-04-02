@@ -30,10 +30,9 @@ obj = $(source:.c=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS := -std=gnu99 -Wall
+CFLAGS :=  -Wall
 
 # Linker Flags
-LDFLAGS = -lm -lapollo
 
 # Regular gcc Compiler
 ifeq ($(COMPILER),gnu)
@@ -50,7 +49,8 @@ endif
 # LLVM Compiler Targeting A100 -- Change SM Level to Target Other GPUs
 ifeq ($(COMPILER),llvm)
   CC = clang
-  CFLAGS += -O3 ${FOPENMP}
+	CPP = clang++
+  CFLAGS += -O0 ${FOPENMP} 
 endif
 
 # IBM XL Compiler
@@ -91,15 +91,17 @@ endif
 # MPI
 ifeq ($(MPI),yes)
   CFLAGS += $(shell mpicc --showme:compile) -DMPI
-  LDFLAGS += $(shell mpicc --showme:link)
+  LDFLAGS = $(shell mpicc --showme:link)
 endif
+
+LDFLAGS += -lm -lapollo
 
 #===============================================================================
 # Targets to Build
 #===============================================================================
 
 $(program): $(obj) XSbench_header.h Makefile
-	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
+	$(CPP) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
 %.o: %.c XSbench_header.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
