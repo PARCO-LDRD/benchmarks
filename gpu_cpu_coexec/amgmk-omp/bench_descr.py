@@ -56,53 +56,71 @@ class Benchmark(BaseBenchmark):
     df['Input'] = df['Input'].astype(int)
     oracle = df[df['Execution Type'] == 'Oracle']
     online = df[df['Execution Type'] == 'Online']
-    print(df)
-    default = df[((df['Policy'] == 'gpu100') & (df['Execution Type'] == 'Static'))]
-    default = default.groupby(['System', 'Input']).mean().reset_index()
-    default['Execution Type'] ='default (GPU)'
-    online = online.groupby(['Execution Type', 'System', 'Input', 'Policy']).mean().reset_index()
-    oracle = oracle.groupby(['Execution Type','System', 'Input', 'Policy']).mean().reset_index()
-    online['Speedup'] = default['Execution time (s)'] / online['Execution time (s)']
-    oracle['Speedup'] = default['Execution time (s)'] / oracle['Execution time (s)']
-    df = df[((df['Execution Type'] == 'Static'))]
-    df = df.groupby(['System', 'Input', 'Policy']).mean().reset_index()
-    df['Speedup'] = -1.0
-    df = df.set_index(['System', 'Input'])
-    for d in df['Policy'].unique():
-        print('Current')
-        df.loc[df['Policy'] == d, 'Speedup'] = df.loc[df['Policy'] == 'gpu100', 'Execution time (s)'] / df.loc[df['Policy'] == d, 'Execution time (s)']
-        s = ''.join(x for x in d if x.isdigit())
-        df.loc[df['Policy'] == d, 'Execution Type'] = f'Static (GPU-{s})'
-    print("Online")
+
+    df = df[ ((df['Execution Type'].isin(['Oracle', 'Online'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
+    map_names={}
     print(df['Policy'].unique())
-    df = df[df["Execution Type"].isin(['Static (GPU-64)', 'Static (GPU-0)'])]
-    df = pd.concat([online, oracle, df.reset_index()])
-    g = sns.relplot(data=df, x='Input', 
-                    y='Speedup',
-                    col='System', 
-                    hue='Execution Type', 
-                    kind='scatter',
-                    edgecolor='black',
-                    alpha=0.7,
-                    facet_kws={'sharey': False, 'sharex': True}
-                    )
-    for r in g.axes:
-        for c in r:
-            c.axhline(y=1.0, c='gray')
-    g.set_axis_labels('Size', 'Speedup')
-    g.set_xticklabels(rotation=-90)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-    plt.tight_layout()
-    plt.savefig(f'{outfile}_coexec_speedup.pdf')
-    plt.close()
-    return   
+    for i in range(60,101,4): 
+        val=100-i
+        map_names[f'gpu{i}']=f'({i},{val})'
+    map_names['gpu0'] = '(0,100)'
+    print (map_names.keys())
+    df["Policy"].replace(map_names, inplace=True)
+    df = df.groupby(['System', 'Execution Type', 'Policy', 'Input']).mean().reset_index()
+    df['TMP_ID'] = df['Execution Type'] + ':' + df['Policy']
     print(df)
-    g = sns.relplot(data=df, x='Input', y='Execution time (s)',
-                    col='System', hue='Policy', kind='line', marker='o')
-    g.set_axis_labels('Grid', 'Execution time (s)\nlog2')
-    g.set_xticklabels(rotation=-90)
-    plt.yscale('log', base=2)
-    plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-    plt.tight_layout()
-    plt.savefig(f'{outfile}')
-    plt.close()
+
+    df["Policy"].replace(map_names, inplace=True)
+    df = df.groupby(['System', 'Execution Type', 'Policy', 'Input']).mean().reset_index()
+    df['TMP_ID'] = df['Execution Type'] + ':' + df['Policy']
+    print(df)
+    df = df.pivot(index=['System', 'Input'], columns='TMP_ID', values='Execution time (s)').reset_index()
+    print(df)
+    vals = []
+    for v in df.columns:
+        if v != 'System' and v != 'Input':
+            vals.append(v)
+            df[v] = df['Static:(100,0)'] / df[v] 
+    df = pd.melt(df, id_vars=['System', 'Input'], value_name = 'Speedup', var_name = 'TMP_ID', value_vars=vals).reset_index().dropna(axis=0)
+    df[['Execution Type', 'Partition']] = df['TMP_ID'].str.split(':', expand=True)  
+    df = df[df['TMP_ID'] != 'Static:(100,0)']
+
+    sns.set(font_scale=1.25)
+    sns.set_style("whitegrid")
+    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
+    #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
+    with sns.plotting_context(rc={'text.usetex' : True}):
+        g = sns.relplot(data=df, x='Input', 
+                        col_order = ['lassen', 'pascal', 'corona'],
+                        y='Speedup',
+                        col='System', 
+                        hue='Execution Type', 
+                        style='Partition', 
+                        #markers=markers,
+                        edgecolor='black',
+                        alpha=0.7,
+                        aspect=1.6,
+                        lw=4, kind='scatter',
+                        facet_kws={'sharey': False, 'sharex': True},
+                        legend="full")
+        plt.setp(g._legend.get_title(), fontsize=20)
+        sns.move_legend(g,loc='center', frameon=True, ncol=3)
+        leg = g._legend
+        leg.set_bbox_to_anchor([0.15,0.75]) 
+        for lh in g._legend.legendHandles:
+            lh.set_alpha(0.7)
+            lh._sizes = [120]
+            lh
+        axes = g.axes
+        for c,s in zip(g.axes.flat,systems):
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+            c.axhline(y=1.0, c='gray')
+            c.set_xlabel("X-Axis", fontsize = 24)
+            c.set_ylabel("Y-Axis", fontsize = 24)
+            c.set_title(s, fontsize = 24)
+        g.set_axis_labels('Grid Size ($n^3$)', 'speedup')
+        #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+        plt.tight_layout()
+        plt.savefig(f'{outfile}_coexec_speedup.pdf')
+        plt.close()
+        return
