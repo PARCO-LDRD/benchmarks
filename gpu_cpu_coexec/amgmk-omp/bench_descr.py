@@ -10,7 +10,7 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make -f Makefile.adaptive'
     self._clean = 'make -f Makefile.adaptive clean'
     self._inputs = []
-    for i in range(4, 12+1):
+    for i in range(1, 16+1):
       self._inputs.append('%d %d %d'%(i*16, i*16, i*16))
     self._executable = f'AMGMk'
 
@@ -39,60 +39,74 @@ class Benchmark(BaseBenchmark):
     exec_time_pattern = 'Wall time = (.*) seconds'
     tmp =  re.findall(exec_time_pattern, stdout)
     if len(tmp) == 0:
-      return None
+        return None
     return tmp[0]
 
   def extractInputFromCMD(self, cmd):
     return ','.join(cmd.split(' ')[1:])
 
   def visualize(self, df, outfile, sizes):
-    import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
+    import matplotlib
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = df['Input'].str.split(',', expand=True)[0] 
     df['Input'] = df['Input'].astype(int)
-    df = df[(df['Input'] > 4*16) & (df['Input'] < 12 * 16)]
+    oracle = df[df['Execution Type'] == 'Oracle']
+    online = df[df['Execution Type'] == 'Online']
 
-    df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
-    unique_policies = df['Execution Type'].unique()
-    df = df.groupby(['System', 'Execution Type', 'Input']).mean().reset_index()
+    df = df[ ((df['Execution Type'].isin(['Oracle', 'Online'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
+    map_names={}
+    print(df['Policy'].unique())
+    for i in range(60,101,4): 
+        val=100-i
+        map_names[f'gpu{i}']=f'({i},{val})'
+    map_names['gpu0'] = '(0,100)'
+    print (map_names.keys())
+    df["Policy"].replace(map_names, inplace=True)
+    df = df.groupby(['System', 'Execution Type', 'Policy', 'Input']).mean().reset_index()
+    df['TMP_ID'] = df['Execution Type'] + ':' + df['Policy']
     print(df)
-    df = df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
-    print(df)
-    print(unique_policies)
-    unique_policies = unique_policies[ unique_policies != 'Static,GPU']
-    for u in unique_policies:
-        df[f'Speed Up {u}'] = df['Static,GPU']/df[u] 
 
-    for u in unique_policies:
-        df[u] = df[f'Speed Up {u}']
-        df = df.drop([f'Speed Up {u}'], axis=1)
-    df = df.drop(['Static,GPU'], axis = 1)
-    df = pd.melt(df, id_vars=['System', 'Input'], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
+    df["Policy"].replace(map_names, inplace=True)
+    df = df.groupby(['System', 'Execution Type', 'Policy', 'Input']).mean().reset_index()
+    df['TMP_ID'] = df['Execution Type'] + ':' + df['Policy']
+    print(df)
+    df = df.pivot(index=['System', 'Input'], columns='TMP_ID', values='Execution time (s)').reset_index()
+    print(df)
+    vals = []
+    for v in df.columns:
+        if v != 'System' and v != 'Input':
+            vals.append(v)
+            df[v] = df['Static:(100,0)'] / df[v] 
+    df = pd.melt(df, id_vars=['System', 'Input'], value_name = 'Speedup', var_name = 'TMP_ID', value_vars=vals).reset_index().dropna(axis=0)
+    df[['Execution Type', 'Partition']] = df['TMP_ID'].str.split(':', expand=True)  
+    df = df[df['TMP_ID'] != 'Static:(100,0)']
+
     sns.set(font_scale=1.25)
     sns.set_style("whitegrid")
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
-    with sns.plotting_context(rc={"legend.fontsize":20, 'text.usetex' : True}):
-        g = sns.relplot(data=df, x='Input', y='Speedup',
-                        col='System', hue='Policy',
+    #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
+    with sns.plotting_context(rc={'text.usetex' : True}):
+        g = sns.relplot(data=df, x='Input', 
                         col_order = ['lassen', 'pascal', 'corona'],
-                        markers=True,
-                        style='Policy',
-                        edgecolor='black', 
-                        aspect=1.6,
+                        y='Speedup',
+                        col='System', 
+                        hue='Execution Type', 
+                        style='Partition', 
+                        #markers=markers,
+                        edgecolor='black',
                         alpha=0.7,
-                        s=120,
-                        lw=2, kind='scatter',
+                        aspect=1.6,
+                        lw=4, kind='scatter',
                         facet_kws={'sharey': False, 'sharex': True},
-                        legend="full",
-                        )
+                        legend="full")
         plt.setp(g._legend.get_title(), fontsize=20)
-        sns.move_legend(g,loc='center', title='Policy', frameon=True)
+        sns.move_legend(g,loc='center', frameon=True, ncol=3)
         leg = g._legend
-        leg.set_bbox_to_anchor([0.95,0.75]) 
+        leg.set_bbox_to_anchor([0.15,0.75]) 
         for lh in g._legend.legendHandles:
             lh.set_alpha(0.7)
             lh._sizes = [120]
@@ -104,11 +118,9 @@ class Benchmark(BaseBenchmark):
             c.set_xlabel("X-Axis", fontsize = 24)
             c.set_ylabel("Y-Axis", fontsize = 24)
             c.set_title(s, fontsize = 24)
-        print(axes.shape)
-        g.set_axis_labels(r'Grid Size ($n^3)$', 'speedup')
+        g.set_axis_labels('Grid Size ($n^3$)', 'speedup')
         #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
         plt.tight_layout()
-        plt.savefig(f'{outfile}_speedup.pdf')
+        plt.savefig(f'{outfile}_coexec_speedup.pdf')
         plt.close()
-
-
+        return
