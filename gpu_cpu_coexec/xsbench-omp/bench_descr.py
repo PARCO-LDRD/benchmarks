@@ -60,6 +60,7 @@ class Benchmark(BaseBenchmark):
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df = df.loc[df['Type'] == 'large',]
     df = df.drop(['Input', 'Type'],axis=1)
+    df = df[(df['Input'] > 4*16) & (df['Input'] < 12 * 16)]
     df['lookups'] = df['lookups'].astype(int)
     df = df[df ['lookups'] >= 256*5000]
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
@@ -123,7 +124,7 @@ class Benchmark(BaseBenchmark):
             c.set_title(s, fontsize = 24)
             c.set_xscale('log', base=2)
         print(axes.shape)
-        g.set_axis_labels(r'Look ups \n (log2)', 'speedup')
+        g.set_axis_labels('Look ups \n ($log2$)', 'speedup')
         #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
         plt.tight_layout()
         plt.savefig(f'{outfile}_coexec_speedup.pdf')
