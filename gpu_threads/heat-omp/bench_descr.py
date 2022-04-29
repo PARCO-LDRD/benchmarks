@@ -63,6 +63,7 @@ class Benchmark(BaseBenchmark):
     default['Execution Type'] ='default'
     online = online.groupby(['Execution Type', 'System', 'Input', 'Num Team Threads']).mean().reset_index()
     oracle = oracle.groupby(['Execution Type','System', 'Input', 'Num Team Threads']).mean().reset_index()
+    print(oracle)
     online['Speedup'] = default['Execution time (s)'] / online['Execution time (s)']
     oracle['Speedup'] = default['Execution time (s)'] / oracle['Execution time (s)']
     df = df.groupby(['Execution Type', 'System', 'Input', 'Num Team Threads']).mean().reset_index()
@@ -71,15 +72,18 @@ class Benchmark(BaseBenchmark):
     df = df.set_index(['System', 'Execution Type', 'Input'])
     print(df)
     for d in df['Num Team Threads'].unique():
-        print('Current')
         df.loc[df['Num Team Threads'] == d, 'Speedup'] = df.loc[df['Num Team Threads'] == defThreads, 'Execution time (s)'] / df.loc[df['Num Team Threads'] == d, 'Execution time (s)']
+
+    df = df.reset_index()
+    df['Execution Type'] = f'Static,Best'
+    idx = df.groupby(['System', 'Input'])['Speedup'].transform(max) == df['Speedup']
+    df = df[idx]
     df = pd.concat([online, oracle, df.reset_index()])
 
     sns.set(font_scale=1.25)
     sns.set_style("whitegrid")
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
-    markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
-    df = df[df['Num Team Threads'] != 256]
+    markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' , 'varies' : 's'}  
     with sns.plotting_context(rc={'text.usetex' : True}):
         g = sns.relplot(data=df, x='Input', 
                         col_order = ['lassen', 'pascal', 'corona'],
@@ -89,9 +93,11 @@ class Benchmark(BaseBenchmark):
                         style='Num Team Threads', 
                         markers=markers,
                         edgecolor='black',
+                        s=200,
                         alpha=0.7,
+                        aspect=1.6,
                         lw=4, kind='scatter',
-                        facet_kws={'sharey': False, 'sharex': True},
+                        facet_kws={'sharey': True, 'sharex': True},
                         legend="full")
         plt.setp(g._legend.get_title(), fontsize=20)
         sns.move_legend(g,loc='center', frameon=True, ncol=3)

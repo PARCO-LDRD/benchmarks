@@ -57,46 +57,73 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     df[['Size', 'lookups']] = df['Input'].str.split(':', expand=True)
+    df = df[df['Size'] == 'large']
     df['lookups'] = df['lookups'].astype(int)
     df['Execution time (s)'] = df['Execution time (s)']/1e6
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
+    defThreads=256
+    df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
+    df=df.drop(['Input'],axis=1)
+    df = df.groupby(['System', 'Execution Type', 'Num Team Threads', 'lookups']).mean().reset_index()
+    df['Merged'] = df['Execution Type'] + ':' + df['Num Team Threads'].astype(str)
+    df = df.drop(['Execution Type', 'Num Team Threads'], axis=1)
+    unique = (df['Merged'].unique())
+    df = df.pivot(index=['System', 'lookups'], columns='Merged', values='Execution time (s)').reset_index()
 
-    static_df = df[df['Execution Type'] == 'Static']
-    oracle = df[df['Execution Type'] == 'Oracle']
-    static_df = static_df.groupby(['System', 'Input', 'Num Team Threads', 'Size', 'lookups']).mean().reset_index()
-    oracle = oracle.groupby(['System', 'Input', 'Num Team Threads', 'Size', 'lookups']).mean().reset_index()
-    best = static_df.loc[static_df.groupby(['System', 'Input'])['Execution time (s)'].idxmin()]
-    worst = static_df.loc[static_df.groupby(['System', 'Input'])['Execution time (s)'].idxmax()]
-    worst['Execution Type'] = 'Static-Worst'
-    best['Execution Type'] = 'Static-Best'
-    oracle['Execution Type'] = 'Oracle'
-    artificial = pd.concat([worst, best, oracle], axis = 0).reset_index()
-    artificial['Num Team Threads'] = (artificial['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
-    artificial = df.pivot(index=['System', 'Input'], columns='Execution Type', values='Execution time (s)').reset_index()
-    print(artificial)
-    return
+    vals = []
+    for v in df.columns:
+        if v != 'System' and v != 'lookups':
+            vals.append(v)
+            df[v] = df['Static:256'] / df[v] 
+    cols = []
+    for v in vals:
+        if 'Static' not in v:
+            cols.append(v)
+    df = df[['System', 'lookups'] + cols]
+    df = pd.melt(df, id_vars=['System', 'lookups'], value_name = 'Speedup', var_name = 'Merged', value_vars=cols).reset_index().dropna(axis=0)
+    df[['Execution Type', 'Num Team Threads']] = df['Merged'].str.split(':', expand=True)  
+    df['Num Team Threads'] = df['Num Team Threads'].astype(int)
+    df = df[df['Execution Type'] != 'Online']
+    df = df.drop('Merged', axis=1)
 
-    fig, ax = plt.subplots(figsize=sizes)
-    g = sns.relplot(data=artificial, x='lookups', 
-                    y='Execution time (s)',
-                    col='System', 
-                    hue='Execution Type', 
-                    row='Size', 
-                    style='Num Team Threads', 
-                    kind='scatter',
-                    edgecolor='black',
-                    alpha=0.3,
-                    facet_kws={'sharey': False, 'sharex': True}
-                    )
-
-    for r in g.axes:
-        for c in r:
-            c.set_yscale('log', base=10)
-            c.set_xscale('log', base=2)
+    sns.set(font_scale=1.25)
+    sns.set_style("whitegrid")
+    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
+    markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
+    with sns.plotting_context(rc={'text.usetex' : True}):
+        g = sns.relplot(data=df, x='lookups', 
+                        col_order = ['lassen', 'pascal', 'corona'],
+                        y='Speedup',
+                        col='System', 
+                        hue='Execution Type', 
+                        style='Num Team Threads', 
+                        markers=markers,
+                        edgecolor='black',
+                        alpha=0.7,
+                        aspect=1.6,
+                        lw=4, kind='scatter',
+                        facet_kws={'sharey': False, 'sharex': True},
+                        legend="full")
+        plt.setp(g._legend.get_title(), fontsize=20)
+        sns.move_legend(g,loc='center', frameon=True, ncol=3)
+        leg = g._legend
+        leg.set_bbox_to_anchor([0.47,0.75]) 
+        for lh in g._legend.legendHandles:
+            lh.set_alpha(0.7)
+            lh._sizes = [120]
+            lh
+        axes = g.axes
+        for c,s in zip(g.axes.flat,systems):
             c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-
-    g.set_axis_labels('Lookups\nlog2', 'Execution time (s)\nlog')
-    plt.tight_layout()
-    plt.savefig(f'{outfile}.pdf')
-    plt.close()
-
+            c.axhline(y=1.0, c='gray')
+            c.set_xlabel("X-Axis", fontsize = 24)
+            c.set_ylabel("Y-Axis", fontsize = 24)
+            c.set_title(s, fontsize = 24)
+            c.set_xscale('log', base=2)
+        print(axes.shape)
+        g.set_axis_labels('Look Ups\n($log2$)', 'speedup')
+        #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+        plt.tight_layout()
+        plt.savefig(f'{outfile}_threads_speedup.pdf')
+        plt.close()
+        return

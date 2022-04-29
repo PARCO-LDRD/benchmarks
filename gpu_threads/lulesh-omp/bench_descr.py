@@ -52,14 +52,12 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     defThread = 256
+    print(df[df['System'] == 'corona'])
+    return
     fig, ax = plt.subplots(figsize=sizes)
     df['Input'] = df['Input'].astype(int)
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
-    print(df[(df['System'] == 'corona') & (df['Execution Type'] != 'Static')])
-    df = df[df['System'] != 'corona']
-
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
-    print(df.loc[df['Num Team Threads'] != 'varies', 'Num Team Threads'])
     df.loc[df['Num Team Threads'] != 'varies', 'Num Team Threads'] = (df.loc[df['Num Team Threads'] != 'varies','Num Team Threads']).str.split('_', expand=True)[1].astype(int)
     oracle = df[df['Execution Type'] == 'Oracle']
     online = df[df['Execution Type'] == 'Online']
@@ -68,8 +66,6 @@ class Benchmark(BaseBenchmark):
     default['Execution Type'] ='default'
     online = online.groupby(['Execution Type', 'System', 'Input', 'Num Team Threads']).mean().reset_index()
     oracle = oracle.groupby(['Execution Type','System', 'Input', 'Num Team Threads']).mean().reset_index()
-    print("Before")
-    print(oracle)
     oracle = oracle.set_index([ "System", "Input"])
     online = online.set_index([ "System", "Input"])
     default = default.set_index([ "System", "Input"])
@@ -79,9 +75,11 @@ class Benchmark(BaseBenchmark):
     df['Speedup'] = -1.0
     df = df.set_index(['System', 'Execution Type', 'Input'])
     for d in df['Num Team Threads'].unique():
-        print('Current')
         df.loc[df['Num Team Threads'] == d, 'Speedup'] = df.loc[df['Num Team Threads'] == defThread, 'Execution time (s)'] / df.loc[df['Num Team Threads'] == d, 'Execution time (s)']
-    print("Online")
+    df = df.reset_index()
+    df['Execution Type'] = 'Static,Best'
+    idx = df.groupby(['System', 'Input'])['Speedup'].transform(max) == df['Speedup']
+    df = df[idx]
     online = online.reset_index()
     oracle = oracle.reset_index()
     df = pd.concat([online, oracle, df.reset_index()])
@@ -89,7 +87,8 @@ class Benchmark(BaseBenchmark):
     sns.set_style("whitegrid")
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' , 'varies' : 's'}  
-    df = df[df['Num Team Threads'] != 256]
+    markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' , 'varies' : 's'}  
+    #df = df[df['Num Team Threads'] != 256]
     with sns.plotting_context(rc={'text.usetex' : True}):
         g = sns.relplot(data=df, x='Input', 
                         y='Speedup',
@@ -100,9 +99,10 @@ class Benchmark(BaseBenchmark):
                         markers=markers,
                         edgecolor='black',
                         aspect=1.6,
+                        s=200,
                         alpha=0.7,
                         lw=4, kind='scatter',
-                        facet_kws={'sharey': False, 'sharex': True},
+                        facet_kws={'sharey': True, 'sharex': True},
                         legend="full")
         plt.setp(g._legend.get_title(), fontsize=20)
         sns.move_legend(g,loc='center', frameon=True, ncol=3)

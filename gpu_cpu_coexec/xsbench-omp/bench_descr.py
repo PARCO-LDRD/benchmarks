@@ -60,7 +60,6 @@ class Benchmark(BaseBenchmark):
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df = df.loc[df['Type'] == 'large',]
     df = df.drop(['Input', 'Type'],axis=1)
-    df = df[(df['Input'] > 4*16) & (df['Input'] < 12 * 16)]
     df['lookups'] = df['lookups'].astype(int)
     df = df[df ['lookups'] >= 256*5000]
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
@@ -103,9 +102,10 @@ class Benchmark(BaseBenchmark):
                         #markers=markers,
                         edgecolor='black',
                         alpha=0.7,
+                        s=200,
                         aspect=1.6,
                         lw=4, kind='scatter',
-                        facet_kws={'sharey': False, 'sharex': True},
+                        facet_kws={'sharey': True, 'sharex': True},
                         legend="full")
         plt.setp(g._legend.get_title(), fontsize=20)
         sns.move_legend(g,loc='center', frameon=True, ncol=3)
