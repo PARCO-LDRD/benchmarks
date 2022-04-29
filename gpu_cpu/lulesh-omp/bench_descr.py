@@ -84,7 +84,7 @@ class Benchmark(BaseBenchmark):
                         alpha=0.7,
                         s=200,
                         lw=2, kind='scatter',
-                        sharey = False,
+                        facet_kws={'sharey': False, 'sharex': True},
                         legend="full",
                         )
         plt.setp(g._legend.get_title(), fontsize=20)
