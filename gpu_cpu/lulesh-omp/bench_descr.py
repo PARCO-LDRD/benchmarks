@@ -82,7 +82,7 @@ class Benchmark(BaseBenchmark):
                         edgecolor='black', 
                         aspect=1.6,
                         alpha=0.7,
-                        s=120,
+                        s=200,
                         lw=2, kind='scatter',
                         facet_kws={'sharey': False, 'sharex': True},
                         legend="full",
@@ -90,7 +90,7 @@ class Benchmark(BaseBenchmark):
         plt.setp(g._legend.get_title(), fontsize=20)
         sns.move_legend(g,loc='center', title='Policy', frameon=True)
         leg = g._legend
-        leg.set_bbox_to_anchor([0.95,0.75]) 
+        leg.set_bbox_to_anchor([0.45,0.75]) 
         for lh in g._legend.legendHandles:
             lh.set_alpha(0.7)
             lh._sizes = [120]

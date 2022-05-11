@@ -83,7 +83,7 @@ class Benchmark(BaseBenchmark):
                         edgecolor='black', 
                         aspect=1.6,
                         alpha=0.7,
-                        s=120,
+                        s=200,
                         lw=2, kind='scatter',
                         facet_kws={'sharey': False, 'sharex': True},
                         legend="full",

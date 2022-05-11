@@ -95,7 +95,7 @@ class Benchmark(BaseBenchmark):
     sns.set_style("whitegrid")
     systems=['Power9 + V100','Intel + P100']
     #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
-    with sns.plotting_context(rc={'text.usetex' : True}):
+    with sns.plotting_context(rc={'text.usetex' : True, 'figure.figsize':sizes}):
         g = sns.relplot(data=df, x='lookups', 
                         col_order = ['lassen', 'pascal'],
                         y='Speedup',
@@ -105,14 +105,15 @@ class Benchmark(BaseBenchmark):
                         #markers=markers,
                         edgecolor='black',
                         alpha=0.7,
-                        aspect=1.6,
+                        s=200,
+#                        aspect=3,
                         lw=4, kind='scatter',
-                        facet_kws={'sharey': False, 'sharex': True},
+                        facet_kws={'sharey': True, 'sharex': True},
                         legend="full")
         plt.setp(g._legend.get_title(), fontsize=20)
         sns.move_legend(g,loc='center', frameon=True, ncol=3)
         leg = g._legend
-        leg.set_bbox_to_anchor([0.75,0.15]) 
+        leg.set_bbox_to_anchor([0.32,0.75]) 
         for lh in g._legend.legendHandles:
             lh.set_alpha(0.7)
             lh._sizes = [120]

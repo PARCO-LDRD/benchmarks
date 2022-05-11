@@ -59,9 +59,10 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
 #    fig, ax = plt.subplots(figsize=sizes)
     df[['Size', 'lookups']] = df['Input'].str.split(':', expand=True)
+    df = df[df['Size'] == 'large'] 
     df['lookups'] = df['lookups'].astype(int)
     df = df[df ['lookups'] >= 256*5000]
-    print(df)
+    print(df[(df['lookups'] == 256 * 5000) & (df['System'] == 'corona')]) 
     df['Execution time (s)'] = df['Execution time (s)']
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
     unique_policies = df['Execution Type'].unique()
@@ -91,7 +92,7 @@ class Benchmark(BaseBenchmark):
                         edgecolor='black', 
                         aspect=1.6,
                         alpha=0.7,
-                        s=120,
+                        s=200,
                         lw=2, kind='scatter',
                         facet_kws={'sharey': False, 'sharex': True},
                         legend="full",
@@ -120,6 +121,7 @@ class Benchmark(BaseBenchmark):
         #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
         plt.tight_layout()
         plt.savefig(f'{outfile}_speedup.pdf')
+        print(f'{outfile}_speedup.pdf')
         plt.close()
 
 
