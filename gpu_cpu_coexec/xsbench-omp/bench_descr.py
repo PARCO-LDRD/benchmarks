@@ -11,8 +11,8 @@ class Benchmark(BaseBenchmark):
     self._build = f'FOPENMP="{compile_flags}" make'
     self._clean = 'make clean'
     self._inputs = []
-    for size in ['small', 'large']:
-      for i in [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]:
+    for size in ['large']:
+      for i in [256, 512, 1024, 2048, 4096, 8192, 16384]:
         lus = i * 5000
         in_args = f'-m event -s {size} -l {lus}'
         self._inputs.append(in_args)
