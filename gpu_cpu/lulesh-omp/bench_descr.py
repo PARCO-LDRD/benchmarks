@@ -68,9 +68,9 @@ class Benchmark(BaseBenchmark):
     df[feature_name] = df['Input'].astype(int)
     df=df[df[feature_name] > 40]
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
-    self.heatmap(df, outfile, feature_name, sizes)
+    self.heatmap(df, outfile, feature_name, sizes, setTitle=True)
     df = self.computeSpeedup(df, feature_name) 
-    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'speedup')
+    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'speedup', setTitle=True)
 
 
 

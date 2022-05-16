@@ -51,7 +51,7 @@ class BaseBenchmark(ABC):
   def extractInputFromCMD(self, cmd):
     pass
 
-  def heatmap(self, df, outfile, feature_name, sizes, logx=False):
+  def heatmap(self, df, outfile, feature_name, sizes, logx=False, setTitle=False):
     import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -91,7 +91,7 @@ class BaseBenchmark(ABC):
     #create figure and #subplots
     f, (axes) = plt.subplots(1, len(plot['System'].unique()), figsize=sizes)
     # Sizes of color bar axes [left, bottom, width, height] 
-    cbar_ax = f.add_axes([.92, .34, .01, .3])
+    cbar_ax = f.add_axes([.92, .36, .01, .24])
     plt.rc('text', usetex=True)
     rcParams['font.family'] = 'sans-serif'
     # Go Over the systems and plot the heatmap
@@ -110,23 +110,29 @@ class BaseBenchmark(ABC):
               vmin=0, vmax=100, cbar=True,cbar_ax=cbar_ax,linecolor='white', 
               linewidths=0.5, square=True, cmap=sns.light_palette("seagreen", as_cmap=True),
               cbar_kws={'label': '% Experiments \n Executed on GPU', 'shrink': 10},
-              annot_kws={"fontsize":8}, xticklabels=tg)
+              annot_kws={"fontsize":8, 'fontname':"sans-serif"}, xticklabels=tg)
       print(g)
       g.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x,pos: ('{{:.{:1d}f}}'.format(int(np.maximum(-np.log10(x),0)))).format(x)))
-      g.set_yticklabels(g.get_yticklabels(), rotation = 0)
-      g.set_xticklabels(g.get_xticklabels(), rotation = 30)
-      ax.set_title(systems[index])
-      ax.set_ylabel('')
+      g.set_yticklabels(g.get_yticklabels(), rotation = 0, fontdict={'size':8, 'family':'sans-serif'})
+      g.set_xticklabels(g.get_xticklabels(), rotation = 30, fontdict={'size':8, 'family':'sans-serif'})
+      if setTitle:
+          ax.set_title(systems[index])
+      else:
+          ax.set_title('')
+      ax.set_ylabel('', fontsize=8, fontname="sans-serif")
+      ax.set_xlabel(feature_name, fontsize=8, fontname="sans-serif")
       if i != 0:
           ax.get_yaxis().set_visible(False)
     plt.yticks(rotation=0)
+    cbar_ax.tick_params(labelsize=8)
+    cbar_ax.set_ylabel(cbar_ax.get_ylabel(), size=8, fontname="sans-serif")
     #Manually adjust space between subplots.
     plt.subplots_adjust(wspace=0.02, hspace=0)
     print(f'{outfile}_heatmap.pdf')
     f.savefig(f'{outfile}_heatmap.pdf',bbox_inches='tight')
     plt.close()
 
-  def scatterplot(self, df, outfile, feature_name, sizes, xAxisTitle, yAxisTitle,  logx=False, xbase=2, logy = False, ybase=2, ncol=1, legendPos=[0.95,0.75]):
+  def scatterplot(self, df, outfile, feature_name, sizes, xAxisTitle, yAxisTitle,  logx=False, xbase=2, logy = False, ybase=2, legend=False, ncol=2, legendPos=[0.555,0.78], setTitle=False):
     import seaborn as sns
     import matplotlib
     import pandas as pd
@@ -136,7 +142,9 @@ class BaseBenchmark(ABC):
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     plt.rc('text', usetex=True)
     rcParams['font.family'] = 'sans-serif'
-    with sns.plotting_context(rc={"legend.fontsize":20, 'text.usetex' : True}):
+    sns.set(rc={'figure.figsize':sizes})
+    sns.set_style("whitegrid", {'axes.grid' : False})
+    with sns.plotting_context(rc={"legend.fontsize":26, 'text.usetex' : True}):
         g = sns.relplot(data=df, x=feature_name, y='Speedup',
                         col='System', hue='Policy',
                         col_order = ['lassen', 'pascal', 'corona'],
@@ -148,16 +156,17 @@ class BaseBenchmark(ABC):
                         s=200,
                         lw=6, kind='scatter',
                         facet_kws={'sharey': False, 'sharex': True},
-                        legend="full",
+                        legend=legend,
                         )
-        plt.setp(g._legend.get_title(), fontsize=20)
-        sns.move_legend(g,loc='center', title='Policy', frameon=True, ncol=ncol)
-        leg = g._legend
-        leg.set_bbox_to_anchor(legendPos) 
-        for lh in g._legend.legendHandles:
-            lh.set_alpha(0.9)
-            lh._sizes = [200]
-            lh
+        if legend:
+            plt.setp(g._legend.get_title(), fontsize=28)
+            sns.move_legend(g,loc='center', title='Policy', frameon=True, ncol=ncol)
+            leg = g._legend
+            leg.set_bbox_to_anchor(legendPos) 
+            for lh in g._legend.legendHandles:
+                lh.set_alpha(0.9)
+                lh._sizes = [200]
+                lh
         axes = g.axes
         for c,s in zip(g.axes.flat,systems):
             c.set_yticklabels(c.get_yticklabels(), fontdict={'size':30})
@@ -171,7 +180,10 @@ class BaseBenchmark(ABC):
                 c.set_xscale('log', base=xbase)
             if logy:
                 c.set_xscale('log', base=ybase)
-            c.set_title(s, fontsize = 38)
+            if setTitle:
+                c.set_title(s, fontsize = 38)
+            else:
+                c.set_title('')
         print(axes.shape)
         g.set_axis_labels(xAxisTitle, yAxisTitle)
         plt.tight_layout()
@@ -193,3 +205,116 @@ class BaseBenchmark(ABC):
     df = df.drop(['Static,GPU'], axis = 1)
     df = pd.melt(df, id_vars=['System', feature_name], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
     return df
+
+  def computeSpeedUpPerPolicy(self, df, inputName, policyName='Num Team Threads', execType='Execution Type', defThreads=256, defaultExec='Static'):
+    import pandas as pd
+    oracle = df[df[execType] == 'Oracle']
+    online = df[df[execType] == 'Online']
+    default = df[((df[policyName] == defThreads) & (df[execType] == defaultExec))]
+    default = default.groupby(['System', inputName]).mean().reset_index()
+    default[execType] ='default'
+    online = online.groupby([execType, 'System', inputName, policyName]).mean().reset_index()
+    oracle = oracle.groupby([execType,'System', inputName, policyName]).mean().reset_index()
+    oracle = oracle.set_index([ "System", inputName])
+    online = online.set_index([ "System", inputName])
+    default = default.set_index([ "System", inputName])
+    online['Speedup'] = default['Execution time (s)'] / online['Execution time (s)']
+    oracle['Speedup'] = default['Execution time (s)'] / oracle['Execution time (s)']
+    df = df[((df['Execution Type'] == 'Static'))]
+    df = df.groupby(['System', inputName, policyName]).mean().reset_index()
+    df['Speedup'] = -1.0
+    df = df.set_index(['System', inputName])
+    for d in df[policyName].unique():
+        df.loc[df[policyName] == d, 'Speedup'] = df.loc[df[policyName] == defThreads, 'Execution time (s)'] / df.loc[df[policyName] == d, 'Execution time (s)']
+        df.loc[df[policyName] == d, execType] = f'Static,Best'
+    online = online.reset_index()
+    oracle = oracle.reset_index()
+    df = df.reset_index()
+    idx = df.groupby(['System', inputName])['Speedup'].transform(max) == df['Speedup']
+    df = df[idx]
+    return pd.concat([online, oracle, df.reset_index()])
+
+  def scatterplotPerPolicy(self, df, outfile, feature_name, sizes, xAxisTitle, yAxisTitle, hue='Execution Type', style='Num Team Threads',  logx=False, xbase=2, logy = False, ybase=2, legend=False, setTitle=False, rotation=0):
+    import matplotlib
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    import seaborn as sns
+    from matplotlib import rcParams
+    from matplotlib.lines import Line2D
+    sns.set_style("whitegrid")
+    plt.rc('text', usetex=True)
+    rcParams['font.family'] = 'sans-serif'
+    sns.set(rc={'figure.figsize':sizes})
+    sns.set_style("whitegrid", {'axes.grid' : False})
+    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
+    markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' , 'varies' : 's'}  
+    color_codes = (sns.color_palette("cubehelix", 3))
+    hue_order= ['Online', 'Oracle', 'Static,Best']
+    colors=dict()
+    for c,h in zip(color_codes, hue_order):
+        colors[h] = c
+
+    with sns.plotting_context(rc={'text.usetex' : True}):
+        g = sns.relplot(data=df, x=feature_name, 
+                        col_order = ['lassen', 'pascal', 'corona'],
+                        y='Speedup',
+                        palette=colors,
+                        hue_order=hue_order,
+                        col='System', 
+                        hue=hue, 
+                        style=style, 
+                        markers=markers,
+                        edgecolor='black',
+                        aspect=1.6,
+                        alpha=0.9,
+                        s=200,
+                        lw=6, kind='scatter',
+                        facet_kws={'sharey': True, 'sharex': True},
+                        legend=legend)
+  
+
+        for i,(c,s) in enumerate(zip(g.axes.flat,systems)):
+            handles, labels = c.get_legend_handles_labels() 
+            print(handles, labels)
+            if i == 1 and legend:
+              g.legend.remove()
+              legendsm = []
+              legendsc = []
+              legendPos=[0.38,0.99]
+              for k,v in markers.items():
+                legendsm.append(Line2D([0], [0], lw=6, markersize=14, marker=v, color='gray', mec='black',  label=k, linestyle='None'))     
+              for k,v in colors.items():
+                legendsc.append(Line2D([0], [0], lw=6, markersize=14, marker='o', color=v, mec='black',  label=k, linestyle='None'))     
+
+              thread_leg = c.legend(handles=legendsm, loc='upper left', title='Num Team Threads',fontsize=26, ncol=2)
+              thread_leg.set_bbox_to_anchor(legendPos)
+              plt.setp(thread_leg.get_title(), fontsize=28)
+              c.add_artist(thread_leg)
+              legendPos=[0.01,0.99]
+              policy_leg = c.legend(handles=legendsc, loc='upper left', title='Policy',fontsize=26)
+              policy_leg.set_bbox_to_anchor(legendPos)
+              plt.setp(policy_leg.get_title(), fontsize=28)
+              c.add_artist(policy_leg)
+
+
+            c.set_yticklabels(c.get_yticklabels(), fontdict={'size':30})
+            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':30},rotation = rotation)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
+            #c.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, _: '{:.3g}'.format(x)))
+            c.axhline(y=1.0, c='gray')
+            c.set_xlabel('', fontsize = 34)
+            c.set_ylabel('', fontsize = 34)
+            if logx:
+                c.set_xscale('log', base=xbase)
+            if logy:
+                c.set_xscale('log', base=ybase)
+            if setTitle:
+                c.set_title(s, fontsize = 38)
+            else:
+                c.set_title('')
+
+        g.set_axis_labels(xAxisTitle, yAxisTitle)
+        plt.tight_layout()
+        plt.savefig(f'{outfile}_threads_speedup.pdf')
+        plt.close()
+
