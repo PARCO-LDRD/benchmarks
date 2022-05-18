@@ -57,12 +57,16 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     import matplotlib
     fig, ax = plt.subplots(figsize=sizes)
+    print(df['Input'].unique())
     df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
     df = df.loc[df['Type'] == 'large',]
     df = df.drop(['Input', 'Type'],axis=1)
     df['lookups'] = df['lookups'].astype(int)
     df = df[df ['lookups'] >= 256*5000]
+    print(df[(df['Policy'] == 'gpu100') & (df['Execution Type'] == 'Static')])
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
+    print(df)
+    return
     map_names={}
     print(df['Policy'].unique())
     for i in range(60,101,4): 
@@ -82,11 +86,9 @@ class Benchmark(BaseBenchmark):
         if v != 'System' and v != 'lookups':
             vals.append(v)
             df[v] = df['Static:(100,0)'] / df[v] 
-    print(vals)
     df = pd.melt(df, id_vars=['System', 'lookups'], value_name = 'Speedup', var_name = 'TMP_ID', value_vars=vals).reset_index().dropna(axis=0)
     df[['Execution Type', 'Partition']] = df['TMP_ID'].str.split(':', expand=True)  
     df = df[df['TMP_ID'] != 'Static:(100,0)']
-    print(df)
 
     sns.set(font_scale=1.25)
     sns.set_style("whitegrid")
@@ -105,7 +107,7 @@ class Benchmark(BaseBenchmark):
                         s=200,
                         aspect=1.6,
                         lw=4, kind='scatter',
-                        facet_kws={'sharey': True, 'sharex': True},
+                        facet_kws={'sharey': False, 'sharex': True},
                         legend="full")
         plt.setp(g._legend.get_title(), fontsize=20)
         sns.move_legend(g,loc='center', frameon=True, ncol=3)

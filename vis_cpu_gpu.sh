@@ -9,4 +9,5 @@ for i in ${!benches[@]}; do
     echo $b,$n
     ./harness.py -b gpu_cpu/$b/ -r new_gpu_results/ -a visualize -j 1
     pdfcrop new_gpu_results/${n}_speedup.pdf
+    pdfcrop new_gpu_results/${n}_heatmap.pdf
 done 

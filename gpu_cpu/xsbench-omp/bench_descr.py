@@ -58,70 +58,13 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
 #    fig, ax = plt.subplots(figsize=sizes)
-    df[['Size', 'lookups']] = df['Input'].str.split(':', expand=True)
+    feature_name = u'Look Ups\n($log2$)'
+    df[['Size', feature_name]] = df['Input'].str.split(':', expand=True)
     df = df[df['Size'] == 'large'] 
-    df['lookups'] = df['lookups'].astype(int)
-    df = df[df ['lookups'] >= 256*5000]
-    print(df[(df['lookups'] == 256 * 5000) & (df['System'] == 'corona')]) 
-    df['Execution time (s)'] = df['Execution time (s)']
+    df[feature_name] = df[feature_name].astype(int)
+    df = df[df [feature_name] >= 256*5000]
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
-    unique_policies = df['Execution Type'].unique()
-    df = df.groupby(['System', 'Execution Type', 'lookups']).mean().reset_index()
-    print(df)
-    df = df.pivot(index=['System', 'lookups'], columns='Execution Type', values='Execution time (s)').reset_index()
-    print(df)
-    print(unique_policies)
-    unique_policies = unique_policies[ unique_policies != 'Static,GPU']
-    for u in unique_policies:
-        df[f'Speed Up {u}'] = df['Static,GPU']/df[u] 
-
-    for u in unique_policies:
-        df[u] = df[f'Speed Up {u}']
-        df = df.drop([f'Speed Up {u}'], axis=1)
-    df = df.drop(['Static,GPU'], axis = 1)
-    df = pd.melt(df, id_vars=['System', 'lookups'], value_name = 'Speedup', var_name = 'Policy', value_vars=unique_policies).reset_index()
-    sns.set(font_scale=1.25)
-    sns.set_style("whitegrid")
-    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
-    with sns.plotting_context(rc={"legend.fontsize":20, 'text.usetex' : True}):
-        g = sns.relplot(data=df, x='lookups', y='Speedup',
-                        col='System', hue='Policy',
-                        col_order = ['lassen', 'pascal', 'corona'],
-                        markers=True,
-                        style='Policy',
-                        edgecolor='black', 
-                        aspect=1.6,
-                        alpha=0.7,
-                        s=200,
-                        lw=2, kind='scatter',
-                        facet_kws={'sharey': False, 'sharex': True},
-                        legend="full",
-                        )
-        plt.setp(g._legend.get_title(), fontsize=20)
-        sns.move_legend(g,loc='center', ncol=2, title='Policy', frameon=True)
-        leg = g._legend
-        leg.set_bbox_to_anchor([0.56,0.7]) 
-        for lh in g._legend.legendHandles:
-            lh.set_alpha(0.7)
-            lh._sizes = [120]
-
-        axes = g.axes
-        for c,s in zip(g.axes.flat,systems):
-            h,l = c.get_legend_handles_labels()
-            print(h,l)
-            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-            c.axhline(y=1.0, c='gray')
-
-            c.set_xlabel("X-Axis", fontsize = 24)
-            c.set_ylabel("Y-Axis", fontsize = 24)
-            c.set_xscale('log', base=2)
-            c.set_title(s, fontsize = 24)
-        print(axes.shape)
-        g.set_axis_labels('Look Ups\n($log2$)', 'speedup')
-        #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
-        plt.tight_layout()
-        plt.savefig(f'{outfile}_speedup.pdf')
-        print(f'{outfile}_speedup.pdf')
-        plt.close()
-
-
+    self.heatmap(df, outfile, feature_name, sizes, logx=True)
+    df = self.computeSpeedup(df, feature_name) 
+    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'speedup', logx=True, legend='brief')# ncol=2, legendPos=[0.55,0.75])
+    return
