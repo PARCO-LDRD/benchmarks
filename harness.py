@@ -117,8 +117,9 @@ def pack(e, regions, bench, csv_files):
         print("\n")
         print(e)
         print('Skipping')
-        continue
+        sys.exit()
       trace_file =f'{csv_path}/trace/{prefix}-{k}-rank-0.csv'
+      print(trace_file, policy_index)
       region_name, policy_id = extract_execution_policy(trace_file, policy_index)
       if k != region_name:
         raise RuntimeError('Region Names do not match (csv VS binary region names)')
@@ -319,11 +320,11 @@ def createOnlineRuns(root_dir, bench, regions, space, repeats):
   execTypes = [ { 'type' : 'Online csv', 'apollo_env' : {
                                 'APOLLO_POLICY_MODEL' : 'DecisionTree',
                                 'APOLLO_TRACE_CSV' : '1',
-                                'APOLLO_PER_REGION_TRAIN_PERIOD' : f'{max_policies}'
+                                'APOLLO_PER_REGION_TRAIN_PERIOD' : '{}'
                                 }, 'repeats' : 1},
                 { 'type' : 'Online Application Time', 'apollo_env' : {
                                 'APOLLO_POLICY_MODEL' : 'DecisionTree',
-                                'APOLLO_PER_REGION_TRAIN_PERIOD' : f'{max_policies}'
+                                'APOLLO_PER_REGION_TRAIN_PERIOD' : '{}'
                 }, 'repeats' : repeats }]
 
 
@@ -354,7 +355,7 @@ def createOnlineRuns(root_dir, bench, regions, space, repeats):
           tmp['hash'] = hs
           tmp['apollo_env'] = {}
           for k,v in e['apollo_env'].items():
-            tmp['apollo_env'][k] = v
+            tmp['apollo_env'][k] = v.format(max_policies)
           scenario.append(tmp)
   scenario_db = f'{root_dir}/scenaria.json'
   scenario = append_to_scenarios(root_dir, scenario)
@@ -451,7 +452,7 @@ def execute_experiment(root,system,e):
 
   with open(e['stderr'], 'w') as fd:
     fd.write(err)
-
+  print("END")
 #I need to delete directory cause I am using shmem.
   if 'Dynamic' in e['type'] or 'Adaptive' in e['type']:
     if "csv"in e['type']:
@@ -498,10 +499,19 @@ def main():
     else:
       with open(f'{experiment_root_dir}/scenaria.json', 'r') as fd:
         experiments = json.load(fd)
+
+      tmp_experiments = []
+      for e in experiments['experiments']:
+        if 'Adaptive' not in e['type']:
+          tmp_experiments.append(e)
+      experiments['experiments'] = tmp_experiments
+      with open(f'{experiment_root_dir}/scenaria.json', 'w') as fd:
+        json.dump(experiments, fd,indent=4)
+
       roi = []
       if args.type == 'adaptive':
         adaptive_exp = []
-        for i in range(1,10,1):
+        for i in range(1,11,1):
           for f in [0.25, 0.5, 0.75]:
             adaptive_exp += apollo_dynamic.get_adaptive_apollo_runs(experiments,percentage=f, state=i)
         unique = {}
@@ -509,6 +519,20 @@ def main():
         createDynamicRuns(experiment_root_dir, adaptive_exp, 1, 'Adaptive')
 
       if args.type == 'oracle':
+#        new_exp = []
+#        for e in experiments['experiments']:
+#          if 'Dynamic' in e['type']:
+#            hs = e['hash']
+#            dr = f'{experiment_root_dir}/runs/{hs}/'
+#            print(dr)
+#            if (os.path.exists(f'{dr}')):
+#              shutil.rmtree(f'{dr}')
+#          else:
+#            new_exp.append(e)
+#        experiments['experiments'] = new_exp
+#        with open(f'{experiment_root_dir}/scenaria.json', 'w') as fd:
+#          json.dump(experiments,fd, indent=4)
+#        return
         dSpace = apollo_dynamic.get_oracle_apollo_runs(experiments)
         createDynamicRuns(experiment_root_dir, dSpace, args.repeats, 'Dynamic')
 
@@ -519,6 +543,23 @@ def main():
   elif args.action == 'map-reduce':
     with open(f'{experiment_root_dir}/scenaria.json', 'r') as fd:
       experiments = json.load(fd)
+
+    models = {}
+    for e in experiments['experiments']:
+      if (('Adaptive' in e['type']) and ('csv' not in e['type'])):
+        for r in e['regions']:
+          v = e['regions'][r]
+          cmd_input = bench.extractInputFromCMD(e['cmd'])
+          if cmd_input not in models:
+            models[cmd_input] = dict()
+          policy = v['policy'].split(':')[1]
+          if policy  not in models[cmd_input]:
+            models[cmd_input][policy] = 0
+          models[cmd_input][policy] += 1
+    with open(f'{host}_experiments_{bench.name}.json', 'w') as fd:
+      json.dump(models,fd, indent=4)
+    print(len(bench.inputs))
+
 
     pending_experiments ={}
     pending_experiments['root_dir'] = experiments['root_dir']
@@ -572,6 +613,7 @@ def main():
     import pandas as pd
     out, err = compile(bench)
     regions = get_apollo_regions_variants( err )
+
     pd.set_option('display.max_rows', None)
     packed_exp = []
     for d in glob.glob(f'{args.results_dir}/*/{bench.name}/'):
@@ -585,6 +627,21 @@ def main():
       with open(f'{d}/scenaria.json','r') as fd:
         experiments = json.load(fd)
 
+      models = {}
+      for e in experiments['experiments']:
+        if (('Adaptive' in e['type']) and ('csv' not in e['type'])):
+          for r in e['regions']:
+            v = e['regions'][r]
+            cmd_input = bench.extractInputFromCMD(e['cmd'])
+            if cmd_input not in models:
+              models[cmd_input] = dict()
+            policy = v['policy'].split(':')[1]
+            if policy  not in models[cmd_input]:
+              models[cmd_input][policy] = 0
+            models[cmd_input][policy] += 1
+      with open(f'{system_name}_experiments_{bench.name}.json', 'w') as fd:
+        json.dump(models,fd, indent=4)
+
       pending = reduce_partial_results(experiments, bench)
       if len(pending) != 0:
         print (f'Skipping {system_name}')
@@ -593,6 +650,15 @@ def main():
                    'Adaptive': {},
                    'Online' : {}
                   }
+      correct_ones = []
+      for e in experiments['experiments']:
+        items_to_delete = []
+        for k,v in e['regions'].items():
+          if "NaN" in k:
+            items_to_delete.append(k)
+        for k in items_to_delete:
+          print(f'deleting {k}')
+          del e['regions'][k]
 
       for e in experiments['experiments']:
         if (('Adaptive' in e['type']) or ('Dynamic' in e['type'])
@@ -613,6 +679,30 @@ def main():
             csv_files['Adaptive'][e['g_hash']] = e
           elif 'Online' in e['type']:
             csv_files['Online'][e['g_hash']] = e
+      deletions={}
+      if system_name == 'corona':
+        for e in experiments['experiments']:
+          if 'Dynamic' in e['type']:
+            f = csv_files['Dynamic'][e['g_hash']]
+          elif 'Adaptive' in e['type']:
+            f = csv_files['Adaptive'][e['g_hash']]
+          elif 'Online' in e['type']:
+            c = csv_files['Online'][e['g_hash']]
+            hashV = c['hash']
+            trace_dir= f'{experiment_root_dir }/runs/{hashV}/trace'
+            print(trace_dir)
+            total_time = 0
+            for tmp in glob.glob(f'{trace_dir}/*csv'):
+              print(tmp)
+              csv = pd.read_csv(tmp, sep=' ', header=0, index_col=False)
+              total_time += csv.at[0,'xtime']
+            if 'measured' in e:
+              print('before', e['measured'])
+              e['measured'] = float(e['measured']) - float(total_time)
+              print('before', e['measured'])
+              if e['g_hash'] not in deletions:
+                deletions[e['g_hash']] = 0
+              deletions[e['g_hash']] += 1
 
       for e in experiments['experiments']:
         if 'Application Time' in e['type']:
