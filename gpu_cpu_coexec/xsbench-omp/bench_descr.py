@@ -50,6 +50,28 @@ class Benchmark(BaseBenchmark):
     vals=cmd.split(' ')
     return f'{vals[4]}:{vals[6]}'
 
+
+  def speedUpCoExec(self, df, feature_name, execution_types=['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100']):
+    import pandas as pd
+    map_names = dict()
+    for f in df['Policy'].unique():
+        val = int(f.replace('gpu',''))
+        map_names[f]=f'({val},{100-val})'
+    map_names['gpu0'] = '(0,100)'
+    df["Policy"].replace(map_names, inplace=True)
+    df = df.drop(['Id'], axis=1)
+    df = df.groupby(['System', 'Execution Type', 'Policy', feature_name]).mean().reset_index()
+    df['TMP_ID'] = df['Execution Type'] + ':' + df['Policy']
+    df = df.pivot(index=['System', feature_name], columns='TMP_ID', values='Execution time (s)').reset_index()
+    vals = []
+    for v in df.columns:
+        if v != 'System' and v != feature_name:
+            vals.append(v)
+            df[v] = df['Static:(100,0)'] / df[v] 
+    df = pd.melt(df, id_vars=['System', feature_name], value_name = 'Speedup', var_name = 'TMP_ID', value_vars=vals).reset_index().dropna(axis=0)
+    df[['Execution Type', 'Partition']] = df['TMP_ID'].str.split(':', expand=True)  
+    return df[df['TMP_ID'] != 'Static:(100,0)']
+
   def visualize(self, df, outfile, sizes):
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -57,45 +79,23 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     import matplotlib
     fig, ax = plt.subplots(figsize=sizes)
-    print(df['Input'].unique())
-    df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
+    feature_name = u'Lookups\n($log2$)'
+    df[['Type', feature_name]] = df['Input'].str.split(':', expand=True)
     df = df.loc[df['Type'] == 'large',]
     df = df.drop(['Input', 'Type'],axis=1)
-    df['lookups'] = df['lookups'].astype(int)
-    df = df[df ['lookups'] >= 256*5000]
-    print(df[(df['Policy'] == 'gpu100') & (df['Execution Type'] == 'Static')])
+    df[feature_name] = df[feature_name].astype(int)
+    df = df[df [feature_name] >= 256*5000]
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
-    print(df)
+    speedUpGlobal = self.computeSpeedup(df.copy(deep=True), feature_name, 'Static') 
+    self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes, feature_name, 'Speedup', logx=True, legend='brief', ncol=1, legendPos=[0.42,0.74])
     return
-    map_names={}
-    print(df['Policy'].unique())
-    for i in range(60,101,4): 
-        val=100-i
-        map_names[f'gpu{i}']=f'({i},{val})'
-    map_names['gpu0'] = '(0,100)'
-    print (map_names.keys())
-    df["Policy"].replace(map_names, inplace=True)
-    df = df.drop(['Id'], axis=1)
-    df = df.groupby(['System', 'Execution Type', 'Policy', 'lookups']).mean().reset_index()
-    df['TMP_ID'] = df['Execution Type'] + ':' + df['Policy']
-    print(df)
-    df = df.pivot(index=['System', 'lookups'], columns='TMP_ID', values='Execution time (s)').reset_index()
-    print(df)
-    vals = []
-    for v in df.columns:
-        if v != 'System' and v != 'lookups':
-            vals.append(v)
-            df[v] = df['Static:(100,0)'] / df[v] 
-    df = pd.melt(df, id_vars=['System', 'lookups'], value_name = 'Speedup', var_name = 'TMP_ID', value_vars=vals).reset_index().dropna(axis=0)
-    df[['Execution Type', 'Partition']] = df['TMP_ID'].str.split(':', expand=True)  
-    df = df[df['TMP_ID'] != 'Static:(100,0)']
-
+    df = self.speedUpCoExec(df, feature_name)
     sns.set(font_scale=1.25)
     sns.set_style("whitegrid")
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
     with sns.plotting_context(rc={'text.usetex' : True}):
-        g = sns.relplot(data=df, x='lookups', 
+        g = sns.relplot(data=df, x=feature_name, 
                         col_order = ['lassen', 'pascal', 'corona'],
                         y='Speedup',
                         col='System', 

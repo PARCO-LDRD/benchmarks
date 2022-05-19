@@ -64,13 +64,13 @@ class Benchmark(BaseBenchmark):
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     import seaborn as sns
-    feature_name = r'size'
+    feature_name = r'Size'
     df[feature_name] = df['Input'].astype(int)
     df=df[df[feature_name] > 40]
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
     self.heatmap(df, outfile, feature_name, sizes, setTitle=True)
     df = self.computeSpeedup(df, feature_name) 
-    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'speedup', setTitle=True)
+    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'Speedup', setTitle=True)
 
 
 

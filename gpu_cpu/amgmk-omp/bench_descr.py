@@ -54,7 +54,7 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    feature_name = r'Grid Size ($n^3$)'
+    feature_name = r'Grid ($n^3$)'
     df[feature_name] = df['Input'].str.split(',', expand=True)[0] 
     df[feature_name] = df[feature_name].astype(int)
     df = df[(df[feature_name] > 4*16) & (df[feature_name] < 12 * 16)]
@@ -62,5 +62,5 @@ class Benchmark(BaseBenchmark):
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
     self.heatmap(df, outfile, feature_name, sizes)
     df = self.computeSpeedup(df, feature_name) 
-    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'speedup')
+    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'Speedup')
     return

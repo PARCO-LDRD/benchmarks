@@ -59,11 +59,16 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
-    df[['Type', 'lookups']] = df['Input'].str.split(':', expand=True)
+    feature_name = u'Lookups\n($log2$)'
+    df[['Type', feature_name]] = df['Input'].str.split(':', expand=True)
     df['Execution time (s)'] = df['Execution time (s)'] / 1000000
-    df['lookups'] = df['lookups'].astype(int)
-    df = df[df ['lookups'] >= 256*5000]
+    df[feature_name] = df[feature_name].astype(int)
+    df = df[df [feature_name] >= 256*5000]
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
+    speedUpGlobal = self.computeSpeedup(df.copy(deep=True), feature_name, 'Static') 
+    self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes, feature_name, 'Speedup', logx=True, legend='brief', ncol=2, legendPos=[0.42,0.74], col_order= ['lassen', 'pascal'], setTitle=True, rows=True)
+    return
+
     print(df)
     map_names={}
     print(df['Policy'].unique())

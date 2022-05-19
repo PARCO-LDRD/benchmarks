@@ -55,6 +55,6 @@ class Benchmark(BaseBenchmark):
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
     df.loc[df['Num Team Threads'] != 'varies', 'Num Team Threads'] = (df.loc[df['Num Team Threads'] != 'varies','Num Team Threads']).str.split('_', expand=True)[1].astype(int)
     df = self.computeSpeedUpPerPolicy(df, 'Input')
-    self.scatterplotPerPolicy(df, outfile, 'Input', sizes, r'size', 'speedup')
+    self.scatterplotPerPolicy(df, outfile, 'Input', sizes, r'Size', 'Speedup')
     return
 
