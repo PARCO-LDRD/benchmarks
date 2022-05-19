@@ -58,10 +58,9 @@ class Benchmark(BaseBenchmark):
   def visualize(self, df, outfile, sizes):
     df[['Iterations', 'Height', 'Width']] = df['Input'].str.split(':', expand=True)
     df[['Iterations', 'Height', 'Width']] = df[['Iterations', 'Height', 'Width']].astype(int)
-    df['Grid'] = df['Height']
-    df['Grid'] = df['Height'] / 1000
+    df['Grid'] = (df['Height'] / 512).astype(int)
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
     df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
     df = self.computeSpeedUpPerPolicy(df, 'Grid')
-    self.scatterplotPerPolicy(df, outfile, 'Grid', sizes, r'Grid ($(n*1000)^2$)', 'Speedup', setTitle=True, rotation=0)
+    self.scatterplotPerPolicy(df, outfile, 'Grid', sizes, r'Grid ($(x*512)^2$)', 'Speedup', setTitle=True, rotation=0)
     return

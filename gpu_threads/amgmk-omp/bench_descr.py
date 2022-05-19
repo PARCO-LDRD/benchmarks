@@ -53,13 +53,15 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     fig, ax = plt.subplots(figsize=sizes)
     defThreads=256
-    df['Input'] =  df['Input'].str.split(',', expand=True)[0]
-    df['Input'] = df['Input'].astype(int)
-    df = df[(df['Input'] > 4*16) & (df['Input'] < 12 * 16)]
+    feature_name = r'Grid ($x^3 * 2^{12}$)'
+    df[feature_name] =  df['Input'].str.split(',', expand=True)[0]
+    df[feature_name] = df[feature_name].astype(int)
+    df = df[(df[feature_name] > 4*16) & (df[feature_name] < 12 * 16)]
+    df[feature_name] = (df[feature_name] / (16)).astype(int)
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
     df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
-    df = self.computeSpeedUpPerPolicy(df, 'Input')
-    self.scatterplotPerPolicy(df, outfile, 'Input', sizes, r'Grid ($n^3$)', 'speedup')
+    df = self.computeSpeedUpPerPolicy(df, feature_name)
+    self.scatterplotPerPolicy(df, outfile, feature_name, sizes, feature_name, 'speedup')
 
     return
 

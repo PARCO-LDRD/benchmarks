@@ -58,13 +58,14 @@ class Benchmark(BaseBenchmark):
     from matplotlib.colors import ListedColormap
     import seaborn as sns
 #    fig, ax = plt.subplots(figsize=sizes)
-    feature_name = u'Lookups\n($log2$)'
+    feature_name = u'Lookups ($x*10000$)'
     df[['Size', feature_name]] = df['Input'].str.split(':', expand=True)
     df = df[df['Size'] == 'large'] 
     df[feature_name] = df[feature_name].astype(int)
     df = df[df [feature_name] >= 256*5000]
+    df[feature_name] = (df[feature_name]/10000).astype(int)
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
     self.heatmap(df, outfile, feature_name, sizes, logx=True)
     df = self.computeSpeedup(df, feature_name) 
-    self.scatterplot(df, outfile, feature_name, sizes, feature_name, 'Speedup', logx=True, legend='brief')# ncol=2, legendPos=[0.55,0.75])
+    self.scatterplot(df, outfile, feature_name, sizes, 'Lookups ($x*10000$) (log-scale)', 'Speedup', logx=True, legend='brief')# ncol=2, legendPos=[0.55,0.75])
     return

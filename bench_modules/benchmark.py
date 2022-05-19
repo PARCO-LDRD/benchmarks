@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
 import numpy as np
+import seaborn as sns
 
 class BaseBenchmark(ABC):
   def __init__(self, name):
     self._name = name
+    self.adaptation_colors = dict() 
+    exec_modes = [ 'Static,CPU', 'Oracle',  'Adaptive-75', 'Adaptive-50', 'Adaptive-25']
+    palette = sns.color_palette("tab10", len(exec_modes))
+    for e, c in zip(exec_modes, palette):
+        self.adaptation_colors[e] = c
 
   @property
   def name(self):
@@ -58,7 +64,6 @@ class BaseBenchmark(ABC):
     from matplotlib.colors import ListedColormap
     from matplotlib import rcParams
     import matplotlib.ticker as ticker
-    import seaborn as sns
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     col_order = ['lassen', 'pascal', 'corona']
     input_sizes = df[feature_name].unique()
@@ -139,7 +144,6 @@ class BaseBenchmark(ABC):
     plt.close()
 
   def scatterplot(self, df, outfile, feature_name, sizes, xAxisTitle, yAxisTitle,  logx=False, xbase=2, logy = False, ybase=2, legend=False, ncol=2, legendPos=[0.555,0.78], setTitle=False, col_order= ['lassen', 'pascal', 'corona'], rows=False):
-    import seaborn as sns
     import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -158,6 +162,7 @@ class BaseBenchmark(ABC):
                             markers=True,
                             style='Policy',
                             edgecolor='black', 
+                            palette=self.adaptation_colors,
                             aspect=1.8,
                             alpha=0.9,
                             s=280,
@@ -170,6 +175,7 @@ class BaseBenchmark(ABC):
                             col='System', hue='Policy',
                             col_order = col_order, 
                             markers=True,
+                            palette=self.adaptation_colors,
                             style='Policy',
                             edgecolor='black', 
                             aspect=1.6,
@@ -260,7 +266,6 @@ class BaseBenchmark(ABC):
     import matplotlib
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
-    import seaborn as sns
     from matplotlib import rcParams
     from matplotlib.lines import Line2D
     sns.set_style("whitegrid")

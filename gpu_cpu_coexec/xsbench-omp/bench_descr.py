@@ -1,6 +1,8 @@
 import os
+from matplotlib import rcParams
 from bench_modules.benchmark import BaseBenchmark
 import re
+import numpy as np
 
 
 class Benchmark(BaseBenchmark):
@@ -39,7 +41,6 @@ class Benchmark(BaseBenchmark):
     return self._root
 
   def getTime(self, stdout):
-    print(' I am trying t find execution time')
     exec_time_pattern = '__ExecutionTime__:(.*)'
     tmp =  re.findall(exec_time_pattern, stdout)
     if len(tmp) == 0:
@@ -79,20 +80,80 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     import matplotlib
     fig, ax = plt.subplots(figsize=sizes)
-    feature_name = u'Lookups\n($log2$)'
+    feature_name = u'Lookups ($x*10000$)'
     df[['Type', feature_name]] = df['Input'].str.split(':', expand=True)
     df = df.loc[df['Type'] == 'large',]
     df = df.drop(['Input', 'Type'],axis=1)
-    df[feature_name] = df[feature_name].astype(int)
+    df[feature_name] = df[feature_name].astype(int) 
     df = df[df [feature_name] >= 256*5000]
+    df[feature_name] = (df[feature_name] / 10000).astype(int) 
+
+
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
     speedUpGlobal = self.computeSpeedup(df.copy(deep=True), feature_name, 'Static') 
-    self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes, feature_name, 'Speedup', logx=True, legend='brief', ncol=1, legendPos=[0.42,0.74])
+    self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes, feature_name, 'Speedup', logx=True, legend='brief', ncol=1, legendPos=[0.42,0.74],setTitle=True)
+    df[feature_name] = '$2^{' + np.log2(df[feature_name]).astype(int).astype(str) + '}$'
+
+    map_names = dict()
+    for f in df['Policy'].unique():
+        val = int(f.replace('gpu',''))
+        map_names[f]=val
+    map_names['gpu0'] = 0 
+    yLabel = r'\begin{center} \% Computations Performed \\ on the GPU\end{center}'
+    df[yLabel] = df["Policy"].replace(map_names)
+    df = df[df['Execution Type'] != 'Static']
+    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
+    sns.set_style("whitegrid")
+    plt.rc('text', usetex=True)
+    rcParams['font.family'] = 'sans-serif'
+    sns.set(rc={'figure.figsize':sizes})
+    sns.set_style("whitegrid", {'axes.grid' : False})
+    #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
+    with sns.plotting_context(rc={'text.usetex' : True, "legend.fontsize":28, "axes.titlesize":34, 'axes.labelsize' : 26}):
+        g = sns.catplot(data=df, x=feature_name, 
+                        col_order = ['lassen', 'pascal', 'corona'],
+                        y=yLabel,
+                        col='System', 
+                        dodge=True,
+                        hue='Execution Type', 
+                        #palette="Set2",
+#                        linewidth=0.1,
+                        cut=True,
+                        #saturation=0.2,
+                        jitter=True,
+                        inner=None, linewidth=1, color='#DDDDDD',
+                        aspect=1.6,
+                        kind='violin',
+                        facet_kws={'sharey': False, 'sharex': True},
+                        legend=False)
+        g.map_dataframe(sns.stripplot, x=feature_name, y=yLabel,
+                hue='Execution Type', palette=self.adaptation_colors,
+                dodge=True, s=10, jitter=0, linewidth=0.1, alpha=0.9, 
+                            edgecolor='black') 
+
+        axes = g.axes
+        for c,s in zip(g.axes.flat,systems):
+            c.set_yticklabels(c.get_yticklabels(), fontdict={'size':30})
+            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':30},rotation = 30)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.3g}$'.format(y)))
+            c.set_title(s, fontsize = 38)
+
+        tmp = g.add_legend(title='Policy', fontsize=26, ncol=2)
+        plt.setp(g._legend.get_title(), fontsize=32)
+        for lh in g._legend.legendHandles:
+            lh.set_alpha(0.9)
+            lh._sizes = [260]
+        g.set_axis_labels(feature_name, yLabel)
+        plt.tight_layout()
+        plt.savefig(f'{outfile}_violin.pdf')
+        plt.close()
+
+
+    
     return
     df = self.speedUpCoExec(df, feature_name)
     sns.set(font_scale=1.25)
     sns.set_style("whitegrid")
-    systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
     with sns.plotting_context(rc={'text.usetex' : True}):
         g = sns.relplot(data=df, x=feature_name, 
@@ -125,7 +186,6 @@ class Benchmark(BaseBenchmark):
             c.set_ylabel("Y-Axis", fontsize = 24)
             c.set_title(s, fontsize = 24)
             c.set_xscale('log', base=2)
-        print(axes.shape)
         g.set_axis_labels('Look ups \n ($log2$)', 'speedup')
         #plt.gca().yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '{:.3g}'.format(y)))
         plt.tight_layout()

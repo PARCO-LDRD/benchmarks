@@ -35,10 +35,8 @@ class Benchmark(BaseBenchmark):
     return self._root
 
   def getTime(self, stdout):
-    print(' I am trying t find execution time')
     exec_time_pattern = 'Solve time \(s\): (.*)\s'
     tmp =  re.findall(exec_time_pattern, stdout)[0]
-    print(tmp, type(tmp))
     return tmp
 
   def extractInputFromCMD(self, cmd):
@@ -52,11 +50,12 @@ class Benchmark(BaseBenchmark):
     import seaborn as sns
     df['Input'] = df['Input'].str.split(',', expand=True)[0]
     df['Input'] = df['Input'].astype(int)
-    df['Input'] = df['Input'] / 1000
+    print(df['Input'].unique())
+    df['Input'] = (df['Input'] / 512).astype(int)
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
     df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
 
     df = self.computeSpeedUpPerPolicy(df, 'Input')
-    self.scatterplotPerPolicy(df, outfile, 'Input', sizes, r'Grid ($(n*1000)^2$)', 'Speedup', legend='brief')
+    self.scatterplotPerPolicy(df, outfile, 'Input', sizes, r'Grid ($(n*512)^2$)', 'Speedup', legend='brief')
     return
 
