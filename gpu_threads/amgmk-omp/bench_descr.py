@@ -61,7 +61,7 @@ class Benchmark(BaseBenchmark):
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
     df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
     df = self.computeSpeedUpPerPolicy(df, feature_name)
-    self.scatterplotPerPolicy(df, outfile, feature_name, sizes, feature_name, 'speedup')
+    self.scatterplotPerPolicy(df, outfile, feature_name, sizes, feature_name, 'Speedup')
 
     return
 

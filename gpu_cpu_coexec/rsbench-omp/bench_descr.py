@@ -100,6 +100,7 @@ class Benchmark(BaseBenchmark):
                         color='#DDDDDD',
                         aspect=2,
                         kind='violin',
+                        sharey = False,
                         facet_kws={'sharey': False, 'sharex': True},
                         legend=False)
         g.map_dataframe(sns.stripplot, x=feature_name, y=yLabel,

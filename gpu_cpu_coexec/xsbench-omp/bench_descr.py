@@ -122,8 +122,9 @@ class Benchmark(BaseBenchmark):
                         #saturation=0.2,
                         jitter=True,
                         inner=None, linewidth=1, color='#DDDDDD',
-                        aspect=1.6,
+                        aspect=2,
                         kind='violin',
+                        sharey = False,
                         facet_kws={'sharey': False, 'sharex': True},
                         legend=False)
         g.map_dataframe(sns.stripplot, x=feature_name, y=yLabel,
