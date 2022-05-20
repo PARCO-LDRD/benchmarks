@@ -143,7 +143,11 @@ class BaseBenchmark(ABC):
     f.savefig(f'{outfile}_heatmap.pdf',bbox_inches='tight')
     plt.close()
 
-  def scatterplot(self, df, outfile, feature_name, sizes, xAxisTitle, yAxisTitle,  logx=False, xbase=2, logy = False, ybase=2, legend=False, ncol=2, legendPos=[0.555,0.78], setTitle=False, col_order= ['lassen', 'pascal', 'corona'], rows=False):
+  def scatterplot(self, df, outfile, feature_name, sizes, xAxisTitle,
+          yAxisTitle,  logx=False, xbase=2, logy = False, ybase=2, legend=False,
+          ncol=2, legendPos=[0.555,0.78], setTitle=False, col_order= ['lassen',
+              'pascal', 'corona'], rows=False, title_fontsize=38,
+          xyticks_fontsize=30, xylabel_fontsize=34, legend_fontsize=32):
     import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -186,7 +190,7 @@ class BaseBenchmark(ABC):
                             legend=legend,
                             )
         if legend:
-            plt.setp(g._legend.get_title(), fontsize=32)
+            plt.setp(g._legend.get_title(), fontsize=legend_fontsize)
             for lh in g._legend.legendHandles:
                 lh.set_alpha(0.9)
                 lh._sizes = [260]
@@ -197,19 +201,19 @@ class BaseBenchmark(ABC):
 
         axes = g.axes
         for c,s in zip(g.axes.flat,systems):
-            c.set_yticklabels(c.get_yticklabels(), fontdict={'size':30})
-            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':30},rotation = 30)
+            c.set_yticklabels(c.get_yticklabels(), fontdict={'size':xyticks_fontsize})
+            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':xyticks_fontsize},rotation = 30)
             c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.3g}$'.format(y)))
             c.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, _: '${:.3g}$'.format(x)))
             c.axhline(y=1.0, c='gray')
-            c.set_xlabel('', fontsize = 34)
-            c.set_ylabel('', fontsize = 34)
+            c.set_xlabel('', fontsize = xylabel_fontsize)
+            c.set_ylabel('', fontsize = xylabel_fontsize)
             if logx:
                 c.set_xscale('log', base=xbase)
             if logy:
                 c.set_xscale('log', base=ybase)
             if setTitle:
-                c.set_title(s, fontsize = 38)
+                c.set_title(s, fontsize = title_fontsize)
             else:
                 c.set_title('')
         print(axes.shape)
