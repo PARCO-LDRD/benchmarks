@@ -91,7 +91,7 @@ class Benchmark(BaseBenchmark):
 
     df = df[ ((df['Execution Type'].isin(['Oracle', 'Adaptive-25', 'Adaptive-50','Adaptive-75', 'Adaptive-100'])) | ( (df['Execution Type'] == 'Static') & (df['Policy'] == 'gpu100') ))]
     speedUpGlobal = self.computeSpeedup(df.copy(deep=True), feature_name, 'Static') 
-    self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes, feature_name, 'Speedup', logx=True, legend='brief', ncol=1, legendPos=[0.42,0.74],setTitle=True)
+    self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes, '', 'Speedup', logx=True, legend='brief', ncol=1, legendPos=[0.42,0.74],setTitle=True)
     df[feature_name] = '$2^{' + np.log2(df[feature_name]).astype(int).astype(str) + '}$'
 
     map_names = dict()
@@ -99,7 +99,7 @@ class Benchmark(BaseBenchmark):
         val = int(f.replace('gpu',''))
         map_names[f]=val
     map_names['gpu0'] = 0 
-    yLabel = r'\begin{center} \% Computations Performed \\ on the GPU\end{center}'
+    yLabel = r'\begin{center} \% on GPU\end{center}'
     df[yLabel] = df["Policy"].replace(map_names)
     df = df[df['Execution Type'] != 'Static']
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
@@ -109,7 +109,7 @@ class Benchmark(BaseBenchmark):
     sns.set(rc={'figure.figsize':sizes})
     sns.set_style("whitegrid", {'axes.grid' : False})
     #markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' }  
-    with sns.plotting_context(rc={'text.usetex' : True, "legend.fontsize":28, "axes.titlesize":34, 'axes.labelsize' : 26}):
+    with sns.plotting_context(rc={'text.usetex' : True, "legend.fontsize":28}):
         g = sns.catplot(data=df, x=feature_name, 
                         col_order = ['lassen', 'pascal', 'corona'],
                         y=yLabel,
@@ -136,14 +136,14 @@ class Benchmark(BaseBenchmark):
             c.set_yticklabels(c.get_yticklabels(), fontdict={'size':30})
             c.set_xticklabels(c.get_xticklabels(), fontdict={'size':30},rotation = 30)
             c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.3g}$'.format(y)))
-            c.set_title(s, fontsize = 38)
+            c.set_title('')
 
-        tmp = g.add_legend(title='Policy', fontsize=26, ncol=2)
-        plt.setp(g._legend.get_title(), fontsize=32)
-        for lh in g._legend.legendHandles:
-            lh.set_alpha(0.9)
-            lh._sizes = [260]
-        g.set_axis_labels(feature_name, yLabel)
+        #tmp = g.add_legend(title='Policy', fontsize=26, ncol=2)
+        #plt.setp(g._legend.get_title(), fontsize=32)
+        #for lh in g._legend.legendHandles:
+        #    lh.set_alpha(0.9)
+        #    lh._sizes = [260]
+        g.set_axis_labels(feature_name, yLabel, fontsize = 30)
         plt.tight_layout()
         plt.savefig(f'{outfile}_violin.pdf')
         plt.close()
