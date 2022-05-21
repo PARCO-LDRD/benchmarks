@@ -67,9 +67,10 @@ class Benchmark(BaseBenchmark):
     speedUpGlobal = self.computeSpeedup(df.copy(deep=True), feature_name, 'Static') 
     self.scatterplot(speedUpGlobal, f'{outfile}_coexec', feature_name, sizes,
             feature_name, 'Speedup', logx=True, legend='brief', ncol=2,
-            legendPos=[0.36,0.52], col_order= ['lassen', 'pascal'],
-            setTitle=True, rows=False, title_fontsize=48, xylabel_fontsize=43,
-            xyticks_fontsize=38, legend_fontsize=40)
+            legendPos=[0.32,0.52], col_order= ['lassen', 'pascal'],
+            setTitle=True, rows=False, title_fontsize=50, xylabel_fontsize=48,
+            xyticks_fontsize=40, legend_title_fontsize=40,
+            show_legend_title=False, aspect_ratio=2)
     df[feature_name] = '$2^{' + np.log2(df[feature_name]).astype(int).astype(str) + '}$'
     systems=['Power9 + V100','Intel + P100']
     map_names = dict()
@@ -98,22 +99,24 @@ class Benchmark(BaseBenchmark):
                         inner=None,
                         #linewidth=1, 
                         color='#DDDDDD',
-                        aspect=2,
+                        aspect=1.8,
                         kind='violin',
                         sharey = False,
                         facet_kws={'sharey': False, 'sharex': True},
                         legend=False)
         g.map_dataframe(sns.stripplot, x=feature_name, y=yLabel,
                 hue='Execution Type', palette=self.adaptation_colors,
-                dodge=True, s=10, jitter=0, linewidth=0.1, alpha=0.9, 
-                            edgecolor='black') 
+                dodge=True, s=12, jitter=0, linewidth=0.1, alpha=0.9,
+                            edgecolor=None) 
 
         axes = g.axes
         for c,s in zip(g.axes.flat,systems):
             c.set_yticklabels(c.get_yticklabels(), fontdict={'size':38})
-            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':38},rotation = 30)
+            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':38},rotation = 0)
             c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.3g}$'.format(y)))
             c.set_title(s, fontsize=48)
+            for i in c.get_xticks()[:-1]:
+                c.axvline(i + 0.5, color='grey', lw=1)
         #tmp = g.add_legend(title='Policy', fontsize=26, ncol=2, )
         #legendPos=[0.55,0.68]
         #g._legend.set_bbox_to_anchor(legendPos) 

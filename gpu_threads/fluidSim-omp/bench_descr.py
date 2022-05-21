@@ -62,5 +62,5 @@ class Benchmark(BaseBenchmark):
     df = df.rename(columns={'Policy' : 'Num Team Threads'})
     df['Num Team Threads'] = (df['Num Team Threads'].str.split('_', expand=True))[1].astype(int)
     df = self.computeSpeedUpPerPolicy(df, 'Grid')
-    self.scatterplotPerPolicy(df, outfile, 'Grid', sizes, r'Grid ($(x*512)^2$)', 'Speedup', setTitle=True, rotation=0)
+    self.scatterplotPerPolicy(df, outfile, 'Grid', sizes, r'Grid $(x*512)^2$', 'Speedup', setTitle=True, rotation=0)
     return

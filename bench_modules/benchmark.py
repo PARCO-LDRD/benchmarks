@@ -125,7 +125,7 @@ class BaseBenchmark(ABC):
         print(g.get_xticklabels())
         print(g.get_xticks())
         g.set_yticklabels(g.get_yticklabels(), rotation = 0, fontdict={'size':8, 'family':'sans-serif', 'usetex':True})
-        g.set_xticklabels(g.get_xticklabels(), rotation = 30, fontdict={'size':8, 'family':'sans-serif', 'usetex':True})
+        g.set_xticklabels(g.get_xticklabels(), rotation = 0, fontdict={'size':8, 'family':'sans-serif', 'usetex':True})
         if setTitle:
           ax.set_title(systems[index], fontdict={'size':10, 'family':'sans-serif', 'usetex':True})
         else:
@@ -147,7 +147,8 @@ class BaseBenchmark(ABC):
           yAxisTitle,  logx=False, xbase=2, logy = False, ybase=2, legend=False,
           ncol=2, legendPos=[0.555,0.78], setTitle=False, col_order= ['lassen',
               'pascal', 'corona'], rows=False, title_fontsize=38,
-          xyticks_fontsize=30, xylabel_fontsize=34, legend_fontsize=32):
+          xyticks_fontsize=34, xylabel_fontsize=34, legend_title_fontsize=34,
+          show_legend_title=True, aspect_ratio=2):
     import matplotlib
     import pandas as pd
     import matplotlib.pyplot as plt
@@ -167,10 +168,11 @@ class BaseBenchmark(ABC):
                             style='Policy',
                             edgecolor='black', 
                             palette=self.adaptation_colors,
-                            aspect=2,
+                            aspect=aspect_ratio,
                             alpha=0.9,
                             s=280,
                             lw=6, kind='scatter',
+                            sharey = False,
                             facet_kws={'sharey': False, 'sharex': True},
                             legend=legend,
                             )
@@ -181,30 +183,37 @@ class BaseBenchmark(ABC):
                             markers=True,
                             palette=self.adaptation_colors,
                             style='Policy',
-                            edgecolor='black', 
-                            aspect=2,
+                            edgecolor=None, 
+                            aspect=aspect_ratio,
                             alpha=0.9,
-                            s=280,
+                            s=500,
                             lw=6, kind='scatter',
                             facet_kws={'sharey': False, 'sharex': True},
                             legend=legend,
                             )
         if legend:
-            plt.setp(g._legend.get_title(), fontsize=legend_fontsize)
+            plt.setp(g._legend.get_title(), fontsize=legend_title_fontsize)
             for lh in g._legend.legendHandles:
                 lh.set_alpha(0.9)
-                lh._sizes = [260]
+                lh._sizes = [500]
                 lh
-            sns.move_legend(g,loc='center', title='Policy', fancybox=True,frameon=False, ncol=ncol, handletextpad=0.01, columnspacing=0.5)
+            if show_legend_title:
+                legend_title = 'Policy'
+            else:
+                legend_title =''
+            sns.move_legend(g,loc='center', title=legend_title,
+                    fancybox=True,frameon=False, ncol=ncol, handletextpad=0.01,
+                    columnspacing=0.5, fontsize=34)
             leg = g._legend
             leg.set_bbox_to_anchor(legendPos) 
 
         axes = g.axes
         for c,s in zip(g.axes.flat,systems):
             c.set_yticklabels(c.get_yticklabels(), fontdict={'size':xyticks_fontsize})
-            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':xyticks_fontsize},rotation = 30)
-            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.3g}$'.format(y)))
-            c.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, _: '${:.3g}$'.format(x)))
+            c.set_xticklabels(c.get_xticklabels(),
+                    fontdict={'size':xyticks_fontsize})#,rotation = 30)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.4g}$'.format(y)))
+            c.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, _: '${:.4g}$'.format(x)))
             c.axhline(y=1.0, c='gray')
             c.set_xlabel('', fontsize = xylabel_fontsize)
             c.set_ylabel('', fontsize = xylabel_fontsize)
@@ -279,7 +288,7 @@ class BaseBenchmark(ABC):
     sns.set_style("whitegrid", {'axes.grid' : False})
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     markers = { 32 : '*', 64 : 'd', 128 : '>', 256 : '<', 512 : 'X', 1024 : 'P' , 'varies' : 's'}  
-    color_codes = (sns.color_palette("cubehelix", 3))
+    color_codes = (sns.color_palette('Paired'))
     hue_order= ['Online', 'Oracle', 'Static,Best']
     colors=dict()
     for c,h in zip(color_codes, hue_order):
@@ -295,42 +304,43 @@ class BaseBenchmark(ABC):
                         hue=hue, 
                         style=style, 
                         markers=markers,
-                        edgecolor='black',
+                        edgecolor=None,
                         aspect=2,
                         alpha=0.9,
-                        s=280,
+                        s=500,
                         lw=6, kind='scatter',
-                        facet_kws={'sharey': True, 'sharex': True},
+                        facet_kws={'sharey': False, 'sharex': True},
                         legend=legend)
 
         for i,(c,s) in enumerate(zip(g.axes.flat,systems)):
             handles, labels = c.get_legend_handles_labels() 
             print(handles, labels)
-            if i == 1 and legend:
+            if i == 0 and legend:
               g.legend.remove()
               legendsm = []
               legendsc = []
-              legendPos=[0.38,0.99]
+              legendPos=[0.38,0.87]
               for k,v in markers.items():
-                legendsm.append(Line2D([0], [0], lw=6, markersize=14, marker=v, color='gray', mec='black',  label=k, linestyle='None'))     
+                legendsm.append(Line2D([0], [0], lw=6, markersize=14, marker=v, color='gray', mec=None,  label=k, linestyle='None'))     
               for k,v in colors.items():
-                legendsc.append(Line2D([0], [0], lw=6, markersize=14, marker='o', color=v, mec='black',  label=k, linestyle='None'))     
+                legendsc.append(Line2D([0], [0], lw=6, markersize=14, marker='o', color=v, mec=None, label=k, linestyle='None'))     
 
-              thread_leg = c.legend(handles=legendsm, loc='upper left', title='Num Team Threads',fontsize=26, ncol=2, frameon=False, handletextpad=0.1)
+              thread_leg = c.legend(handles=legendsm, loc='upper left', edgecolor=None, \
+                      title='Num Team Threads', markerscale=1.5, fontsize=34, ncol=3, frameon=False, handletextpad=0.1, columnspacing=0.1)
               thread_leg.set_bbox_to_anchor(legendPos)
-              plt.setp(thread_leg.get_title(), fontsize=28)
+              plt.setp(thread_leg.get_title(), fontsize=34)
               c.add_artist(thread_leg)
-              legendPos=[0.01,0.99]
-              policy_leg = c.legend(handles=legendsc, loc='upper left', title='Policy',fontsize=26, frameon=False, handletextpad=0.01)
+              legendPos=[0.01,0.87]
+              policy_leg = c.legend(handles=legendsc, edgecolor=None, markerscale=1.5, loc='upper left', title='Policy',fontsize=34, frameon=False, handletextpad=0.01)
               policy_leg.set_bbox_to_anchor(legendPos)
-              plt.setp(policy_leg.get_title(), fontsize=28)
+              plt.setp(policy_leg.get_title(), fontsize=34)
               c.add_artist(policy_leg)
 
 
-            c.set_yticklabels(c.get_yticklabels(), fontdict={'size':30})
-            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':30},rotation = rotation)
-            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.3g}$'.format(y)))
-            c.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, _: '${:.3g}$'.format(x)))
+            c.set_yticklabels(c.get_yticklabels(), fontdict={'size':34})
+            c.set_xticklabels(c.get_xticklabels(), fontdict={'size':34},rotation = rotation)
+            c.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda y, _: '${:.4g}$'.format(y)))
+            c.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, _: '${:.4g}$'.format(x)))
             c.axhline(y=1.0, c='gray')
             c.set_xlabel('', fontsize = 34)
             c.set_ylabel('', fontsize = 34)
