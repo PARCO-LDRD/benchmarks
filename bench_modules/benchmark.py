@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from matplotlib.patches import Patch
 import numpy as np
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 class BaseBenchmark(ABC):
   def __init__(self, name):
@@ -60,7 +62,6 @@ class BaseBenchmark(ABC):
   def heatmap(self, df, outfile, feature_name, sizes, logx=False, setTitle=False):
     import matplotlib
     import pandas as pd
-    import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     from matplotlib import rcParams
     import matplotlib.ticker as ticker
@@ -357,4 +358,51 @@ class BaseBenchmark(ABC):
         plt.tight_layout()
         plt.savefig(f'{outfile}_threads_speedup.pdf')
         plt.close()
+    
+
+  def choicemap(self, df, outfile, sizes, feature_name='Size'):
+    systems=[r'\begin{flushright} Power9 \\ V100 \end{flushright}', r'\begin{flushright} Intel \\ P100 \end{flushright}', r'\begin{flushright} AMD \\ MI50 \end{flushright}']
+    import matplotlib
+    import pandas as pd
+    from matplotlib.colors import ListedColormap
+    from matplotlib import rcParams
+    import matplotlib.ticker as ticker
+    col_order = ['lassen', 'pascal', 'corona']
+    sNames = {}
+    for k,v in zip(col_order, systems):
+      sNames[k] = v
+    df['Policy'] = df['Policy'].str.upper()
+    policies=df['Policy'].unique()
+    remap = {}
+    for i,k in enumerate(policies):
+      remap[k] = i
+    exec_type = 'Oracle'
+    df = df[df['Execution Type'] == exec_type]
+    df = df.groupby(['System', 'Region', 'Execution Type', 'Policy', feature_name]).mean().reset_index()[['System', 'Policy', feature_name]]
+    df = df.replace(remap)
+    df = df.replace({"System" : sNames })
+    df = df.pivot(index='System', columns=feature_name, values='Policy')
+    df.index = pd.CategoricalIndex(df.index, categories= systems)
+    df.sort_index(level=0, inplace=True)
+    color = sns.color_palette('vlag', len(policies))
+    
+    print(color)
+    print(df)
+    f, ax = plt.subplots(figsize=sizes)
+    with sns.plotting_context(rc={'text.usetex' : True}):
+      ax = sns.heatmap(df,cmap=color, cbar=False, linewidth=.5, square=True, ax=ax)
+    ax.set_yticklabels(ax.get_yticklabels(), rotation = 0, fontdict={'size':8, 'family':'sans-serif', 'usetex':True})
+    ax.set_xticklabels(ax.get_xticklabels(), rotation = 0, fontdict={'size':8, 'family':'sans-serif', 'usetex':True})
+    ax.set_xlabel(feature_name, fontdict={'size':8, 'family':'sans-serif', 'usetex':True})
+    ax.set_ylabel('System Architecture', fontdict={'size':12, 'family':'sans-serif', 'usetex':True})
+    legend_elements = list()
+    for c, l in zip(color, policies):
+      legend_elements.append(Patch(facecolor=c, label=l))
+
+    leg = ax.legend(handles=legend_elements, title='Optimal Selection', bbox_to_anchor =(0.7,1.2), loc='upper center',  borderaxespad=0., frameon=False, ncol=3, fontsize=8)
+    leg.get_title().set_position((-95, -12))
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+    plt.savefig(f'{outfile}_choice.pdf')
+    return
 

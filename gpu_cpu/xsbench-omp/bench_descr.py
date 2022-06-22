@@ -66,6 +66,7 @@ class Benchmark(BaseBenchmark):
     df[feature_name] = (df[feature_name]/10000).astype(int)
     df.loc[df['Execution Type'] == 'Static', 'Execution Type'] = 'Static,' + df.loc[df['Execution Type'] == 'Static', 'Policy'].str.upper()
     self.heatmap(df, outfile, feature_name, sizes, logx=True)
+    self.choicemap(df, outfile, sizes, feature_name)
     df = self.computeSpeedup(df, feature_name) 
     self.scatterplot(df, outfile, feature_name, sizes, 'Lookups ($x*10000$) (log-scale)', 'Speedup', logx=True, legend='brief', show_legend_title=False)# ncol=2, legendPos=[0.55,0.75])
     return

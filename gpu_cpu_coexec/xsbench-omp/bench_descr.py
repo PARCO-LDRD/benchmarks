@@ -103,6 +103,7 @@ class Benchmark(BaseBenchmark):
     map_names['gpu0'] = 0 
     yLabel = r'\begin{center} \% on GPU\end{center}'
     df[yLabel] = df["Policy"].replace(map_names)
+    self.choicemap(df, outfile, sizes, feature_name)
     df = df[df['Execution Type'] != 'Static']
     systems=['Power9 + V100','Intel + P100', 'AMD + MI50']
     sns.set_style("whitegrid")
